@@ -11,8 +11,14 @@ import {
   type AppScreen,
   type ProjectMode,
 } from "./data/content";
+import {
+  getAssistantRuntime,
+  sendAssistantMessage,
+  type AssistantMessage,
+} from "./lib/assistant";
 
 type ScenarioData = (typeof scenarios)[ProjectMode];
+type AssistantThread = Record<ProjectMode, AssistantMessage[]>;
 
 function LogoMark() {
   return (
@@ -407,15 +413,27 @@ function AssistantScreen({
   mode,
   scenario,
   draft,
-  onPromptClick,
+  error,
+  isLoading,
+  messages,
+  onDraftChange,
   onModeChange,
+  onPromptClick,
+  onSubmit,
 }: {
   mode: ProjectMode;
   scenario: ScenarioData;
   draft: string;
-  onPromptClick: (prompt: string) => void;
+  error: string | null;
+  isLoading: boolean;
+  messages: AssistantMessage[];
+  onDraftChange: (value: string) => void;
   onModeChange: (mode: ProjectMode) => void;
+  onPromptClick: (prompt: string) => void;
+  onSubmit: () => void;
 }) {
+  const runtime = getAssistantRuntime();
+
   return (
     <section className="screen-stack">
       <div className="screen-header">
@@ -426,15 +444,22 @@ function AssistantScreen({
 
       <ModeSwitch mode={mode} onChange={onModeChange} />
 
+      <div className="assistant-runtime">
+        <span className="assistant-runtime__badge">Modele actif</span>
+        <strong>{runtime.label}</strong>
+      </div>
+
       <div className="chat-card">
-        {assistantConversations[mode].map((message, index) => (
+        {messages.map((message, index) => (
           <div
-            className={message.from === "assistant" ? "chat-bubble is-assistant" : "chat-bubble is-user"}
-            key={`${message.text}-${index}`}
+            className={message.role === "assistant" ? "chat-bubble is-assistant" : "chat-bubble is-user"}
+            key={`${message.content}-${index}`}
           >
-            {message.text}
+            {message.content}
           </div>
         ))}
+
+        {isLoading ? <div className="chat-bubble is-assistant is-loading">CoachImmoIA reflechit...</div> : null}
       </div>
 
       <div className="prompt-row">
@@ -445,13 +470,21 @@ function AssistantScreen({
         ))}
       </div>
 
+      {error ? <div className="assistant-error">{error}</div> : null}
+
       <div className="assistant-composer">
         <div>
-          <p className="assistant-composer__label">Brouillon pret a envoyer</p>
-          <strong>{draft}</strong>
+          <p className="assistant-composer__label">Message a envoyer</p>
+          <textarea
+            className="assistant-input"
+            onChange={(event) => onDraftChange(event.target.value)}
+            placeholder="Posez une question sur votre projet immobilier..."
+            rows={4}
+            value={draft}
+          />
         </div>
-        <button className="send-button" type="button">
-          Envoyer
+        <button className="send-button" disabled={isLoading || !draft.trim()} onClick={onSubmit} type="button">
+          {isLoading ? "Envoi..." : "Envoyer"}
         </button>
       </div>
     </section>
@@ -579,12 +612,25 @@ function App() {
   const [mode, setMode] = useState<ProjectMode>("buyer");
   const [activeScreen, setActiveScreen] = useState<AppScreen>("home");
   const [assistantDraft, setAssistantDraft] = useState(scenarios.buyer.assistantPrompts[0]);
+  const [assistantThreads, setAssistantThreads] = useState<AssistantThread>(() => ({
+    buyer: assistantConversations.buyer.map((message) => ({
+      role: message.from,
+      content: message.text,
+    })),
+    seller: assistantConversations.seller.map((message) => ({
+      role: message.from,
+      content: message.text,
+    })),
+  }));
+  const [assistantError, setAssistantError] = useState<string | null>(null);
+  const [assistantLoading, setAssistantLoading] = useState(false);
 
   const scenario = scenarios[mode];
 
   const handleModeChange = (nextMode: ProjectMode) => {
     setMode(nextMode);
     setAssistantDraft(scenarios[nextMode].assistantPrompts[0]);
+    setAssistantError(null);
   };
 
   const handleAction = (id: ActionCard["id"]) => {
@@ -604,7 +650,65 @@ function App() {
 
     setMode("seller");
     setAssistantDraft("J'aimerais estimer mon bien avant de choisir une strategie de vente.");
+    setAssistantError(null);
     setActiveScreen("assistant");
+  };
+
+  const handleAssistantSubmit = async () => {
+    const content = assistantDraft.trim();
+
+    if (!content || assistantLoading) {
+      return;
+    }
+
+    const userMessage: AssistantMessage = {
+      role: "user",
+      content,
+    };
+
+    const nextThread = [...assistantThreads[mode], userMessage];
+
+    setAssistantError(null);
+    setAssistantLoading(true);
+    setAssistantDraft("");
+    setAssistantThreads((current) => ({
+      ...current,
+      [mode]: nextThread,
+    }));
+
+    try {
+      const response = await sendAssistantMessage({
+        mode,
+        messages: nextThread,
+      });
+
+      setAssistantThreads((current) => ({
+        ...current,
+        [mode]: [
+          ...current[mode],
+          {
+            role: "assistant",
+            content: response.content,
+          },
+        ],
+      }));
+    } catch (error) {
+      const fallbackMessage =
+        error instanceof Error
+          ? error.message
+          : "Connexion au modele impossible pour le moment.";
+
+      setAssistantError(
+        `${fallbackMessage} Verifiez la cle API Mistral et le modele configure, puis reessayez.`,
+      );
+      setAssistantDraft(content);
+      setAssistantThreads((current) => ({
+        ...current,
+        [mode]: current[mode].filter((_, index) => index !== current[mode].length - 1),
+      }));
+    } finally {
+      setAssistantLoading(false);
+    }
   };
 
   const renderScreen = () => {
@@ -628,9 +732,14 @@ function App() {
       return (
         <AssistantScreen
           draft={assistantDraft}
+          error={assistantError}
+          isLoading={assistantLoading}
+          messages={assistantThreads[mode]}
           mode={mode}
+          onDraftChange={setAssistantDraft}
           onModeChange={handleModeChange}
           onPromptClick={setAssistantDraft}
+          onSubmit={handleAssistantSubmit}
           scenario={scenario}
         />
       );

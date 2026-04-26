@@ -1028,6 +1028,34 @@ svg {
   background: linear-gradient(180deg, rgba(247, 251, 249, 0.96), rgba(255, 255, 255, 0.96));
 }
 
+.assistant-runtime {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(34, 191, 146, 0.08);
+  border-radius: 18px;
+  background: rgba(244, 250, 247, 0.96);
+  color: var(--ink-soft);
+}
+
+.assistant-runtime strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.assistant-runtime__badge {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: white;
+  color: var(--mint-deep);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .chat-bubble {
   max-width: 88%;
   padding: 12px 14px;
@@ -1049,6 +1077,10 @@ svg {
   border-bottom-right-radius: 6px;
 }
 
+.chat-bubble.is-loading {
+  opacity: 0.78;
+}
+
 .prompt-pill {
   padding: 12px 14px;
   border: 1px solid rgba(19, 41, 61, 0.08);
@@ -1068,12 +1100,43 @@ svg {
   border-radius: 20px;
 }
 
+.assistant-composer > div {
+  flex: 1;
+}
+
 .assistant-composer strong {
   display: block;
   margin-top: 6px;
   color: var(--ink);
   font-size: 0.95rem;
   line-height: 1.35;
+}
+
+.assistant-input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(19, 41, 61, 0.08);
+  border-radius: 16px;
+  background: rgba(250, 251, 251, 0.96);
+  color: var(--ink);
+  font: inherit;
+  resize: vertical;
+}
+
+.assistant-input:focus {
+  outline: 2px solid rgba(34, 191, 146, 0.18);
+  border-color: rgba(34, 191, 146, 0.32);
+}
+
+.assistant-error {
+  padding: 14px 16px;
+  border: 1px solid rgba(196, 95, 95, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 246, 244, 0.96);
+  color: #8b4343;
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .send-button {
@@ -1084,6 +1147,11 @@ svg {
   background: linear-gradient(180deg, #22bf92, #16ae83);
   color: white;
   cursor: pointer;
+}
+
+.send-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .timeline-card,
