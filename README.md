@@ -78,6 +78,20 @@ Notes :
 - en production, c'est la fonction [api/mistral.ts](/Users/lmetivier/Dev/CoachImoIA/api/mistral.ts) qui parle a Mistral ;
 - en local, `vite.config.ts` garde un proxy pratique pour le developpement.
 
+## Design et UX
+
+Le point d'entree design versionne est dans :
+
+- [design/README.md](/Users/lmetivier/Dev/CoachImoIA/design/README.md)
+
+Les specs UX principales sont dans :
+
+- [docs/ux-parcours-produit.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-parcours-produit.md)
+- [docs/ux-flow-acheteur-ecran-par-ecran.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-flow-acheteur-ecran-par-ecran.md)
+- [docs/ux-flow-vendeur-ecran-par-ecran.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-flow-vendeur-ecran-par-ecran.md)
+- [docs/ux-sitemap-final.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-sitemap-final.md)
+- [docs/brief-figma-hifi.md](/Users/lmetivier/Dev/CoachImoIA/docs/brief-figma-hifi.md)
+
 ## Source produit
 
 Le prototype a ete initialise a partir du cahier des charges local disponible dans :
