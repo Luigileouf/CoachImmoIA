@@ -94,6 +94,7 @@ Les specs UX principales sont dans :
 - [docs/ux-sitemap-final.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-sitemap-final.md)
 - [docs/brief-figma-hifi.md](/Users/lmetivier/Dev/CoachImoIA/docs/brief-figma-hifi.md)
 - [docs/front-backlog-ecran-par-ecran.md](/Users/lmetivier/Dev/CoachImoIA/docs/front-backlog-ecran-par-ecran.md)
+- [docs/architecture-front-backend.md](/Users/lmetivier/Dev/CoachImoIA/docs/architecture-front-backend.md)
 - [docs/ux-plateforme-web-architecture.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-plateforme-web-architecture.md)
 - [docs/ux-plateforme-web-ecrans-prioritaires.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-plateforme-web-ecrans-prioritaires.md)
 - [docs/ux-espace-social.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-espace-social.md)

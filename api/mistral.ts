@@ -1,11 +1,5 @@
-type MistralMessage = {
-  role: "system" | "user" | "assistant";
-  content: string;
-};
-
-type MistralRequestBody = {
-  messages?: MistralMessage[];
-};
+import { forwardMistralChat, getMistralRuntimeConfig } from "./_lib/mistral";
+import type { MistralRequestBody } from "./_lib/mistral-types";
 
 export const config = {
   runtime: "nodejs",
@@ -16,11 +10,9 @@ export default async function handler(request: Request) {
     return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
-  const apiKey = process.env.MISTRAL_API_KEY;
-  const model = process.env.MISTRAL_MODEL || "mistral-small-latest";
-  const baseUrl = process.env.MISTRAL_API_BASE_URL || "https://api.mistral.ai";
+  const runtime = getMistralRuntimeConfig();
 
-  if (!apiKey) {
+  if (!runtime.apiKey) {
     return Response.json(
       {
         error:
@@ -32,20 +24,7 @@ export default async function handler(request: Request) {
 
   try {
     const body = (await request.json()) as MistralRequestBody;
-
-    const upstream = await fetch(`${baseUrl}/v1/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        messages: body.messages ?? [],
-      }),
-    });
-
-    const text = await upstream.text();
+    const { upstream, text } = await forwardMistralChat(body, runtime);
 
     return new Response(text, {
       status: upstream.status,
