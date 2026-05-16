@@ -1,5 +1,5 @@
 export type ProjectMode = "buyer" | "seller";
-export type AppScreen = "home" | "listings" | "assistant" | "projects" | "profile";
+export type AppScreen = "home" | "listings" | "assistant" | "projects" | "documents" | "profile";
 
 export type ActionCard = {
   id: "buyer" | "seller" | "estimate";

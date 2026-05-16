@@ -196,6 +196,22 @@ function UserIcon() {
   );
 }
 
+function DocumentIcon() {
+  return (
+    <svg aria-hidden="true" className="nav-icon-svg" viewBox="0 0 24 24">
+      <path
+        d="M8 4.5h6.8L19 8.7V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 7 19V6A1.5 1.5 0 0 1 8.5 4.5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+      <path d="M14.5 4.8V9h4.2" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
+      <path d="M10 12h6M10 15.5h6M10 19h4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
 function highlightText(text: string, highlight: string) {
   if (!text.includes(highlight)) {
     return text;
@@ -1037,7 +1053,7 @@ function PrototypeToolbar({
   variants: ScreenVariantState;
   onChange: <T extends keyof ScreenVariantState>(screen: T, variant: ScreenVariantState[T]) => void;
 }) {
-  if (activeScreen === "profile") {
+  if (activeScreen === "profile" || activeScreen === "documents") {
     return null;
   }
 
@@ -1095,106 +1111,658 @@ function PrototypeToolbar({
   );
 }
 
-function DesktopShowcase({
-  activeScreen,
+function PlatformHeader({
   mode,
-  scenario,
+  activeScreen,
+  onModeChange,
 }: {
-  activeScreen: AppScreen;
   mode: ProjectMode;
-  scenario: ScenarioData;
+  activeScreen: AppScreen;
+  onModeChange: (mode: ProjectMode) => void;
 }) {
-  const isBuyer = mode === "buyer";
-  const activeLabel =
-    activeScreen === "home"
-      ? "Vue d'ensemble"
-      : activeScreen === "listings"
-        ? "Selection de biens"
-        : activeScreen === "assistant"
-          ? "Assistant IA"
-          : activeScreen === "projects"
-            ? "Suivi projet"
-            : "Profil et securite";
-
-  const screenCopy: Record<AppScreen, { title: string; body: string; items: string[] }> = {
+  const titles: Record<AppScreen, { title: string; subtitle: string }> = {
     home: {
-      title: isBuyer ? "Un cockpit clair pour lancer le projet acheteur." : "Une base rassurante pour cadrer la vente.",
-      body: scenario.projectNote,
-      items: scenario.checklist,
+      title: "Dashboard",
+      subtitle: "Vue d'ensemble du dossier, des urgences et des prochaines actions.",
     },
     listings: {
-      title: isBuyer ? "Prioriser les biens sans se disperser." : "Comparer le marche avec les bons reperes.",
-      body: scenario.listingsSubtitle,
-      items: scenario.listingFilters,
+      title: "Biens",
+      subtitle: "Selection, qualification et comparaison des biens ou comparables.",
     },
     assistant: {
-      title: "Une conversation guidee par le contexte du projet.",
-      body: scenario.assistantIntro,
-      items: scenario.assistantPrompts,
+      title: "Assistant IA",
+      subtitle: "Workspace conversationnel avec contexte, prompts et sources utiles.",
     },
     projects: {
-      title: isBuyer ? "Transformer l'intention en plan d'action." : "Structurer le dossier avant la mise en vente.",
-      body: scenario.projectStatus,
-      items: projectSteps[mode].map((step) => step.title),
+      title: "Projet",
+      subtitle: "Roadmap, dependances et points de vigilance du dossier actif.",
+    },
+    documents: {
+      title: "Documents",
+      subtitle: "Pilotage documentaire et preparation du futur socle RAG.",
     },
     profile: {
-      title: "Donner de la confiance et de la clarte au produit.",
-      body: securityMessage,
-      items: profileSections[0]?.items.map((item) => `${item.label} : ${item.value}`) ?? [],
+      title: "Profil",
+      subtitle: "Compte, preferences d'accompagnement et cadrage securite.",
     },
   };
 
-  const current = screenCopy[activeScreen];
+  return (
+    <header className="platform-header">
+      <div>
+        <p className="platform-header__eyebrow">Plateforme web</p>
+        <h1>{titles[activeScreen].title}</h1>
+        <p>{titles[activeScreen].subtitle}</p>
+      </div>
+
+      <div className="platform-header__actions">
+        <div className="platform-search">Rechercher un dossier, un bien, un document...</div>
+        <ModeTabs mode={mode} onChange={onModeChange} />
+        <button className="platform-ghost-button" type="button">
+          Notifications
+        </button>
+        <button className="platform-primary-button" type="button">
+          Contacter coach
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function PlatformSidebar({
+  activeScreen,
+  mode,
+  onModeChange,
+  onNavigate,
+}: {
+  activeScreen: AppScreen;
+  mode: ProjectMode;
+  onModeChange: (mode: ProjectMode) => void;
+  onNavigate: (screen: AppScreen) => void;
+}) {
+  const navItems: Array<{ key: AppScreen; label: string; icon: ReactNode }> = [
+    { key: "home", label: "Dashboard", icon: <HomeGlyph /> },
+    { key: "listings", label: "Biens", icon: <GridIcon /> },
+    { key: "assistant", label: "Assistant IA", icon: <ChatIcon /> },
+    { key: "projects", label: "Projet", icon: <CheckIcon /> },
+    { key: "documents", label: "Documents", icon: <DocumentIcon /> },
+    { key: "profile", label: "Profil", icon: <UserIcon /> },
+  ];
 
   return (
-    <aside className="desktop-panel" aria-label="Presentation contextuelle">
-      <div className="desktop-panel__hero">
-        <p className="desktop-panel__eyebrow">Experience produit responsive</p>
-        <h2>{scenario.greeting} un parcours immobilier qui s'adapte au desktop.</h2>
-        <p>{current.body}</p>
+    <aside className="platform-sidebar">
+      <div className="platform-sidebar__brand">
+        <LogoMark />
+        <div>
+          <strong>CoachImmoIA</strong>
+          <span>{mode === "buyer" ? "Plateforme acheteur" : "Plateforme vendeur"}</span>
+        </div>
       </div>
 
-      <div className="desktop-panel__status">
-        <span className="desktop-panel__badge">{isBuyer ? "Parcours acheteur" : "Parcours vendeur"}</span>
-        <strong>{activeLabel}</strong>
+      <div className="platform-sidebar__mode">
+        <button
+          className={mode === "buyer" ? "platform-mode-chip is-active" : "platform-mode-chip"}
+          onClick={() => onModeChange("buyer")}
+          type="button"
+        >
+          Acheteur
+        </button>
+        <button
+          className={mode === "seller" ? "platform-mode-chip is-active" : "platform-mode-chip"}
+          onClick={() => onModeChange("seller")}
+          type="button"
+        >
+          Vendeur
+        </button>
       </div>
 
-      <div className="desktop-panel__grid">
-        <article className="desktop-card desktop-card--feature">
-          <div className="desktop-card__icon">
-            <SparkleIcon />
-          </div>
-          <div className="desktop-card__copy">
-            <span>Focus ecran</span>
-            <h3>{current.title}</h3>
-          </div>
-        </article>
+      <nav className="platform-sidebar__nav" aria-label="Navigation plateforme">
+        {navItems.map((item) => (
+          <button
+            className={activeScreen === item.key ? "platform-sidebar__item is-active" : "platform-sidebar__item"}
+            key={item.key}
+            onClick={() => onNavigate(item.key)}
+            type="button"
+          >
+            <span className="platform-sidebar__icon">{item.icon}</span>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
 
-        <article className="desktop-card">
-          <span className="desktop-card__label">Statistiques clefs</span>
-          <div className="desktop-metrics">
-            {scenario.stats.map((metric) => (
-              <div key={metric.label} className="desktop-metric">
-                <strong>{metric.value}</strong>
-                <span>{metric.label}</span>
+      <article className="platform-coach-card">
+        <span className="platform-coach-card__eyebrow">Coach humain</span>
+        <strong>Escalade rapide sur offre, prix ou document sensible.</strong>
+        <p>Le contexte du dossier est transmis avec vos points d'arbitrage.</p>
+      </article>
+    </aside>
+  );
+}
+
+function DashboardScreen({
+  mode,
+  scenario,
+  onNavigate,
+}: {
+  mode: ProjectMode;
+  scenario: ScenarioData;
+  onNavigate: (screen: AppScreen) => void;
+}) {
+  return (
+    <section className="platform-screen platform-screen--dashboard">
+      <article className="platform-hero-card">
+        <div className="platform-hero-card__copy">
+          <p className="platform-section-label">{scenario.greeting}</p>
+          <h2>
+            {mode === "buyer"
+              ? "Pilotez votre projet acheteur sans dispersion."
+              : "Cadrez votre vente avec une vue claire sur les priorites."}
+          </h2>
+          <p>{scenario.projectNote}</p>
+        </div>
+
+        <div className="platform-hero-card__actions">
+          <button className="platform-primary-button" onClick={() => onNavigate("assistant")} type="button">
+            Ouvrir l&apos;assistant
+          </button>
+          <button className="platform-ghost-button" onClick={() => onNavigate("projects")} type="button">
+            Voir le projet
+          </button>
+        </div>
+      </article>
+
+      <div className="platform-kpi-grid">
+        {scenario.stats.map((stat) => (
+          <article className="platform-kpi-card" key={stat.label}>
+            <span>{stat.label}</span>
+            <strong>{stat.value}</strong>
+          </article>
+        ))}
+      </div>
+
+      <div className="platform-grid platform-grid--dashboard">
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Roadmap dossier</h3>
+            <button className="platform-text-button" onClick={() => onNavigate("projects")} type="button">
+              Ouvrir
+            </button>
+          </div>
+
+          <div className="platform-timeline">
+            {projectSteps[mode].map((step) => (
+              <div className={`platform-timeline__row is-${step.status}`} key={step.title}>
+                <span className="platform-timeline__dot" />
+                <div>
+                  <strong>{step.title}</strong>
+                  <p>{step.detail}</p>
+                </div>
               </div>
             ))}
           </div>
         </article>
 
-        <article className="desktop-card">
-          <span className="desktop-card__label">Elements a mettre en avant</span>
-          <ul className="desktop-list">
-            {current.items.slice(0, 3).map((item) => (
-              <li key={item}>
-                <span className="desktop-list__dot" />
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Priorites du moment</h3>
+            <button className="platform-text-button" onClick={() => onNavigate("documents")} type="button">
+              Documents
+            </button>
+          </div>
+
+          <div className="platform-priority-list">
+            {scenario.checklist.map((item) => (
+              <div className="platform-priority-item" key={item}>
+                <span className="platform-priority-item__dot" />
                 <span>{item}</span>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
+        </article>
+
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Coach et IA</h3>
+            <span className="platform-badge">Mistral actif</span>
+          </div>
+          <p className="platform-summary-copy">{scenario.coachHint}</p>
+          <div className="platform-inline-actions">
+            <button className="platform-primary-button" onClick={() => onNavigate("assistant")} type="button">
+              Generer checklist
+            </button>
+            <button className="platform-ghost-button" type="button">
+              Demander arbitrage
+            </button>
+          </div>
         </article>
       </div>
-    </aside>
+    </section>
+  );
+}
+
+function ListingsWorkspaceScreen({
+  mode,
+  scenario,
+  selectedIndex,
+  onModeChange,
+  onSelectListing,
+}: {
+  mode: ProjectMode;
+  scenario: ScenarioData;
+  selectedIndex: number;
+  onModeChange: (mode: ProjectMode) => void;
+  onSelectListing: (index: number) => void;
+}) {
+  const activeListing = listingFeeds[mode][selectedIndex] ?? listingFeeds[mode][0];
+
+  return (
+    <section className="platform-screen platform-screen--listings">
+      <div className="platform-toolbar-row">
+        <ModeTabs mode={mode} onChange={onModeChange} />
+        <div className="platform-chip-row">
+          {scenario.listingFilters.map((filter) => (
+            <span className="platform-chip" key={filter}>
+              {filter}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="platform-grid platform-grid--listings">
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>{scenario.listingsTitle}</h3>
+            <span className="platform-badge">{listingFeeds[mode].length} options</span>
+          </div>
+          <div className="platform-listing-stack">
+            {listingFeeds[mode].map((item, index) => (
+              <button
+                className={selectedIndex === index ? "platform-listing-row is-active" : "platform-listing-row"}
+                key={`${item.title}-${item.location}`}
+                onClick={() => onSelectListing(index)}
+                type="button"
+              >
+                <SceneArtwork scene={item.scene} />
+                <div>
+                  <strong>{item.title}</strong>
+                  <p>{item.location}</p>
+                </div>
+                <span>{item.price}</span>
+              </button>
+            ))}
+          </div>
+        </article>
+
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Detail du bien</h3>
+            <span className="platform-badge">{activeListing.badge}</span>
+          </div>
+
+          <div className="platform-listing-detail">
+            <SceneArtwork scene={activeListing.scene} />
+            <div>
+              <h4>{activeListing.title}</h4>
+              <p>{activeListing.location}</p>
+              <strong>{activeListing.price}</strong>
+            </div>
+          </div>
+
+          <p className="platform-summary-copy">{activeListing.detail}</p>
+
+          <div className="platform-priority-list">
+            <div className="platform-priority-item">
+              <span className="platform-priority-item__dot" />
+              <span>Point fort : bien aligne avec vos criteres non negociables.</span>
+            </div>
+            <div className="platform-priority-item">
+              <span className="platform-priority-item__dot" />
+              <span>Vigilance : verifier copropriete, charges et travaux avant offre.</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function AssistantWorkspaceScreen({
+  mode,
+  scenario,
+  draft,
+  error,
+  isLoading,
+  messages,
+  onDraftChange,
+  onModeChange,
+  onPromptClick,
+  onSubmit,
+}: {
+  mode: ProjectMode;
+  scenario: ScenarioData;
+  draft: string;
+  error: string | null;
+  isLoading: boolean;
+  messages: AssistantMessage[];
+  onDraftChange: (value: string) => void;
+  onModeChange: (mode: ProjectMode) => void;
+  onPromptClick: (prompt: string) => void;
+  onSubmit: () => void;
+}) {
+  const runtime = getAssistantRuntime();
+
+  return (
+    <section className="platform-screen platform-screen--assistant">
+      <div className="platform-toolbar-row">
+        <ModeTabs mode={mode} onChange={onModeChange} />
+        <span className="platform-chip">Modele actif : {runtime.label}</span>
+      </div>
+
+      <div className="platform-grid platform-grid--assistant">
+        <article className="platform-surface platform-chat-surface">
+          <div className="platform-surface__header">
+            <h3>Conversation active</h3>
+            <span className="platform-badge">Reponses actionnables</span>
+          </div>
+
+          <div className="platform-chat-thread">
+            {messages.map((message, index) => (
+              <div
+                className={message.role === "assistant" ? "platform-chat-bubble is-assistant" : "platform-chat-bubble is-user"}
+                key={`${message.content}-${index}`}
+              >
+                {message.content}
+              </div>
+            ))}
+
+            {isLoading ? <div className="platform-chat-bubble is-assistant">CoachImmoIA reflechit...</div> : null}
+          </div>
+
+          <div className="platform-chip-row">
+            {scenario.assistantPrompts.map((prompt) => (
+              <button className="platform-chip platform-chip--button" key={prompt} onClick={() => onPromptClick(prompt)} type="button">
+                {prompt}
+              </button>
+            ))}
+          </div>
+
+          {error ? <div className="feedback-banner is-error">{error}</div> : null}
+
+          <div className="platform-composer">
+            <textarea
+              className="platform-composer__input"
+              onChange={(event) => onDraftChange(event.target.value)}
+              placeholder="Posez une question sur votre projet immobilier..."
+              rows={4}
+              value={draft}
+            />
+            <button className="platform-primary-button" disabled={isLoading || !draft.trim()} onClick={onSubmit} type="button">
+              {isLoading ? "Envoi..." : "Envoyer"}
+            </button>
+          </div>
+        </article>
+
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Contexte dossier</h3>
+            <span className="platform-badge">RAG ready</span>
+          </div>
+          <p className="platform-summary-copy">{scenario.assistantIntro}</p>
+
+          <div className="platform-context-list">
+            <div>
+              <span className="platform-context-list__label">Resume</span>
+              <p>{scenario.projectStatus}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Sources liees</span>
+              <p>{scenario.projectDocuments.slice(0, 3).join(" · ")}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Escalade</span>
+              <p>{scenario.coachHint}</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function ProjectsWorkspaceScreen({
+  mode,
+  scenario,
+}: {
+  mode: ProjectMode;
+  scenario: ScenarioData;
+}) {
+  return (
+    <section className="platform-screen platform-screen--projects">
+      <div className="platform-grid platform-grid--projects">
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Roadmap du dossier</h3>
+            <span className="platform-badge">{scenario.projectStatus}</span>
+          </div>
+
+          <div className="platform-timeline">
+            {projectSteps[mode].map((step) => (
+              <div className={`platform-timeline__row is-${step.status}`} key={step.title}>
+                <span className="platform-timeline__dot" />
+                <div>
+                  <strong>{step.title}</strong>
+                  <p>{step.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Checklist active</h3>
+            <span className="platform-badge">Prioritaire</span>
+          </div>
+          <div className="platform-priority-list">
+            {scenario.checklist.map((item) => (
+              <div className="platform-priority-item" key={item}>
+                <span className="platform-priority-item__dot" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="platform-surface is-dark">
+          <div className="platform-surface__header">
+            <h3>Risque principal</h3>
+            <span className="platform-badge is-contrast">Coach recommande</span>
+          </div>
+          <p className="platform-summary-copy">
+            {mode === "buyer"
+              ? "Le bien cible reste prometteur, mais la copropriete et le timing banque doivent etre verifies avant arbitrage d'offre."
+              : "Le prix et les documents de copropriete demandent encore un arbitrage avant diffusion large."}
+          </p>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function DocumentsScreen({ mode, scenario }: { mode: ProjectMode; scenario: ScenarioData }) {
+  const rows =
+    mode === "seller"
+      ? sellerDocumentStatuses
+      : scenario.projectDocuments.map((label, index) => ({
+          label,
+          status: index < 2 ? "Disponible" : "A preparer",
+          tone: index < 2 ? "mint" : "dark",
+        }));
+
+  return (
+    <section className="platform-screen platform-screen--documents">
+      <div className="platform-kpi-grid platform-kpi-grid--documents">
+        <article className="platform-kpi-card">
+          <span>Disponibles</span>
+          <strong>{rows.filter((row) => row.status === "Disponible").length}</strong>
+        </article>
+        <article className="platform-kpi-card">
+          <span>En attente</span>
+          <strong>{rows.filter((row) => row.status !== "Disponible").length}</strong>
+        </article>
+        <article className="platform-kpi-card">
+          <span>Indexation future</span>
+          <strong>RAG ready</strong>
+        </article>
+      </div>
+
+      <article className="platform-surface">
+        <div className="platform-surface__header">
+          <h3>Table documentaire</h3>
+          <span className="platform-badge">Projet {mode === "buyer" ? "acheteur" : "vendeur"}</span>
+        </div>
+
+        <div className="platform-document-table">
+          <div className="platform-document-table__head">
+            <span>Document</span>
+            <span>Statut</span>
+            <span>Action</span>
+          </div>
+
+          {rows.map((row) => (
+            <div className="platform-document-table__row" key={row.label}>
+              <strong>{row.label}</strong>
+              <span className={row.tone === "mint" ? "status-badge is-mint" : "status-badge is-dark"}>{row.status}</span>
+              <button className="platform-text-button" type="button">
+                {row.status === "Disponible" ? "Voir" : "Relancer"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </article>
+    </section>
+  );
+}
+
+function ProfileWorkspaceScreen() {
+  return (
+    <section className="platform-screen platform-screen--profile">
+      <div className="platform-grid platform-grid--profile">
+        <article className="platform-surface">
+          <div className="platform-profile-head">
+            <div className="profile-hero__avatar">LM</div>
+            <div>
+              <h3>Loic Metivier</h3>
+              <p>Accompagnement hybride IA + coach humain</p>
+            </div>
+          </div>
+
+          <div className="platform-context-list">
+            {profileSections[0].items.map((item) => (
+              <div key={item.label}>
+                <span className="platform-context-list__label">{item.label}</span>
+                <p>{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="platform-surface is-dark">
+          <div className="platform-surface__header">
+            <h3>Securite et confiance</h3>
+            <span className="platform-badge is-contrast">Mistral API active</span>
+          </div>
+          <p className="platform-summary-copy">{securityMessage}</p>
+        </article>
+
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Parametres clefs</h3>
+            <span className="platform-badge">Coach disponible</span>
+          </div>
+          <div className="platform-context-list">
+            {profileSections.slice(1).flatMap((section) => section.items).map((item) => (
+              <div key={item.label}>
+                <span className="platform-context-list__label">{item.label}</span>
+                <p>{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function WebPlatformShell({
+  activeScreen,
+  mode,
+  scenario,
+  selectedListingIndex,
+  draft,
+  error,
+  isLoading,
+  messages,
+  onDraftChange,
+  onModeChange,
+  onNavigate,
+  onPromptClick,
+  onSelectListing,
+  onSubmit,
+}: {
+  activeScreen: AppScreen;
+  mode: ProjectMode;
+  scenario: ScenarioData;
+  selectedListingIndex: number;
+  draft: string;
+  error: string | null;
+  isLoading: boolean;
+  messages: AssistantMessage[];
+  onDraftChange: (value: string) => void;
+  onModeChange: (mode: ProjectMode) => void;
+  onNavigate: (screen: AppScreen) => void;
+  onPromptClick: (prompt: string) => void;
+  onSelectListing: (index: number) => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <section className="web-shell" aria-label="Plateforme web CoachImmoIA">
+      <PlatformSidebar activeScreen={activeScreen} mode={mode} onModeChange={onModeChange} onNavigate={onNavigate} />
+
+      <div className="web-shell__main">
+        <PlatformHeader activeScreen={activeScreen} mode={mode} onModeChange={onModeChange} />
+
+        <div className="web-shell__content">
+          {activeScreen === "home" ? <DashboardScreen mode={mode} onNavigate={onNavigate} scenario={scenario} /> : null}
+          {activeScreen === "listings" ? (
+            <ListingsWorkspaceScreen
+              mode={mode}
+              onModeChange={onModeChange}
+              onSelectListing={onSelectListing}
+              scenario={scenario}
+              selectedIndex={selectedListingIndex}
+            />
+          ) : null}
+          {activeScreen === "assistant" ? (
+            <AssistantWorkspaceScreen
+              draft={draft}
+              error={error}
+              isLoading={isLoading}
+              messages={messages}
+              mode={mode}
+              onDraftChange={onDraftChange}
+              onModeChange={onModeChange}
+              onPromptClick={onPromptClick}
+              onSubmit={onSubmit}
+              scenario={scenario}
+            />
+          ) : null}
+          {activeScreen === "projects" ? <ProjectsWorkspaceScreen mode={mode} scenario={scenario} /> : null}
+          {activeScreen === "documents" ? <DocumentsScreen mode={mode} scenario={scenario} /> : null}
+          {activeScreen === "profile" ? <ProfileWorkspaceScreen /> : null}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1202,6 +1770,7 @@ function App() {
   const [mode, setMode] = useState<ProjectMode>("buyer");
   const [activeAction, setActiveAction] = useState<ActionCard["id"]>("buyer");
   const [activeScreen, setActiveScreen] = useState<AppScreen>("home");
+  const [selectedListingIndex, setSelectedListingIndex] = useState(0);
   const [assistantDraft, setAssistantDraft] = useState(scenarios.buyer.assistantPrompts[0]);
   const [assistantThreads, setAssistantThreads] = useState<AssistantThread>(() => ({
     buyer: assistantConversations.buyer.map((message) => ({
@@ -1221,6 +1790,7 @@ function App() {
 
   const handleModeChange = (nextMode: ProjectMode) => {
     setMode(nextMode);
+    setSelectedListingIndex(0);
     setAssistantDraft(scenarios[nextMode].assistantPrompts[0]);
     setAssistantError(null);
 
@@ -1235,17 +1805,20 @@ function App() {
 
     if (id === "buyer") {
       setMode("buyer");
+      setSelectedListingIndex(0);
       setAssistantDraft(scenarios.buyer.assistantPrompts[0]);
       return;
     }
 
     if (id === "seller") {
       setMode("seller");
+      setSelectedListingIndex(0);
       setAssistantDraft(scenarios.seller.assistantPrompts[0]);
       return;
     }
 
     setMode("seller");
+    setSelectedListingIndex(0);
     setAssistantDraft("J'aimerais estimer mon bien avant de choisir une strategie de vente.");
   };
 
@@ -1383,6 +1956,10 @@ function App() {
       );
     }
 
+    if (activeScreen === "documents") {
+      return <DocumentsScreen mode={mode} scenario={scenario} />;
+    }
+
     return <ProfileScreen />;
   };
 
@@ -1392,37 +1969,54 @@ function App() {
       <div className="app-glow app-glow--right" />
 
       <div className="app-stage__layout">
-        <section className="device-shell" aria-label="Application CoachImmoIA">
-          <div className="device-shell__chrome" />
-          <div className="device-shell__speaker" />
+        <WebPlatformShell
+          activeScreen={activeScreen}
+          draft={assistantDraft}
+          error={assistantError}
+          isLoading={assistantLoading}
+          messages={assistantThreads[mode]}
+          mode={mode}
+          onDraftChange={setAssistantDraft}
+          onModeChange={handleModeChange}
+          onNavigate={setActiveScreen}
+          onPromptClick={setAssistantDraft}
+          onSelectListing={setSelectedListingIndex}
+          onSubmit={handleAssistantSubmit}
+          scenario={scenario}
+          selectedListingIndex={selectedListingIndex}
+        />
 
-          <div className="device-screen">
-            <header className="status-bar" aria-hidden="true">
-              <span>9:41</span>
-              <div className="status-bar__icons">
-                <span className="status-bar__signal">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <span className="status-bar__wifi" />
-                <span className="status-bar__battery" />
+        <aside className="mobile-preview" aria-label="Apercu mobile">
+          <section className="device-shell" aria-label="Application mobile CoachImmoIA">
+            <div className="device-shell__chrome" />
+            <div className="device-shell__speaker" />
+
+            <div className="device-screen">
+              <header className="status-bar" aria-hidden="true">
+                <span>9:41</span>
+                <div className="status-bar__icons">
+                  <span className="status-bar__signal">
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  <span className="status-bar__wifi" />
+                  <span className="status-bar__battery" />
+                </div>
+              </header>
+
+              <AppTopBar subtitle={mode === "buyer" ? "Parcours acheteur" : "Parcours vendeur"} />
+
+              <div className="screen-scroll">
+                <PrototypeToolbar activeScreen={activeScreen} onChange={handleVariantChange} variants={screenVariants} />
+                {renderScreen()}
               </div>
-            </header>
 
-            <AppTopBar subtitle={mode === "buyer" ? "Parcours acheteur" : "Parcours vendeur"} />
-
-            <div className="screen-scroll">
-              <PrototypeToolbar activeScreen={activeScreen} onChange={handleVariantChange} variants={screenVariants} />
-              {renderScreen()}
+              <BottomNav activeScreen={activeScreen} onNavigate={setActiveScreen} />
             </div>
-
-            <BottomNav activeScreen={activeScreen} onNavigate={setActiveScreen} />
-          </div>
-        </section>
-
-        <DesktopShowcase activeScreen={activeScreen} mode={mode} scenario={scenario} />
+          </section>
+        </aside>
       </div>
     </main>
   );
