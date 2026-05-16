@@ -36,12 +36,255 @@ type DocumentStatus = {
   tone: "mint" | "dark";
 };
 
+type DocumentWorkspaceItem = DocumentStatus & {
+  source: string;
+  owner: string;
+  ragStatus: "indexed" | "ready" | "missing";
+  chunkCount: number;
+  lastUpdated: string;
+  summary: string;
+  nextAction: string;
+  notes: string[];
+};
+
+type ListingWorkspaceMeta = {
+  score: string;
+  tempo: string;
+  coachSignal: string;
+  nextAction: string;
+  strengths: string[];
+  risks: string[];
+  prepDocs: string[];
+};
+
+type ProjectStepMeta = {
+  owner: string;
+  deadline: string;
+  checkpoint: string;
+  blocker: string;
+};
+
 const sellerDocumentStatuses: DocumentStatus[] = [
   { label: "Titre de propriete", status: "Disponible", tone: "mint" },
   { label: "Taxe fonciere", status: "Disponible", tone: "mint" },
   { label: "Diagnostics", status: "A completer", tone: "dark" },
   { label: "PV d'AG et carnet d'entretien", status: "A demander", tone: "dark" },
 ];
+
+const documentWorkspaceData: Record<ProjectMode, DocumentWorkspaceItem[]> = {
+  buyer: [
+    {
+      label: "Piece d'identite",
+      status: "Disponible",
+      tone: "mint",
+      source: "Client",
+      owner: "Utilisateur",
+      ragStatus: "indexed",
+      chunkCount: 6,
+      lastUpdated: "Aujourd'hui · 09:20",
+      summary: "Utilise pour securiser le dossier banque et l'offre.",
+      nextAction: "Conserver dans le contexte du dossier.",
+      notes: ["Version lisible", "Partage autorise avec le coach"],
+    },
+    {
+      label: "Simulation bancaire",
+      status: "Disponible",
+      tone: "mint",
+      source: "Banque",
+      owner: "Conseiller",
+      ragStatus: "indexed",
+      chunkCount: 12,
+      lastUpdated: "Hier · 18:10",
+      summary: "Base de reference pour cadrer budget et capacite d'emprunt.",
+      nextAction: "Mettre a jour si le taux change.",
+      notes: ["Budget cadre 620 kEUR", "Taux a reverifier sous 15 jours"],
+    },
+    {
+      label: "Plan de financement",
+      status: "A preparer",
+      tone: "dark",
+      source: "Assistant IA",
+      owner: "Utilisateur",
+      ragStatus: "ready",
+      chunkCount: 0,
+      lastUpdated: "En attente",
+      summary: "Document de synthese pour harmoniser banque, apport et conditions suspensives.",
+      nextAction: "Generer une premiere version avec l'assistant.",
+      notes: ["Futur support RAG", "A transmettre avant offre"],
+    },
+    {
+      label: "Questions de visite",
+      status: "A preparer",
+      tone: "dark",
+      source: "Assistant IA",
+      owner: "CoachImmoIA",
+      ragStatus: "missing",
+      chunkCount: 0,
+      lastUpdated: "A creer",
+      summary: "Check-list exploitable pendant la visite pour limiter les angles morts.",
+      nextAction: "Generer les questions copropriete et travaux.",
+      notes: ["Priorite forte", "A synchroniser avec le coach si offre rapide"],
+    },
+  ],
+  seller: [
+    {
+      label: "Titre de propriete",
+      status: "Disponible",
+      tone: "mint",
+      source: "Client",
+      owner: "Utilisateur",
+      ragStatus: "indexed",
+      chunkCount: 9,
+      lastUpdated: "Aujourd'hui · 08:45",
+      summary: "Piece socle pour ouvrir le dossier vendeur et rassurer l'accompagnement.",
+      nextAction: "Confirmer la version la plus recente.",
+      notes: ["Document indexe", "Reference juridique de base"],
+    },
+    {
+      label: "Taxe fonciere",
+      status: "Disponible",
+      tone: "mint",
+      source: "Client",
+      owner: "Utilisateur",
+      ragStatus: "ready",
+      chunkCount: 4,
+      lastUpdated: "Hier · 17:30",
+      summary: "Piece de reference pour la presentation vendeur et les questions acheteurs.",
+      nextAction: "Lier au resume du dossier.",
+      notes: ["Pas encore indexee", "Bonne piece pour le contexte IA"],
+    },
+    {
+      label: "Diagnostics",
+      status: "A completer",
+      tone: "dark",
+      source: "Diagnostiqueur",
+      owner: "Prestataire",
+      ragStatus: "missing",
+      chunkCount: 0,
+      lastUpdated: "Relance requise",
+      summary: "Bloc critique pour la mise en vente et la reduction des frictions acheteur.",
+      nextAction: "Relancer le diagnostiqueur et programmer la mise a jour.",
+      notes: ["Bloquant avant diffusion large", "A escalader si pas de retour sous 48h"],
+    },
+    {
+      label: "PV d'AG et carnet d'entretien",
+      status: "A demander",
+      tone: "dark",
+      source: "Syndic",
+      owner: "Syndic",
+      ragStatus: "missing",
+      chunkCount: 0,
+      lastUpdated: "Demande non envoyee",
+      summary: "Documents de copropriete essentiels pour les comparaisons, les objections et le futur RAG.",
+      nextAction: "Generer un email syndic et suivre la reponse.",
+      notes: ["Support RAG prioritaire", "Cle pour l'analyse des risques"],
+    },
+  ],
+};
+
+const listingWorkspaceMeta: Record<ProjectMode, ListingWorkspaceMeta[]> = {
+  buyer: [
+    {
+      score: "91/100",
+      tempo: "Visite cette semaine",
+      coachSignal: "Verte",
+      nextAction: "Generer la checklist copropriete avant visite.",
+      strengths: ["Bon fit budget / surface", "Copropriete saine", "Exterieur utile"],
+      risks: ["Charges a challenger", "Travaux en parties communes a confirmer"],
+      prepDocs: ["Questions de visite", "Simulation bancaire", "Plan de financement"],
+    },
+    {
+      score: "74/100",
+      tempo: "A challenger",
+      coachSignal: "Orange",
+      nextAction: "Comparer au bien de Saint Ambroise avant arbitrage.",
+      strengths: ["Surface genereuse", "Bon potentiel de valorisation"],
+      risks: ["DPE a verifier", "Environnement plus bruyant"],
+      prepDocs: ["Comparatif de biens", "Questions travaux", "Grille de notation"],
+    },
+    {
+      score: "79/100",
+      tempo: "Sous surveillance",
+      coachSignal: "Orange",
+      nextAction: "Valider les charges et la luminosite reelle.",
+      strengths: ["Etage eleve", "Bonne optimisation de plan"],
+      risks: ["Charges a confirmer", "Visite necessaire en fin de journee"],
+      prepDocs: ["Questions de visite", "Comparatif quartier", "Plan de financement"],
+    },
+  ],
+  seller: [
+    {
+      score: "Comparable A",
+      tempo: "Reference forte",
+      coachSignal: "Verte",
+      nextAction: "Integrer cette reference dans le cadrage prix.",
+      strengths: ["Delai de vente rapide", "Presentation tres proche du bien cible"],
+      risks: ["Marche potentiellement plus tendu au moment de diffusion"],
+      prepDocs: ["Arguments prix", "Comparables", "Strategie de diffusion"],
+    },
+    {
+      score: "Comparable B",
+      tempo: "Signal utile",
+      coachSignal: "Orange",
+      nextAction: "Comparer la marge de nego reellement observee.",
+      strengths: ["Reference de secteur utile", "Dossier vendeur tres propre"],
+      risks: ["Contexte de marche un peu different"],
+      prepDocs: ["Comparatif prix", "Questions coach", "Pieces vendeur"],
+    },
+    {
+      score: "Comparable C",
+      tempo: "A contextualiser",
+      coachSignal: "Orange",
+      nextAction: "Verifier la proximite de standing avec votre bien.",
+      strengths: ["Bonne reference surface", "Diffusion bien documentee"],
+      risks: ["Canal de vente direct", "Conditions de nego differentes"],
+      prepDocs: ["Tableau comparables", "Strategie vendeur", "Dossier copropriete"],
+    },
+  ],
+};
+
+const projectStepMeta: Record<ProjectMode, ProjectStepMeta[]> = {
+  buyer: [
+    {
+      owner: "Utilisateur + banque",
+      deadline: "Valide",
+      checkpoint: "Simulation confirmee et marge de securite posee.",
+      blocker: "Aucun blocker critique.",
+    },
+    {
+      owner: "Utilisateur + Assistant IA",
+      deadline: "Cette semaine",
+      checkpoint: "Comparer les 3 meilleurs biens sans bruit contextuel.",
+      blocker: "Questions copropriete encore incomplètes.",
+    },
+    {
+      owner: "Coach + utilisateur",
+      deadline: "Avant offre",
+      checkpoint: "Rassembler les points sensibles avant positionnement prix.",
+      blocker: "Travaux et timing banque a clarifier.",
+    },
+  ],
+  seller: [
+    {
+      owner: "Utilisateur",
+      deadline: "En cours",
+      checkpoint: "Documents critiques identifies et statuts traces.",
+      blocker: "Pieces copropriete non encore centralisees.",
+    },
+    {
+      owner: "Coach + utilisateur",
+      deadline: "Cette semaine",
+      checkpoint: "Comparer 3 references solides avec un angle marche.",
+      blocker: "Prix cible encore a arbitrer.",
+    },
+    {
+      owner: "Coach humain",
+      deadline: "Avant diffusion",
+      checkpoint: "Choisir le canal de vente et la mise en scene documentaire.",
+      blocker: "Diagnostics et pieces syndic manquants.",
+    },
+  ],
+};
 
 const defaultVariants: ScreenVariantState = {
   home: "default",
@@ -1383,6 +1626,7 @@ function ListingsWorkspaceScreen({
   onSelectListing: (index: number) => void;
 }) {
   const activeListing = listingFeeds[mode][selectedIndex] ?? listingFeeds[mode][0];
+  const activeMeta = listingWorkspaceMeta[mode][selectedIndex] ?? listingWorkspaceMeta[mode][0];
 
   return (
     <section className="platform-screen platform-screen--listings">
@@ -1442,24 +1686,45 @@ function ListingsWorkspaceScreen({
           <div className="platform-mini-metrics">
             <div className="platform-mini-metric">
               <span>Decision</span>
-              <strong>{mode === "buyer" ? "Visite prioritaire" : "Comparable fort"}</strong>
+              <strong>{activeMeta.tempo}</strong>
             </div>
             <div className="platform-mini-metric">
-              <span>Prochaine action</span>
-              <strong>{mode === "buyer" ? "Questions de visite" : "Comparer au prix cible"}</strong>
+              <span>Signal coach</span>
+              <strong>{activeMeta.coachSignal}</strong>
+            </div>
+            <div className="platform-mini-metric">
+              <span>Score</span>
+              <strong>{activeMeta.score}</strong>
+            </div>
+            <div className="platform-mini-metric">
+              <span>Next step</span>
+              <strong>{activeMeta.nextAction}</strong>
             </div>
           </div>
 
-          <div className="platform-priority-list">
-            <div className="platform-priority-item">
-              <span className="platform-priority-item__dot" />
-              <span>Point fort : bien aligne avec vos criteres non negociables.</span>
+          <div className="platform-detail-columns">
+            <div className="platform-priority-list">
+              {activeMeta.strengths.map((item) => (
+                <div className="platform-priority-item" key={item}>
+                  <span className="platform-priority-item__dot" />
+                  <span>{item}</span>
+                </div>
+              ))}
             </div>
-            <div className="platform-priority-item">
-              <span className="platform-priority-item__dot" />
-              <span>Vigilance : verifier copropriete, charges et travaux avant offre.</span>
+            <div className="platform-warning-list">
+              {activeMeta.risks.map((item) => (
+                <div className="platform-warning-item" key={item}>
+                  <span className="platform-warning-item__dot" />
+                  <span>{item}</span>
+                </div>
+              ))}
             </div>
           </div>
+
+          <article className="platform-inline-panel">
+            <span className="platform-section-label">Pieces a preparer</span>
+            <strong>{activeMeta.prepDocs.join(" · ")}</strong>
+          </article>
 
           <div className="platform-inline-actions">
             <button className="platform-primary-button" type="button">
@@ -1600,10 +1865,17 @@ function AssistantWorkspaceScreen({
 function ProjectsWorkspaceScreen({
   mode,
   scenario,
+  selectedStepIndex,
+  onSelectStep,
 }: {
   mode: ProjectMode;
   scenario: ScenarioData;
+  selectedStepIndex: number;
+  onSelectStep: (index: number) => void;
 }) {
+  const activeStep = projectSteps[mode][selectedStepIndex] ?? projectSteps[mode][0];
+  const activeMeta = projectStepMeta[mode][selectedStepIndex] ?? projectStepMeta[mode][0];
+
   return (
     <section className="platform-screen platform-screen--projects">
       <div className="platform-grid platform-grid--projects">
@@ -1614,30 +1886,53 @@ function ProjectsWorkspaceScreen({
           </div>
 
           <div className="platform-timeline">
-            {projectSteps[mode].map((step) => (
-              <div className={`platform-timeline__row is-${step.status}`} key={step.title}>
+            {projectSteps[mode].map((step, index) => (
+              <button
+                className={
+                  selectedStepIndex === index
+                    ? `platform-timeline__row is-${step.status} is-selected`
+                    : `platform-timeline__row is-${step.status}`
+                }
+                key={step.title}
+                onClick={() => onSelectStep(index)}
+                type="button"
+              >
                 <span className="platform-timeline__dot" />
                 <div>
                   <strong>{step.title}</strong>
                   <p>{step.detail}</p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </article>
 
         <article className="platform-surface">
           <div className="platform-surface__header">
-            <h3>Checklist active</h3>
+            <h3>Focus d'etape</h3>
             <span className="platform-badge">Prioritaire</span>
           </div>
-          <div className="platform-priority-list">
-            {scenario.checklist.map((item) => (
-              <div className="platform-priority-item" key={item}>
-                <span className="platform-priority-item__dot" />
-                <span>{item}</span>
-              </div>
-            ))}
+          <div className="platform-context-list">
+            <div>
+              <span className="platform-context-list__label">Etape active</span>
+              <p>{activeStep.title}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Owner</span>
+              <p>{activeMeta.owner}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Deadline</span>
+              <p>{activeMeta.deadline}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Checkpoint</span>
+              <p>{activeMeta.checkpoint}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Blocker</span>
+              <p>{activeMeta.blocker}</p>
+            </div>
           </div>
         </article>
 
@@ -1651,10 +1946,18 @@ function ProjectsWorkspaceScreen({
               ? "Le bien cible reste prometteur, mais la copropriete et le timing banque doivent etre verifies avant arbitrage d'offre."
               : "Le prix et les documents de copropriete demandent encore un arbitrage avant diffusion large."}
           </p>
+          <div className="platform-priority-list platform-priority-list--contrast">
+            {scenario.checklist.map((item) => (
+              <div className="platform-priority-item" key={item}>
+                <span className="platform-priority-item__dot" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
           <div className="platform-inline-actions">
             <button className="platform-primary-button platform-primary-button--light" type="button">
               Escalader au coach
-            </button>
+              </button>
             <button className="platform-ghost-button platform-ghost-button--dark" type="button">
               Ajouter un contexte
             </button>
@@ -1665,19 +1968,30 @@ function ProjectsWorkspaceScreen({
   );
 }
 
-function DocumentsScreen({ mode, scenario }: { mode: ProjectMode; scenario: ScenarioData }) {
-  const rows =
-    mode === "seller"
-      ? sellerDocumentStatuses.map((row, index) => ({
-          ...row,
-          source: index < 2 ? "Client" : index === 2 ? "Diagnostiqueur" : "Syndic",
-        }))
-      : scenario.projectDocuments.map((label, index) => ({
-          label,
-          status: index < 2 ? "Disponible" : "A preparer",
-          tone: index < 2 ? "mint" : "dark",
-          source: index === 0 ? "Client" : index === 1 ? "Banque" : "Assistant IA",
-        }));
+function DocumentsScreen({
+  mode,
+  selectedDocumentIndex,
+  documentFilter,
+  documentContextSelection,
+  onDocumentFilterChange,
+  onSelectDocument,
+  onToggleDocumentContext,
+}: {
+  mode: ProjectMode;
+  selectedDocumentIndex: number;
+  documentFilter: "all" | "action" | "rag";
+  documentContextSelection: string[];
+  onDocumentFilterChange: (filter: "all" | "action" | "rag") => void;
+  onSelectDocument: (index: number) => void;
+  onToggleDocumentContext: (label: string) => void;
+}) {
+  const rows = documentWorkspaceData[mode];
+  const filteredRows = rows.filter((row) => {
+    if (documentFilter === "action") return row.status !== "Disponible";
+    if (documentFilter === "rag") return row.ragStatus !== "missing";
+    return true;
+  });
+  const activeDocument = filteredRows[selectedDocumentIndex] ?? filteredRows[0] ?? rows[0];
 
   return (
     <section className="platform-screen platform-screen--documents">
@@ -1690,6 +2004,26 @@ function DocumentsScreen({ mode, scenario }: { mode: ProjectMode; scenario: Scen
         </strong>
       </article>
 
+      <div className="platform-toolbar-row">
+        <div className="platform-chip-row">
+          {[
+            { label: "Tous", value: "all" },
+            { label: "Action requise", value: "action" },
+            { label: "RAG pret", value: "rag" },
+          ].map((filter) => (
+            <button
+              className={documentFilter === filter.value ? "platform-chip platform-chip--button is-active" : "platform-chip platform-chip--button"}
+              key={filter.value}
+              onClick={() => onDocumentFilterChange(filter.value as "all" | "action" | "rag")}
+              type="button"
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+        <span className="platform-chip">Contexte IA : {documentContextSelection.length} pieces</span>
+      </div>
+
       <div className="platform-kpi-grid platform-kpi-grid--documents">
         <article className="platform-kpi-card">
           <span>Disponibles</span>
@@ -1701,36 +2035,102 @@ function DocumentsScreen({ mode, scenario }: { mode: ProjectMode; scenario: Scen
         </article>
         <article className="platform-kpi-card">
           <span>Indexation future</span>
-          <strong>RAG ready</strong>
+          <strong>{rows.filter((row) => row.ragStatus !== "missing").length} pretes</strong>
         </article>
       </div>
 
-      <article className="platform-surface">
-        <div className="platform-surface__header">
-          <h3>Table documentaire</h3>
-          <span className="platform-badge">Projet {mode === "buyer" ? "acheteur" : "vendeur"}</span>
-        </div>
-
-        <div className="platform-document-table">
-          <div className="platform-document-table__head">
-            <span>Document</span>
-            <span>Statut</span>
-            <span>Source</span>
-            <span>Action</span>
+      <div className="platform-grid platform-grid--documents-workspace">
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Table documentaire</h3>
+            <span className="platform-badge">Projet {mode === "buyer" ? "acheteur" : "vendeur"}</span>
           </div>
 
-          {rows.map((row) => (
-            <div className="platform-document-table__row" key={row.label}>
-              <strong>{row.label}</strong>
-              <span className={row.tone === "mint" ? "status-badge is-mint" : "status-badge is-dark"}>{row.status}</span>
-              <span className="platform-document-table__source">{row.source}</span>
-              <button className="platform-text-button" type="button">
-                {row.status === "Disponible" ? "Voir" : "Relancer"}
-              </button>
+          <div className="platform-document-table">
+            <div className="platform-document-table__head">
+              <span>Document</span>
+              <span>Statut</span>
+              <span>Source</span>
+              <span>Action</span>
             </div>
-          ))}
-        </div>
-      </article>
+
+            {filteredRows.map((row, index) => (
+              <button
+                className={activeDocument.label === row.label ? "platform-document-table__row is-active" : "platform-document-table__row"}
+                key={row.label}
+                onClick={() => onSelectDocument(index)}
+                type="button"
+              >
+                <strong>{row.label}</strong>
+                <span className={row.tone === "mint" ? "status-badge is-mint" : "status-badge is-dark"}>{row.status}</span>
+                <span className="platform-document-table__source">{row.source}</span>
+                <span className="platform-text-button">
+                  {row.status === "Disponible" ? "Voir" : "Relancer"}
+                </span>
+              </button>
+            ))}
+          </div>
+        </article>
+
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Detail document</h3>
+            <span className="platform-badge">RAG {activeDocument.ragStatus}</span>
+          </div>
+
+          <div className="platform-context-list">
+            <div>
+              <span className="platform-context-list__label">Document</span>
+              <p>{activeDocument.label}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Owner</span>
+              <p>{activeDocument.owner}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Last updated</span>
+              <p>{activeDocument.lastUpdated}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Summary</span>
+              <p>{activeDocument.summary}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Next action</span>
+              <p>{activeDocument.nextAction}</p>
+            </div>
+          </div>
+
+          <div className="platform-mini-metrics">
+            <div className="platform-mini-metric">
+              <span>Chunks</span>
+              <strong>{activeDocument.chunkCount}</strong>
+            </div>
+            <div className="platform-mini-metric">
+              <span>RAG status</span>
+              <strong>{activeDocument.ragStatus}</strong>
+            </div>
+          </div>
+
+          <div className="platform-priority-list">
+            {activeDocument.notes.map((note) => (
+              <div className="platform-priority-item" key={note}>
+                <span className="platform-priority-item__dot" />
+                <span>{note}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="platform-inline-actions">
+            <button className="platform-primary-button" onClick={() => onToggleDocumentContext(activeDocument.label)} type="button">
+              {documentContextSelection.includes(activeDocument.label) ? "Retirer du contexte IA" : "Ajouter au contexte IA"}
+            </button>
+            <button className="platform-ghost-button" type="button">
+              {activeDocument.status === "Disponible" ? "Voir l'extrait" : "Generer relance"}
+            </button>
+          </div>
+        </article>
+      </div>
     </section>
   );
 }
@@ -1795,30 +2195,46 @@ function WebPlatformShell({
   mode,
   scenario,
   selectedListingIndex,
+  selectedProjectStepIndex,
+  selectedDocumentIndex,
+  documentFilter,
+  documentContextSelection,
   draft,
   error,
   isLoading,
   messages,
   onDraftChange,
+  onDocumentFilterChange,
+  onSelectDocument,
   onModeChange,
   onNavigate,
   onPromptClick,
+  onSelectProjectStep,
   onSelectListing,
+  onToggleDocumentContext,
   onSubmit,
 }: {
   activeScreen: AppScreen;
   mode: ProjectMode;
   scenario: ScenarioData;
   selectedListingIndex: number;
+  selectedProjectStepIndex: number;
+  selectedDocumentIndex: number;
+  documentFilter: "all" | "action" | "rag";
+  documentContextSelection: string[];
   draft: string;
   error: string | null;
   isLoading: boolean;
   messages: AssistantMessage[];
   onDraftChange: (value: string) => void;
+  onDocumentFilterChange: (filter: "all" | "action" | "rag") => void;
+  onSelectDocument: (index: number) => void;
   onModeChange: (mode: ProjectMode) => void;
   onNavigate: (screen: AppScreen) => void;
   onPromptClick: (prompt: string) => void;
+  onSelectProjectStep: (index: number) => void;
   onSelectListing: (index: number) => void;
+  onToggleDocumentContext: (label: string) => void;
   onSubmit: () => void;
 }) {
   return (
@@ -1853,8 +2269,25 @@ function WebPlatformShell({
               scenario={scenario}
             />
           ) : null}
-          {activeScreen === "projects" ? <ProjectsWorkspaceScreen mode={mode} scenario={scenario} /> : null}
-          {activeScreen === "documents" ? <DocumentsScreen mode={mode} scenario={scenario} /> : null}
+          {activeScreen === "projects" ? (
+            <ProjectsWorkspaceScreen
+              mode={mode}
+              onSelectStep={onSelectProjectStep}
+              scenario={scenario}
+              selectedStepIndex={selectedProjectStepIndex}
+            />
+          ) : null}
+          {activeScreen === "documents" ? (
+            <DocumentsScreen
+              documentContextSelection={documentContextSelection}
+              documentFilter={documentFilter}
+              mode={mode}
+              onDocumentFilterChange={onDocumentFilterChange}
+              onSelectDocument={onSelectDocument}
+              onToggleDocumentContext={onToggleDocumentContext}
+              selectedDocumentIndex={selectedDocumentIndex}
+            />
+          ) : null}
           {activeScreen === "profile" ? <ProfileWorkspaceScreen /> : null}
         </div>
       </div>
@@ -1867,6 +2300,13 @@ function App() {
   const [activeAction, setActiveAction] = useState<ActionCard["id"]>("buyer");
   const [activeScreen, setActiveScreen] = useState<AppScreen>("home");
   const [selectedListingIndex, setSelectedListingIndex] = useState(0);
+  const [selectedProjectStepIndex, setSelectedProjectStepIndex] = useState(0);
+  const [selectedDocumentIndex, setSelectedDocumentIndex] = useState(0);
+  const [documentFilter, setDocumentFilter] = useState<"all" | "action" | "rag">("all");
+  const [documentContextSelection, setDocumentContextSelection] = useState<Record<ProjectMode, string[]>>({
+    buyer: ["Piece d'identite", "Simulation bancaire"],
+    seller: ["Titre de propriete"],
+  });
   const [assistantDraft, setAssistantDraft] = useState(scenarios.buyer.assistantPrompts[0]);
   const [assistantThreads, setAssistantThreads] = useState<AssistantThread>(() => ({
     buyer: assistantConversations.buyer.map((message) => ({
@@ -1887,6 +2327,9 @@ function App() {
   const handleModeChange = (nextMode: ProjectMode) => {
     setMode(nextMode);
     setSelectedListingIndex(0);
+    setSelectedProjectStepIndex(0);
+    setSelectedDocumentIndex(0);
+    setDocumentFilter("all");
     setAssistantDraft(scenarios[nextMode].assistantPrompts[0]);
     setAssistantError(null);
 
@@ -1902,6 +2345,9 @@ function App() {
     if (id === "buyer") {
       setMode("buyer");
       setSelectedListingIndex(0);
+      setSelectedProjectStepIndex(0);
+      setSelectedDocumentIndex(0);
+      setDocumentFilter("all");
       setAssistantDraft(scenarios.buyer.assistantPrompts[0]);
       return;
     }
@@ -1909,12 +2355,18 @@ function App() {
     if (id === "seller") {
       setMode("seller");
       setSelectedListingIndex(0);
+      setSelectedProjectStepIndex(0);
+      setSelectedDocumentIndex(0);
+      setDocumentFilter("all");
       setAssistantDraft(scenarios.seller.assistantPrompts[0]);
       return;
     }
 
     setMode("seller");
     setSelectedListingIndex(0);
+    setSelectedProjectStepIndex(0);
+    setSelectedDocumentIndex(0);
+    setDocumentFilter("all");
     setAssistantDraft("J'aimerais estimer mon bien avant de choisir une strategie de vente.");
   };
 
@@ -1940,6 +2392,25 @@ function App() {
       ...current,
       [screen]: variant,
     }));
+  };
+
+  const handleDocumentFilterChange = (nextFilter: "all" | "action" | "rag") => {
+    setDocumentFilter(nextFilter);
+    setSelectedDocumentIndex(0);
+  };
+
+  const handleToggleDocumentContext = (label: string) => {
+    setDocumentContextSelection((current) => {
+      const currentSelection = current[mode];
+      const nextSelection = currentSelection.includes(label)
+        ? currentSelection.filter((item) => item !== label)
+        : [...currentSelection, label];
+
+      return {
+        ...current,
+        [mode]: nextSelection,
+      };
+    });
   };
 
   const handleAssistantSubmit = async () => {
@@ -2053,7 +2524,17 @@ function App() {
     }
 
     if (activeScreen === "documents") {
-      return <DocumentsScreen mode={mode} scenario={scenario} />;
+      return (
+        <DocumentsScreen
+          documentContextSelection={documentContextSelection[mode]}
+          documentFilter={documentFilter}
+          mode={mode}
+          onDocumentFilterChange={handleDocumentFilterChange}
+          onSelectDocument={setSelectedDocumentIndex}
+          onToggleDocumentContext={handleToggleDocumentContext}
+          selectedDocumentIndex={selectedDocumentIndex}
+        />
+      );
     }
 
     return <ProfileScreen />;
@@ -2067,19 +2548,27 @@ function App() {
       <div className="app-stage__layout">
         <WebPlatformShell
           activeScreen={activeScreen}
+          documentContextSelection={documentContextSelection[mode]}
+          documentFilter={documentFilter}
           draft={assistantDraft}
           error={assistantError}
           isLoading={assistantLoading}
           messages={assistantThreads[mode]}
           mode={mode}
           onDraftChange={setAssistantDraft}
+          onDocumentFilterChange={handleDocumentFilterChange}
           onModeChange={handleModeChange}
           onNavigate={setActiveScreen}
           onPromptClick={setAssistantDraft}
+          onSelectDocument={setSelectedDocumentIndex}
+          onSelectProjectStep={setSelectedProjectStepIndex}
           onSelectListing={setSelectedListingIndex}
+          onToggleDocumentContext={handleToggleDocumentContext}
           onSubmit={handleAssistantSubmit}
           scenario={scenario}
+          selectedDocumentIndex={selectedDocumentIndex}
           selectedListingIndex={selectedListingIndex}
+          selectedProjectStepIndex={selectedProjectStepIndex}
         />
 
         <aside className="mobile-preview" aria-label="Apercu mobile">
