@@ -65,9 +65,20 @@ svg {
   position: relative;
   display: grid;
   place-items: center;
+  width: 100%;
   min-height: 100vh;
   overflow: hidden;
   padding: 32px 16px 40px;
+}
+
+.app-stage__layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 406px) minmax(320px, 520px);
+  align-items: center;
+  gap: 56px;
+  width: min(100%, 1140px);
 }
 
 .app-glow {
@@ -95,7 +106,6 @@ svg {
 
 .device-shell {
   position: relative;
-  z-index: 1;
   width: min(100%, 406px);
   border-radius: 54px;
   padding: 8px;
@@ -183,6 +193,181 @@ svg {
   right: -18px;
   top: 130px;
   background: rgba(121, 213, 178, 0.14);
+}
+
+.desktop-panel {
+  display: grid;
+  gap: 24px;
+  align-self: stretch;
+  padding: 26px 0;
+}
+
+.desktop-panel__hero,
+.desktop-card {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 251, 246, 0.72);
+  box-shadow: 0 20px 48px rgba(43, 35, 28, 0.08);
+  backdrop-filter: blur(20px);
+}
+
+.desktop-panel__hero {
+  display: grid;
+  gap: 16px;
+  padding: 28px;
+  border-radius: 32px;
+}
+
+.desktop-panel__eyebrow {
+  margin: 0;
+  color: var(--mint-deep);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.desktop-panel__hero h2,
+.desktop-card h3 {
+  margin: 0;
+  font-family: "Cormorant Garamond", "Iowan Old Style", "Times New Roman", serif;
+  color: var(--ink);
+}
+
+.desktop-panel__hero h2 {
+  font-size: clamp(2.7rem, 5vw, 4.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+}
+
+.desktop-panel__hero p,
+.desktop-card__copy span,
+.desktop-card__label,
+.desktop-metric span,
+.desktop-list li {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.desktop-panel__hero p {
+  max-width: 44ch;
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
+.desktop-panel__status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.desktop-panel__badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(121, 213, 178, 0.16);
+  color: var(--mint-deep);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.desktop-panel__status strong {
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.desktop-panel__grid {
+  display: grid;
+  gap: 16px;
+}
+
+.desktop-card {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 28px;
+}
+
+.desktop-card--feature {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.desktop-card__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: rgba(19, 36, 44, 0.94);
+  color: #fff;
+}
+
+.desktop-card__copy {
+  display: grid;
+  gap: 8px;
+}
+
+.desktop-card__copy span,
+.desktop-card__label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.desktop-card h3 {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.desktop-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.desktop-metric {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.desktop-metric strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.desktop-metric span {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.desktop-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.desktop-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.desktop-list__dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 0.22rem;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 0 6px rgba(121, 213, 178, 0.12);
 }
 
 .status-bar {
@@ -1273,6 +1458,16 @@ svg {
     padding: 0;
   }
 
+  .app-stage__layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+    width: 100%;
+  }
+
+  .desktop-panel {
+    display: none;
+  }
+
   .device-shell {
     width: 100%;
     border-radius: 0;
@@ -1306,5 +1501,37 @@ svg {
   .listing-card .scene-card {
     width: 100%;
     height: 156px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .app-stage__layout {
+    grid-template-columns: minmax(0, 406px) minmax(280px, 1fr);
+    gap: 32px;
+  }
+
+  .desktop-panel__hero h2 {
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+  }
+
+  .desktop-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .app-stage {
+    padding-block: 24px 32px;
+  }
+
+  .app-stage__layout {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 24px;
+  }
+
+  .desktop-panel {
+    width: min(100%, 640px);
+    padding: 0;
   }
 }

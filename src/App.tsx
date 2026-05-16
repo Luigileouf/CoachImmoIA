@@ -1095,6 +1095,109 @@ function PrototypeToolbar({
   );
 }
 
+function DesktopShowcase({
+  activeScreen,
+  mode,
+  scenario,
+}: {
+  activeScreen: AppScreen;
+  mode: ProjectMode;
+  scenario: ScenarioData;
+}) {
+  const isBuyer = mode === "buyer";
+  const activeLabel =
+    activeScreen === "home"
+      ? "Vue d'ensemble"
+      : activeScreen === "listings"
+        ? "Selection de biens"
+        : activeScreen === "assistant"
+          ? "Assistant IA"
+          : activeScreen === "projects"
+            ? "Suivi projet"
+            : "Profil et securite";
+
+  const screenCopy: Record<AppScreen, { title: string; body: string; items: string[] }> = {
+    home: {
+      title: isBuyer ? "Un cockpit clair pour lancer le projet acheteur." : "Une base rassurante pour cadrer la vente.",
+      body: scenario.projectNote,
+      items: scenario.checklist,
+    },
+    listings: {
+      title: isBuyer ? "Prioriser les biens sans se disperser." : "Comparer le marche avec les bons reperes.",
+      body: scenario.listingsSubtitle,
+      items: scenario.listingFilters,
+    },
+    assistant: {
+      title: "Une conversation guidee par le contexte du projet.",
+      body: scenario.assistantIntro,
+      items: scenario.assistantPrompts,
+    },
+    projects: {
+      title: isBuyer ? "Transformer l'intention en plan d'action." : "Structurer le dossier avant la mise en vente.",
+      body: scenario.projectStatus,
+      items: projectSteps[mode].map((step) => step.title),
+    },
+    profile: {
+      title: "Donner de la confiance et de la clarte au produit.",
+      body: securityMessage,
+      items: profileSections[0]?.items.map((item) => `${item.label} : ${item.value}`) ?? [],
+    },
+  };
+
+  const current = screenCopy[activeScreen];
+
+  return (
+    <aside className="desktop-panel" aria-label="Presentation contextuelle">
+      <div className="desktop-panel__hero">
+        <p className="desktop-panel__eyebrow">Experience produit responsive</p>
+        <h2>{scenario.greeting} un parcours immobilier qui s'adapte au desktop.</h2>
+        <p>{current.body}</p>
+      </div>
+
+      <div className="desktop-panel__status">
+        <span className="desktop-panel__badge">{isBuyer ? "Parcours acheteur" : "Parcours vendeur"}</span>
+        <strong>{activeLabel}</strong>
+      </div>
+
+      <div className="desktop-panel__grid">
+        <article className="desktop-card desktop-card--feature">
+          <div className="desktop-card__icon">
+            <SparkleIcon />
+          </div>
+          <div className="desktop-card__copy">
+            <span>Focus ecran</span>
+            <h3>{current.title}</h3>
+          </div>
+        </article>
+
+        <article className="desktop-card">
+          <span className="desktop-card__label">Statistiques clefs</span>
+          <div className="desktop-metrics">
+            {scenario.stats.map((metric) => (
+              <div key={metric.label} className="desktop-metric">
+                <strong>{metric.value}</strong>
+                <span>{metric.label}</span>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="desktop-card">
+          <span className="desktop-card__label">Elements a mettre en avant</span>
+          <ul className="desktop-list">
+            {current.items.slice(0, 3).map((item) => (
+              <li key={item}>
+                <span className="desktop-list__dot" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </aside>
+  );
+}
+
 function App() {
   const [mode, setMode] = useState<ProjectMode>("buyer");
   const [activeAction, setActiveAction] = useState<ActionCard["id"]>("buyer");
@@ -1288,35 +1391,39 @@ function App() {
       <div className="app-glow app-glow--left" />
       <div className="app-glow app-glow--right" />
 
-      <section className="device-shell" aria-label="Application CoachImmoIA">
-        <div className="device-shell__chrome" />
-        <div className="device-shell__speaker" />
+      <div className="app-stage__layout">
+        <section className="device-shell" aria-label="Application CoachImmoIA">
+          <div className="device-shell__chrome" />
+          <div className="device-shell__speaker" />
 
-        <div className="device-screen">
-          <header className="status-bar" aria-hidden="true">
-            <span>9:41</span>
-            <div className="status-bar__icons">
-              <span className="status-bar__signal">
-                <i />
-                <i />
-                <i />
-                <i />
-              </span>
-              <span className="status-bar__wifi" />
-              <span className="status-bar__battery" />
+          <div className="device-screen">
+            <header className="status-bar" aria-hidden="true">
+              <span>9:41</span>
+              <div className="status-bar__icons">
+                <span className="status-bar__signal">
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className="status-bar__wifi" />
+                <span className="status-bar__battery" />
+              </div>
+            </header>
+
+            <AppTopBar subtitle={mode === "buyer" ? "Parcours acheteur" : "Parcours vendeur"} />
+
+            <div className="screen-scroll">
+              <PrototypeToolbar activeScreen={activeScreen} onChange={handleVariantChange} variants={screenVariants} />
+              {renderScreen()}
             </div>
-          </header>
 
-          <AppTopBar subtitle={mode === "buyer" ? "Parcours acheteur" : "Parcours vendeur"} />
-
-          <div className="screen-scroll">
-            <PrototypeToolbar activeScreen={activeScreen} onChange={handleVariantChange} variants={screenVariants} />
-            {renderScreen()}
+            <BottomNav activeScreen={activeScreen} onNavigate={setActiveScreen} />
           </div>
+        </section>
 
-          <BottomNav activeScreen={activeScreen} onNavigate={setActiveScreen} />
-        </div>
-      </section>
+        <DesktopShowcase activeScreen={activeScreen} mode={mode} scenario={scenario} />
+      </div>
     </main>
   );
 }
