@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   actionCards,
   assistantConversations,
@@ -20,19 +20,32 @@ import {
 type ScenarioData = (typeof scenarios)[ProjectMode];
 type AssistantThread = Record<ProjectMode, AssistantMessage[]>;
 
+type DocumentStatus = {
+  label: string;
+  status: string;
+  tone: "mint" | "dark";
+};
+
+const sellerDocumentStatuses: DocumentStatus[] = [
+  { label: "Titre de propriete", status: "Disponible", tone: "mint" },
+  { label: "Taxe fonciere", status: "Disponible", tone: "mint" },
+  { label: "Diagnostics", status: "A completer", tone: "dark" },
+  { label: "PV d'AG et carnet d'entretien", status: "A demander", tone: "dark" },
+];
+
 function LogoMark() {
   return (
-    <svg aria-hidden="true" className="logo-mark" viewBox="0 0 40 40">
-      <rect x="3" y="10" width="18" height="22" rx="8" transform="rotate(-45 3 10)" />
-      <rect x="17" y="8" width="18" height="22" rx="8" transform="rotate(45 17 8)" />
-      <path d="M12 20.5 20 13l8 7.5v6.5a2 2 0 0 1-2 2h-3.5v-6h-5v6H14a2 2 0 0 1-2-2z" />
+    <svg aria-hidden="true" className="logo-mark" viewBox="0 0 32 32">
+      <rect x="4" y="6" width="9" height="15" rx="4" transform="rotate(-45 4 6)" />
+      <rect x="16" y="5" width="9" height="15" rx="4" transform="rotate(45 16 5)" />
+      <path d="M10 16.5 16 11l6 5.5v5a2 2 0 0 1-2 2h-2.7v-4.8h-2.6v4.8H12a2 2 0 0 1-2-2z" />
     </svg>
   );
 }
 
 function BellIcon() {
   return (
-    <svg aria-hidden="true" className="icon icon--bell" viewBox="0 0 24 24">
+    <svg aria-hidden="true" className="mini-icon" viewBox="0 0 24 24">
       <path
         d="M12 4.5a4 4 0 0 0-4 4v2.3c0 .8-.2 1.6-.6 2.3L6 15.5h12l-1.4-2.4c-.4-.7-.6-1.5-.6-2.3V8.5a4 4 0 0 0-4-4Z"
         fill="none"
@@ -55,7 +68,7 @@ function BellIcon() {
 
 function ArrowIcon() {
   return (
-    <svg aria-hidden="true" className="arrow-icon" viewBox="0 0 24 24">
+    <svg aria-hidden="true" className="mini-icon" viewBox="0 0 24 24">
       <path
         d="m9 6 6 6-6 6"
         fill="none"
@@ -70,66 +83,44 @@ function ArrowIcon() {
 
 function SparkleIcon() {
   return (
-    <svg aria-hidden="true" className="sparkle-icon" viewBox="0 0 24 24">
+    <svg aria-hidden="true" className="mini-icon" viewBox="0 0 24 24">
       <path d="M12 2 14.5 9.5 22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z" />
       <path d="M18.5 2 19.4 4.6 22 5.5l-2.6.9-.9 2.6-.9-2.6L15 5.5l2.6-.9Z" />
     </svg>
   );
 }
 
-function highlightText(text: string, highlight: string) {
-  if (!text.includes(highlight)) {
-    return text;
-  }
-
-  const parts = text.split(highlight);
-
-  return parts.map((part, index) => (
-    <span key={`${part}-${index}`}>
-      {part}
-      {index < parts.length - 1 ? <strong>{highlight}</strong> : null}
-    </span>
-  ));
+function HomeGlyph() {
+  return (
+    <svg aria-hidden="true" className="feature-icon" viewBox="0 0 24 24">
+      <path
+        d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
 }
 
-function IconForCard({ icon }: Pick<ActionCard, "icon">) {
-  if (icon === "home") {
-    return (
-      <svg aria-hidden="true" className="feature-icon" viewBox="0 0 24 24">
-        <path
-          d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"
-          fill="none"
-          stroke="currentColor"
-          strokeLinejoin="round"
-          strokeWidth="1.8"
-        />
-      </svg>
-    );
-  }
+function KeyGlyph() {
+  return (
+    <svg aria-hidden="true" className="feature-icon" viewBox="0 0 24 24">
+      <circle cx="8" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M12 12h8m-3 0v3m-3-3v2"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
 
-  if (icon === "key") {
-    return (
-      <svg aria-hidden="true" className="feature-icon" viewBox="0 0 24 24">
-        <circle
-          cx="8"
-          cy="12"
-          r="4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <path
-          d="M12 12h8m-3 0v3m-3-3v2"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.8"
-        />
-      </svg>
-    );
-  }
-
+function ChartGlyph() {
   return (
     <svg aria-hidden="true" className="feature-icon" viewBox="0 0 24 24">
       <path
@@ -151,210 +142,282 @@ function IconForCard({ icon }: Pick<ActionCard, "icon">) {
   );
 }
 
-function SceneArtwork({ scene }: Pick<ActionCard, "scene">) {
+function GridIcon() {
   return (
-    <div className={`scene scene--${scene}`}>
-      <div className="scene__glow" />
-      <div className="scene__shape scene__shape--one" />
-      <div className="scene__shape scene__shape--two" />
-      <div className="scene__shape scene__shape--three" />
-    </div>
+    <svg aria-hidden="true" className="nav-icon-svg" viewBox="0 0 24 24">
+      <rect x="5" y="5" width="5" height="5" rx="1.6" />
+      <rect x="14" y="5" width="5" height="5" rx="1.6" />
+      <rect x="5" y="14" width="5" height="5" rx="1.6" />
+      <rect x="14" y="14" width="5" height="5" rx="1.6" />
+    </svg>
   );
 }
 
-function HomeActionCard({
-  card,
-  isActive,
-  onSelect,
-}: {
-  card: ActionCard;
-  isActive: boolean;
-  onSelect: (id: ActionCard["id"]) => void;
-}) {
+function ChatIcon() {
   return (
-    <button
-      className={isActive ? "action-card is-active" : "action-card"}
-      onClick={() => onSelect(card.id)}
-      type="button"
-    >
-      <div className="action-card__content">
-        <div className="action-card__icon-wrap">
-          <IconForCard icon={card.icon} />
-        </div>
-        <div className="action-card__copy">
-          <h3>{card.title}</h3>
-          <p>{card.description}</p>
-        </div>
-      </div>
-
-      <div className="action-card__visual">
-        <div className="action-card__arrow">
-          <ArrowIcon />
-        </div>
-        <SceneArtwork scene={card.scene} />
-      </div>
-    </button>
+    <svg aria-hidden="true" className="nav-icon-svg" viewBox="0 0 24 24">
+      <path d="M5 6.5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H11l-4.5 3v-3H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" />
+    </svg>
   );
 }
 
-function ModeSwitch({
+function CheckIcon() {
+  return (
+    <svg aria-hidden="true" className="nav-icon-svg" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="m8.7 12.5 2.1 2.1 4.5-4.8" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg aria-hidden="true" className="nav-icon-svg" viewBox="0 0 24 24">
+      <circle cx="12" cy="8.3" r="3.5" />
+      <path d="M5.5 20a6.5 6.5 0 0 1 13 0" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function highlightText(text: string, highlight: string) {
+  if (!text.includes(highlight)) {
+    return text;
+  }
+
+  const parts = text.split(highlight);
+
+  return parts.map((part, index) => (
+    <span key={`${part}-${index}`}>
+      {part}
+      {index < parts.length - 1 ? <strong>{highlight}</strong> : null}
+    </span>
+  ));
+}
+
+function ModeTabs({
   mode,
   onChange,
+  includeEstimate = false,
+  activeAction,
+  onActionChange,
 }: {
   mode: ProjectMode;
   onChange: (mode: ProjectMode) => void;
+  includeEstimate?: boolean;
+  activeAction?: ActionCard["id"];
+  onActionChange?: (id: ActionCard["id"]) => void;
 }) {
   return (
-    <div className="mode-switch-inline" role="tablist" aria-label="Type de projet">
+    <div className="mode-tabs" role="tablist" aria-label="Type de parcours">
       <button
-        className={mode === "buyer" ? "mode-chip is-active" : "mode-chip"}
-        onClick={() => onChange("buyer")}
+        className={mode === "buyer" ? "mode-tab is-active" : "mode-tab"}
+        onClick={() => {
+          onChange("buyer");
+          onActionChange?.("buyer");
+        }}
         type="button"
       >
         Acheteur
       </button>
       <button
-        className={mode === "seller" ? "mode-chip is-active" : "mode-chip"}
-        onClick={() => onChange("seller")}
+        className={mode === "seller" ? "mode-tab is-active" : "mode-tab"}
+        onClick={() => {
+          onChange("seller");
+          onActionChange?.("seller");
+        }}
         type="button"
       >
         Vendeur
+      </button>
+      {includeEstimate ? (
+        <button
+          className={activeAction === "estimate" ? "mode-tab is-active" : "mode-tab"}
+          onClick={() => {
+            onChange("seller");
+            onActionChange?.("estimate");
+          }}
+          type="button"
+        >
+          Estimer
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function AppTopBar({ subtitle }: { subtitle: string }) {
+  return (
+    <div className="app-topbar">
+      <div className="app-brand">
+        <LogoMark />
+        <div>
+          <strong>CoachImmoIA</strong>
+          <span>{subtitle}</span>
+        </div>
+      </div>
+
+      <button className="round-button" type="button" aria-label="Notifications">
+        <BellIcon />
+        <span className="round-button__dot" />
       </button>
     </div>
   );
 }
 
-function AssistantOrbit() {
+function AssistantVisual() {
   return (
-    <div className="assistant-orbit" aria-hidden="true">
-      <div className="assistant-orbit__halo assistant-orbit__halo--outer" />
-      <div className="assistant-orbit__halo assistant-orbit__halo--mid" />
-      <div className="assistant-orbit__halo assistant-orbit__halo--inner" />
-      <div className="assistant-bot">
-        <div className="assistant-bot__visor">
+    <div className="assistant-visual" aria-hidden="true">
+      <div className="assistant-visual__aura assistant-visual__aura--mint" />
+      <div className="assistant-visual__aura assistant-visual__aura--peach" />
+      <div className="assistant-visual__robot">
+        <div className="assistant-visual__helmet">
           <span />
           <span />
         </div>
       </div>
-      <div className="spark spark--one" />
-      <div className="spark spark--two" />
-      <div className="spark spark--three" />
+    </div>
+  );
+}
+
+function SceneArtwork({ scene }: Pick<ActionCard, "scene">) {
+  return (
+    <div className={`scene-card scene-card--${scene}`}>
+      <div className="scene-card__blob scene-card__blob--one" />
+      <div className="scene-card__blob scene-card__blob--two" />
+      <div className="scene-card__ground" />
+      <div className="scene-card__house" />
+      <div className="scene-card__roof scene-card__roof--left" />
+      <div className="scene-card__roof scene-card__roof--right" />
+    </div>
+  );
+}
+
+function ActionIcon({ icon }: Pick<ActionCard, "icon">) {
+  if (icon === "home") return <HomeGlyph />;
+  if (icon === "key") return <KeyGlyph />;
+  return <ChartGlyph />;
+}
+
+function HomeActionCard({
+  card,
+  active,
+  onClick,
+}: {
+  card: ActionCard;
+  active: boolean;
+  onClick: (id: ActionCard["id"]) => void;
+}) {
+  return (
+    <button className={active ? "choice-card is-active" : "choice-card"} onClick={() => onClick(card.id)} type="button">
+      <div className="choice-card__copy">
+        <div className="choice-card__icon">
+          <ActionIcon icon={card.icon} />
+        </div>
+        <div>
+          <h3>{card.title}</h3>
+          <p>{card.description}</p>
+        </div>
+      </div>
+
+      <div className="choice-card__visual">
+        <SceneArtwork scene={card.scene} />
+        <span className="choice-card__orbit">
+          <ArrowIcon />
+        </span>
+      </div>
+    </button>
+  );
+}
+
+function ListingCard({
+  item,
+  compact = false,
+}: {
+  item: (typeof listingFeeds)[ProjectMode][number];
+  compact?: boolean;
+}) {
+  return (
+    <article className={compact ? "listing-card is-compact" : "listing-card"}>
+      <SceneArtwork scene={item.scene} />
+
+      <div className="listing-card__content">
+        <div className="listing-card__meta">
+          <span className="pill-badge">{item.badge}</span>
+          <button className="round-button round-button--small" type="button" aria-label={`Voir ${item.title}`}>
+            <ArrowIcon />
+          </button>
+        </div>
+
+        <h2>{item.title}</h2>
+        <p className="listing-card__location">{item.location}</p>
+        <strong>{item.price}</strong>
+        <p className="listing-card__detail">{item.detail}</p>
+      </div>
+    </article>
+  );
+}
+
+function AssistantThreadBubble({ message }: { message: AssistantMessage }) {
+  return (
+    <div className={message.role === "assistant" ? "message-bubble is-assistant" : "message-bubble is-user"}>
+      {message.content}
     </div>
   );
 }
 
 function HomeScreen({
   mode,
+  activeAction,
   scenario,
   onModeChange,
-  onAction,
+  onActionChange,
   onPrimaryAction,
 }: {
   mode: ProjectMode;
+  activeAction: ActionCard["id"];
   scenario: ScenarioData;
   onModeChange: (mode: ProjectMode) => void;
-  onAction: (id: ActionCard["id"]) => void;
+  onActionChange: (id: ActionCard["id"]) => void;
   onPrimaryAction: () => void;
 }) {
   return (
-    <>
-      <section className="hero-block">
-        <div className="hero-copy">
+    <section className="screen-flow">
+      <div className="hero-shell">
+        <div className="hero-shell__copy">
+          <p className="eyebrow">{scenario.greeting}</p>
           <h1>
-            {scenario.greeting}
-            <br />
             {scenario.title} <span>{scenario.accent}</span>
           </h1>
-          <p>{highlightText(scenario.intro, scenario.introHighlight)}</p>
+          <p className="body-copy">{highlightText(scenario.intro, scenario.introHighlight)}</p>
         </div>
 
-        <AssistantOrbit />
-      </section>
+        <AssistantVisual />
+      </div>
 
-      <section className="actions-section">
-        <div className="section-heading">
-          <div>
-            <p className="section-label">Que souhaitez-vous faire ?</p>
-            <p className="section-copy">Choisissez une entree produit pour avancer tout de suite.</p>
-          </div>
-          <ModeSwitch mode={mode} onChange={onModeChange} />
-        </div>
+      <ModeTabs
+        activeAction={activeAction}
+        includeEstimate
+        mode={mode}
+        onActionChange={onActionChange}
+        onChange={onModeChange}
+      />
 
-        <div className="action-list">
-          {actionCards.map((card) => (
-            <HomeActionCard
-              card={card}
-              isActive={card.id === mode}
-              key={card.id}
-              onSelect={onAction}
-            />
-          ))}
-        </div>
-      </section>
+      <div className="card-stack">
+        {actionCards.map((card) => (
+          <HomeActionCard
+            active={card.id === activeAction}
+            card={card}
+            key={card.id}
+            onClick={onActionChange}
+          />
+        ))}
+      </div>
 
-      <button className="primary-cta" onClick={onPrimaryAction} type="button">
+      <button className="hero-cta" onClick={onPrimaryAction} type="button">
         <span>{scenario.cta}</span>
         <SparkleIcon />
       </button>
-
-      <section className="trust-card">
-        <div className="trust-card__icon">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path
-              d="M12 3.5 19 6v5.2c0 4.4-2.9 8.5-7 9.8-4.1-1.3-7-5.4-7-9.8V6z"
-              fill="none"
-              stroke="currentColor"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-            <path
-              d="m8.8 12.2 2.2 2.1 4.4-4.7"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-          </svg>
-        </div>
-        <p>{securityMessage}</p>
-      </section>
-
-      <section className="stats-grid">
-        {scenario.stats.map((stat) => (
-          <article className="metric-card" key={stat.label}>
-            <p>{stat.label}</p>
-            <strong>{stat.value}</strong>
-          </article>
-        ))}
-      </section>
-
-      <section className="project-card">
-        <div className="project-card__top">
-          <div>
-            <p className="project-card__eyebrow">Projet en cours</p>
-            <h2>{scenario.projectStatus}</h2>
-          </div>
-          <span className="project-card__badge">{mode === "buyer" ? "Acheteur" : "Vendeur"}</span>
-        </div>
-
-        <p className="project-card__note">{scenario.projectNote}</p>
-
-        <ul className="project-card__list">
-          {scenario.checklist.map((item) => (
-            <li key={item}>
-              <span className="project-card__bullet" />
-              {item}
-            </li>
-          ))}
-        </ul>
-
-        <div className="coach-hint">
-          <SparkleIcon />
-          <p>{scenario.coachHint}</p>
-        </div>
-      </section>
-    </>
+    </section>
   );
 }
 
@@ -368,16 +431,16 @@ function ListingsScreen({
   onModeChange: (mode: ProjectMode) => void;
 }) {
   return (
-    <section className="screen-stack">
-      <div className="screen-header">
-        <p className="screen-eyebrow">Biens</p>
+    <section className="screen-flow">
+      <header className="screen-intro">
+        <p className="eyebrow">Biens</p>
         <h1>{scenario.listingsTitle}</h1>
-        <p>{scenario.listingsSubtitle}</p>
-      </div>
+        <p className="body-copy">{scenario.listingsSubtitle}</p>
+      </header>
 
-      <ModeSwitch mode={mode} onChange={onModeChange} />
+      <ModeTabs mode={mode} onChange={onModeChange} />
 
-      <div className="filter-row">
+      <div className="chip-row">
         {scenario.listingFilters.map((filter) => (
           <span className="filter-chip" key={filter}>
             {filter}
@@ -385,24 +448,9 @@ function ListingsScreen({
         ))}
       </div>
 
-      <div className="listing-stack">
+      <div className="card-stack">
         {listingFeeds[mode].map((item) => (
-          <article className="listing-card" key={`${item.title}-${item.location}`}>
-            <div className="listing-card__copy">
-              <div className="listing-card__meta">
-                <span className="listing-card__badge">{item.badge}</span>
-                <button className="ghost-icon" type="button" aria-label={`Voir ${item.title}`}>
-                  <ArrowIcon />
-                </button>
-              </div>
-              <h2>{item.title}</h2>
-              <p className="listing-card__location">{item.location}</p>
-              <strong className="listing-card__price">{item.price}</strong>
-              <p className="listing-card__detail">{item.detail}</p>
-            </div>
-
-            <SceneArtwork scene={item.scene} />
-          </article>
+          <ListingCard item={item} key={`${item.title}-${item.location}`} />
         ))}
       </div>
     </section>
@@ -435,59 +483,150 @@ function AssistantScreen({
   const runtime = getAssistantRuntime();
 
   return (
-    <section className="screen-stack">
-      <div className="screen-header">
-        <p className="screen-eyebrow">Assistant IA</p>
+    <section className="screen-flow">
+      <header className="screen-intro">
+        <p className="eyebrow">Assistant IA</p>
         <h1>Une conversation qui fait avancer le projet</h1>
-        <p>{scenario.assistantIntro}</p>
-      </div>
+        <p className="body-copy">{scenario.assistantIntro}</p>
+      </header>
 
-      <ModeSwitch mode={mode} onChange={onModeChange} />
+      <ModeTabs mode={mode} onChange={onModeChange} />
 
-      <div className="assistant-runtime">
-        <span className="assistant-runtime__badge">Modele actif</span>
-        <strong>{runtime.label}</strong>
-      </div>
+      <article className="assistant-hero-card">
+        <div>
+          <p className="assistant-hero-card__label">Modele actif</p>
+          <strong>{runtime.label}</strong>
+          <span>Reponses courtes, structurees et actionnables</span>
+        </div>
+        <div className="assistant-hero-card__tag">Reponse claire</div>
+      </article>
 
-      <div className="chat-card">
+      <div className="chat-thread">
         {messages.map((message, index) => (
-          <div
-            className={message.role === "assistant" ? "chat-bubble is-assistant" : "chat-bubble is-user"}
-            key={`${message.content}-${index}`}
-          >
-            {message.content}
-          </div>
+          <AssistantThreadBubble key={`${message.content}-${index}`} message={message} />
         ))}
 
-        {isLoading ? <div className="chat-bubble is-assistant is-loading">CoachImmoIA reflechit...</div> : null}
+        {isLoading ? <div className="message-bubble is-assistant">CoachImmoIA reflechit...</div> : null}
       </div>
 
-      <div className="prompt-row">
+      <div className="chip-row">
         {scenario.assistantPrompts.map((prompt) => (
-          <button className="prompt-pill" key={prompt} onClick={() => onPromptClick(prompt)} type="button">
+          <button className="filter-chip filter-chip--button" key={prompt} onClick={() => onPromptClick(prompt)} type="button">
             {prompt}
           </button>
         ))}
       </div>
 
-      {error ? <div className="assistant-error">{error}</div> : null}
+      {error ? <div className="feedback-banner is-error">{error}</div> : null}
 
-      <div className="assistant-composer">
-        <div>
-          <p className="assistant-composer__label">Message a envoyer</p>
-          <textarea
-            className="assistant-input"
-            onChange={(event) => onDraftChange(event.target.value)}
-            placeholder="Posez une question sur votre projet immobilier..."
-            rows={4}
-            value={draft}
-          />
-        </div>
-        <button className="send-button" disabled={isLoading || !draft.trim()} onClick={onSubmit} type="button">
+      <article className="summary-card">
+        <h2>Prochaines actions</h2>
+        <p>
+          1. Preparer vos questions de visite
+          <br />
+          2. Relever les points de risque
+          <br />
+          3. Securiser le timing du financement
+        </p>
+      </article>
+
+      <div className="composer-card">
+        <label className="composer-card__label" htmlFor="assistant-message">
+          Message a envoyer
+        </label>
+        <textarea
+          className="composer-input"
+          id="assistant-message"
+          onChange={(event) => onDraftChange(event.target.value)}
+          placeholder="Posez une question sur votre projet immobilier..."
+          rows={4}
+          value={draft}
+        />
+
+        <button className="primary-button" disabled={isLoading || !draft.trim()} onClick={onSubmit} type="button">
           {isLoading ? "Envoi..." : "Envoyer"}
         </button>
       </div>
     </section>
+  );
+}
+
+function BuyerProjectScreen({ scenario }: { scenario: ScenarioData }) {
+  return (
+    <>
+      <header className="screen-intro">
+        <p className="eyebrow">Projet acheteur</p>
+        <h1>{scenario.projectStatus}</h1>
+        <p className="body-copy">{scenario.projectNote}</p>
+      </header>
+
+      <article className="sheet-card">
+        <h2>Feuille de route</h2>
+        <div className="timeline-list">
+          {projectSteps.buyer.map((step) => (
+            <div className={`timeline-row is-${step.status}`} key={step.title}>
+              <span className="timeline-row__dot" />
+              <div>
+                <h3>{step.title}</h3>
+                <p>{step.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </article>
+
+      <article className="dark-card">
+        <h2>Documents a preparer</h2>
+        <p className="dark-card__note">
+          {scenario.projectDocuments.map((document) => `- ${document}`).join("\n")}
+        </p>
+        <div className="coach-tile">
+          <span>Coach humain</span>
+        </div>
+      </article>
+    </>
+  );
+}
+
+function SellerProjectScreen({ scenario }: { scenario: ScenarioData }) {
+  return (
+    <>
+      <header className="screen-intro">
+        <p className="eyebrow">Projet vendeur</p>
+        <h1>Votre vente se structure</h1>
+        <p className="body-copy">{scenario.projectNote}</p>
+      </header>
+
+      <div className="stats-pair">
+        {scenario.stats.map((stat, index) => (
+          <article className={index === 0 ? "stat-card is-dark" : "stat-card"} key={stat.label}>
+            <span>{stat.label}</span>
+            <strong>{stat.value}</strong>
+          </article>
+        ))}
+      </div>
+
+      <article className="sheet-card">
+        <h2>Documents prioritaires</h2>
+        <div className="document-status-list">
+          {sellerDocumentStatuses.map((document) => (
+            <div className="document-status-row" key={document.label}>
+              <div>
+                <strong>{document.label}</strong>
+              </div>
+              <span className={document.tone === "mint" ? "status-badge is-mint" : "status-badge is-dark"}>
+                {document.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </article>
+
+      <article className="mint-card">
+        <h2>Prochaine action</h2>
+        <p>Generer un message syndic clair pour recuperer rapidement les pieces copro manquantes.</p>
+      </article>
+    </>
   );
 }
 
@@ -501,79 +640,36 @@ function ProjectsScreen({
   onModeChange: (mode: ProjectMode) => void;
 }) {
   return (
-    <section className="screen-stack">
-      <div className="screen-header">
-        <p className="screen-eyebrow">Projets</p>
-        <h1>{scenario.projectStatus}</h1>
-        <p>{scenario.projectNote}</p>
-      </div>
-
-      <ModeSwitch mode={mode} onChange={onModeChange} />
-
-      <div className="stats-grid">
-        {scenario.stats.map((stat) => (
-          <article className="metric-card" key={stat.label}>
-            <p>{stat.label}</p>
-            <strong>{stat.value}</strong>
-          </article>
-        ))}
-      </div>
-
-      <div className="timeline-card">
-        {projectSteps[mode].map((step) => (
-          <div className={`timeline-step is-${step.status}`} key={step.title}>
-            <span className="timeline-step__dot" />
-            <div>
-              <h2>{step.title}</h2>
-              <p>{step.detail}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="docs-card">
-        <div className="docs-card__header">
-          <h2>Documents a piloter</h2>
-          <span>{scenario.projectDocuments.length} elements</span>
-        </div>
-        <ul className="docs-card__list">
-          {scenario.projectDocuments.map((document) => (
-            <li key={document}>
-              <span className="docs-card__dot" />
-              {document}
-            </li>
-          ))}
-        </ul>
-      </div>
+    <section className="screen-flow">
+      <ModeTabs mode={mode} onChange={onModeChange} />
+      {mode === "buyer" ? <BuyerProjectScreen scenario={scenario} /> : <SellerProjectScreen scenario={scenario} />}
     </section>
   );
 }
 
 function ProfileScreen() {
   return (
-    <section className="screen-stack">
-      <div className="screen-header">
-        <p className="screen-eyebrow">Profil</p>
-        <h1>Compte, preferences et confiance</h1>
-        <p>Retrouvez vos parametres personnels, le cadre de partage et vos habitudes de suivi.</p>
-      </div>
+    <section className="screen-flow">
+      <header className="screen-intro">
+        <p className="eyebrow">Profil</p>
+        <h1>Compte, confiance et preferences</h1>
+        <p className="body-copy">Retrouvez vos reglages projet, vos habitudes de suivi et le cadre de partage.</p>
+      </header>
 
       <article className="profile-hero">
-        <div className="profile-avatar">LM</div>
+        <div className="profile-hero__avatar">LM</div>
         <div>
           <h2>Loic Metivier</h2>
-          <p>Compte verifie, suivi actif avec copilote immobilier IA</p>
+          <p>Projet acheteur · Coaching assiste par IA</p>
         </div>
       </article>
 
       {profileSections.map((section) => (
-        <article className="profile-card" key={section.title}>
-          <div className="profile-card__header">
-            <h2>{section.title}</h2>
-          </div>
-          <div className="profile-card__rows">
+        <article className="sheet-card" key={section.title}>
+          <h2>{section.title}</h2>
+          <div className="profile-list">
             {section.items.map((item) => (
-              <div className="profile-row" key={item.label}>
+              <div className="profile-list__row" key={item.label}>
                 <span>{item.label}</span>
                 <strong>{item.value}</strong>
               </div>
@@ -582,34 +678,53 @@ function ProfileScreen() {
         </article>
       ))}
 
-      <section className="trust-card">
-        <div className="trust-card__icon">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path
-              d="M12 3.5 19 6v5.2c0 4.4-2.9 8.5-7 9.8-4.1-1.3-7-5.4-7-9.8V6z"
-              fill="none"
-              stroke="currentColor"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-            <path
-              d="m8.8 12.2 2.2 2.1 4.4-4.7"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.8"
-            />
-          </svg>
-        </div>
+      <article className="mint-card">
+        <h2>Cadrage securite</h2>
         <p>{securityMessage}</p>
-      </section>
+      </article>
     </section>
+  );
+}
+
+function BottomNav({
+  activeScreen,
+  onNavigate,
+}: {
+  activeScreen: AppScreen;
+  onNavigate: (screen: AppScreen) => void;
+}) {
+  const navItems: Array<{
+    key: AppScreen;
+    label: string;
+    icon: ReactNode;
+  }> = [
+    { key: "home", label: "Accueil", icon: <HomeGlyph /> },
+    { key: "listings", label: "Biens", icon: <GridIcon /> },
+    { key: "assistant", label: "IA", icon: <ChatIcon /> },
+    { key: "projects", label: "Projet", icon: <CheckIcon /> },
+    { key: "profile", label: "Profil", icon: <UserIcon /> },
+  ];
+
+  return (
+    <nav className="bottom-nav" aria-label="Navigation principale">
+      {navItems.map((item) => (
+        <button
+          className={activeScreen === item.key ? "bottom-nav__item is-active" : "bottom-nav__item"}
+          key={item.key}
+          onClick={() => onNavigate(item.key)}
+          type="button"
+        >
+          <span className="bottom-nav__icon">{item.icon}</span>
+          <span>{item.label}</span>
+        </button>
+      ))}
+    </nav>
   );
 }
 
 function App() {
   const [mode, setMode] = useState<ProjectMode>("buyer");
+  const [activeAction, setActiveAction] = useState<ActionCard["id"]>("buyer");
   const [activeScreen, setActiveScreen] = useState<AppScreen>("home");
   const [assistantDraft, setAssistantDraft] = useState(scenarios.buyer.assistantPrompts[0]);
   const [assistantThreads, setAssistantThreads] = useState<AssistantThread>(() => ({
@@ -631,26 +746,43 @@ function App() {
     setMode(nextMode);
     setAssistantDraft(scenarios[nextMode].assistantPrompts[0]);
     setAssistantError(null);
+
+    if (activeAction !== "estimate") {
+      setActiveAction(nextMode);
+    }
   };
 
-  const handleAction = (id: ActionCard["id"]) => {
+  const handleActionChange = (id: ActionCard["id"]) => {
+    setAssistantError(null);
+    setActiveAction(id);
+
     if (id === "buyer") {
       setMode("buyer");
       setAssistantDraft(scenarios.buyer.assistantPrompts[0]);
-      setActiveScreen("listings");
       return;
     }
 
     if (id === "seller") {
       setMode("seller");
       setAssistantDraft(scenarios.seller.assistantPrompts[0]);
-      setActiveScreen("projects");
       return;
     }
 
     setMode("seller");
     setAssistantDraft("J'aimerais estimer mon bien avant de choisir une strategie de vente.");
-    setAssistantError(null);
+  };
+
+  const handlePrimaryAction = () => {
+    if (activeAction === "buyer") {
+      setActiveScreen("projects");
+      return;
+    }
+
+    if (activeAction === "seller") {
+      setActiveScreen("projects");
+      return;
+    }
+
     setActiveScreen("assistant");
   };
 
@@ -661,12 +793,12 @@ function App() {
       return;
     }
 
+    const previousThread = assistantThreads[mode];
     const userMessage: AssistantMessage = {
       role: "user",
       content,
     };
-
-    const nextThread = [...assistantThreads[mode], userMessage];
+    const nextThread = [...previousThread, userMessage];
 
     setAssistantError(null);
     setAssistantLoading(true);
@@ -694,9 +826,7 @@ function App() {
       }));
     } catch (error) {
       const fallbackMessage =
-        error instanceof Error
-          ? error.message
-          : "Connexion au modele impossible pour le moment.";
+        error instanceof Error ? error.message : "Connexion au modele impossible pour le moment.";
 
       setAssistantError(
         `${fallbackMessage} Verifiez la cle API Mistral et le modele configure, puis reessayez.`,
@@ -704,7 +834,7 @@ function App() {
       setAssistantDraft(content);
       setAssistantThreads((current) => ({
         ...current,
-        [mode]: current[mode].filter((_, index) => index !== current[mode].length - 1),
+        [mode]: previousThread,
       }));
     } finally {
       setAssistantLoading(false);
@@ -715,10 +845,11 @@ function App() {
     if (activeScreen === "home") {
       return (
         <HomeScreen
+          activeAction={activeAction}
           mode={mode}
-          onAction={handleAction}
+          onActionChange={handleActionChange}
           onModeChange={handleModeChange}
-          onPrimaryAction={() => setActiveScreen("projects")}
+          onPrimaryAction={handlePrimaryAction}
           scenario={scenario}
         />
       );
@@ -753,146 +884,34 @@ function App() {
   };
 
   return (
-    <main className="stage">
-      <div className="ambient ambient--left" />
-      <div className="ambient ambient--right" />
-      <div className="pedestal" />
+    <main className="app-stage">
+      <div className="app-glow app-glow--left" />
+      <div className="app-glow app-glow--right" />
 
-      <section className="phone-frame" aria-label="Application CoachImmoIA">
-        <div className="phone-shell">
-          <div className="phone-speaker" />
+      <section className="device-shell" aria-label="Application CoachImmoIA">
+        <div className="device-shell__chrome" />
+        <div className="device-shell__speaker" />
 
-          <div className="phone-screen">
-            <header className="status-bar" aria-hidden="true">
-              <span>9:41</span>
-              <div className="status-icons">
-                <span className="signal-bars">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <span className="wifi-icon" />
-                <span className="battery-icon" />
-              </div>
-            </header>
-
-            <div className="app-topbar">
-              <div className="brand">
-                <LogoMark />
-                <span>
-                  CoachImmo<span>IA</span>
-                </span>
-              </div>
-
-              <button className="icon-button" type="button" aria-label="Notifications">
-                <BellIcon />
-                <span className="icon-button__dot" />
-              </button>
+        <div className="device-screen">
+          <header className="status-bar" aria-hidden="true">
+            <span>9:41</span>
+            <div className="status-bar__icons">
+              <span className="status-bar__signal">
+                <i />
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="status-bar__wifi" />
+              <span className="status-bar__battery" />
             </div>
+          </header>
 
-            <div className="screen-scroll">{renderScreen()}</div>
+          <AppTopBar subtitle={mode === "buyer" ? "Parcours acheteur" : "Parcours vendeur"} />
 
-            <nav className="bottom-nav" aria-label="Navigation principale">
-              <button
-                className={activeScreen === "home" ? "bottom-nav__item is-active" : "bottom-nav__item"}
-                onClick={() => setActiveScreen("home")}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <path
-                    d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinejoin="round"
-                    strokeWidth="1.8"
-                  />
-                </svg>
-                <span>Accueil</span>
-              </button>
+          <div className="screen-scroll">{renderScreen()}</div>
 
-              <button
-                className={activeScreen === "listings" ? "bottom-nav__item is-active" : "bottom-nav__item"}
-                onClick={() => setActiveScreen("listings")}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <circle
-                    cx="11"
-                    cy="11"
-                    r="6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                  />
-                  <path
-                    d="m20 20-3.5-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeWidth="1.8"
-                  />
-                </svg>
-                <span>Biens</span>
-              </button>
-
-              <button
-                className={
-                  activeScreen === "assistant"
-                    ? "bottom-nav__item bottom-nav__item--center is-active"
-                    : "bottom-nav__item bottom-nav__item--center"
-                }
-                onClick={() => setActiveScreen("assistant")}
-                type="button"
-              >
-                <SparkleIcon />
-                <span>Assistant IA</span>
-              </button>
-
-              <button
-                className={activeScreen === "projects" ? "bottom-nav__item is-active" : "bottom-nav__item"}
-                onClick={() => setActiveScreen("projects")}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <path
-                    d="M6 4.5V3m12 1.5V3M5 8h14M6 5.5h12A1.5 1.5 0 0 1 19.5 7v11A1.5 1.5 0 0 1 18 19.5H6A1.5 1.5 0 0 1 4.5 18V7A1.5 1.5 0 0 1 6 5.5Z"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.8"
-                  />
-                </svg>
-                <span>Projets</span>
-              </button>
-
-              <button
-                className={activeScreen === "profile" ? "bottom-nav__item is-active" : "bottom-nav__item"}
-                onClick={() => setActiveScreen("profile")}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <circle
-                    cx="12"
-                    cy="8.5"
-                    r="3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                  />
-                  <path
-                    d="M5.5 20a6.5 6.5 0 0 1 13 0"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeWidth="1.8"
-                  />
-                </svg>
-                <span>Profil</span>
-              </button>
-            </nav>
-          </div>
+          <BottomNav activeScreen={activeScreen} onNavigate={setActiveScreen} />
         </div>
       </section>
     </main>
