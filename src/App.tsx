@@ -1271,6 +1271,25 @@ function DashboardScreen({
         </div>
       </article>
 
+      <article className="platform-focus-strip">
+        <div>
+          <span className="platform-section-label">Focus du jour</span>
+          <strong>
+            {mode === "buyer"
+              ? "Preparer la visite de demain et cadrer les questions de copropriete."
+              : "Verifier les pieces copropriete avant de figer la strategie de mise en vente."}
+          </strong>
+        </div>
+        <div className="platform-inline-actions">
+          <button className="platform-primary-button" onClick={() => onNavigate("assistant")} type="button">
+            Generer checklist IA
+          </button>
+          <button className="platform-ghost-button" onClick={() => onNavigate("documents")} type="button">
+            Ouvrir documents
+          </button>
+        </div>
+      </article>
+
       <div className="platform-kpi-grid">
         {scenario.stats.map((stat) => (
           <article className="platform-kpi-card" key={stat.label}>
@@ -1326,6 +1345,16 @@ function DashboardScreen({
             <span className="platform-badge">Mistral actif</span>
           </div>
           <p className="platform-summary-copy">{scenario.coachHint}</p>
+          <div className="platform-mini-metrics">
+            <div className="platform-mini-metric">
+              <span>Statut coach</span>
+              <strong>Disponible</strong>
+            </div>
+            <div className="platform-mini-metric">
+              <span>Prochaine aide</span>
+              <strong>Checklist visite</strong>
+            </div>
+          </div>
           <div className="platform-inline-actions">
             <button className="platform-primary-button" onClick={() => onNavigate("assistant")} type="button">
               Generer checklist
@@ -1410,6 +1439,17 @@ function ListingsWorkspaceScreen({
 
           <p className="platform-summary-copy">{activeListing.detail}</p>
 
+          <div className="platform-mini-metrics">
+            <div className="platform-mini-metric">
+              <span>Decision</span>
+              <strong>{mode === "buyer" ? "Visite prioritaire" : "Comparable fort"}</strong>
+            </div>
+            <div className="platform-mini-metric">
+              <span>Prochaine action</span>
+              <strong>{mode === "buyer" ? "Questions de visite" : "Comparer au prix cible"}</strong>
+            </div>
+          </div>
+
           <div className="platform-priority-list">
             <div className="platform-priority-item">
               <span className="platform-priority-item__dot" />
@@ -1419,6 +1459,15 @@ function ListingsWorkspaceScreen({
               <span className="platform-priority-item__dot" />
               <span>Vigilance : verifier copropriete, charges et travaux avant offre.</span>
             </div>
+          </div>
+
+          <div className="platform-inline-actions">
+            <button className="platform-primary-button" type="button">
+              Ouvrir dans le projet
+            </button>
+            <button className="platform-ghost-button" type="button">
+              Preparer la visite
+            </button>
           </div>
         </article>
       </div>
@@ -1464,6 +1513,15 @@ function AssistantWorkspaceScreen({
             <h3>Conversation active</h3>
             <span className="platform-badge">Reponses actionnables</span>
           </div>
+
+          <article className="platform-inline-panel">
+            <span className="platform-section-label">Objectif courant</span>
+            <strong>
+              {mode === "buyer"
+                ? "Structurer la visite et les questions avant engagement."
+                : "Organiser les relances documentaires et le cadrage prix."}
+            </strong>
+          </article>
 
           <div className="platform-chat-thread">
             {messages.map((message, index) => (
@@ -1522,6 +1580,16 @@ function AssistantWorkspaceScreen({
               <span className="platform-context-list__label">Escalade</span>
               <p>{scenario.coachHint}</p>
             </div>
+          </div>
+
+          <div className="platform-source-stack">
+            {scenario.projectDocuments.slice(0, 3).map((item) => (
+              <article className="platform-source-card" key={item}>
+                <span className="platform-context-list__label">Source reliee</span>
+                <strong>{item}</strong>
+                <p>Disponible pour contextualiser les prochaines reponses et actions.</p>
+              </article>
+            ))}
           </div>
         </article>
       </div>
@@ -1583,6 +1651,14 @@ function ProjectsWorkspaceScreen({
               ? "Le bien cible reste prometteur, mais la copropriete et le timing banque doivent etre verifies avant arbitrage d'offre."
               : "Le prix et les documents de copropriete demandent encore un arbitrage avant diffusion large."}
           </p>
+          <div className="platform-inline-actions">
+            <button className="platform-primary-button platform-primary-button--light" type="button">
+              Escalader au coach
+            </button>
+            <button className="platform-ghost-button platform-ghost-button--dark" type="button">
+              Ajouter un contexte
+            </button>
+          </div>
         </article>
       </div>
     </section>
@@ -1592,15 +1668,28 @@ function ProjectsWorkspaceScreen({
 function DocumentsScreen({ mode, scenario }: { mode: ProjectMode; scenario: ScenarioData }) {
   const rows =
     mode === "seller"
-      ? sellerDocumentStatuses
+      ? sellerDocumentStatuses.map((row, index) => ({
+          ...row,
+          source: index < 2 ? "Client" : index === 2 ? "Diagnostiqueur" : "Syndic",
+        }))
       : scenario.projectDocuments.map((label, index) => ({
           label,
           status: index < 2 ? "Disponible" : "A preparer",
           tone: index < 2 ? "mint" : "dark",
+          source: index === 0 ? "Client" : index === 1 ? "Banque" : "Assistant IA",
         }));
 
   return (
     <section className="platform-screen platform-screen--documents">
+      <article className="platform-inline-panel">
+        <span className="platform-section-label">Vision documentaire</span>
+        <strong>
+          {mode === "buyer"
+            ? "Les pieces critiques du financement et de la visite sont centralisees pour accelerer le dossier."
+            : "Les documents vendeur sont classes par statut pour preparer la diffusion et le futur RAG."}
+        </strong>
+      </article>
+
       <div className="platform-kpi-grid platform-kpi-grid--documents">
         <article className="platform-kpi-card">
           <span>Disponibles</span>
@@ -1626,6 +1715,7 @@ function DocumentsScreen({ mode, scenario }: { mode: ProjectMode; scenario: Scen
           <div className="platform-document-table__head">
             <span>Document</span>
             <span>Statut</span>
+            <span>Source</span>
             <span>Action</span>
           </div>
 
@@ -1633,6 +1723,7 @@ function DocumentsScreen({ mode, scenario }: { mode: ProjectMode; scenario: Scen
             <div className="platform-document-table__row" key={row.label}>
               <strong>{row.label}</strong>
               <span className={row.tone === "mint" ? "status-badge is-mint" : "status-badge is-dark"}>{row.status}</span>
+              <span className="platform-document-table__source">{row.source}</span>
               <button className="platform-text-button" type="button">
                 {row.status === "Disponible" ? "Voir" : "Relancer"}
               </button>
@@ -1647,6 +1738,11 @@ function DocumentsScreen({ mode, scenario }: { mode: ProjectMode; scenario: Scen
 function ProfileWorkspaceScreen() {
   return (
     <section className="platform-screen platform-screen--profile">
+      <article className="platform-inline-panel">
+        <span className="platform-section-label">Accompagnement</span>
+        <strong>Le profil concentre la confiance, les preferences IA et les regles d&apos;escalade coach.</strong>
+      </article>
+
       <div className="platform-grid platform-grid--profile">
         <article className="platform-surface">
           <div className="platform-profile-head">
