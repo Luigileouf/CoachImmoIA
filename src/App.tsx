@@ -19,6 +19,16 @@ import {
 
 type ScenarioData = (typeof scenarios)[ProjectMode];
 type AssistantThread = Record<ProjectMode, AssistantMessage[]>;
+type HomeVariant = "default" | "empty";
+type ListingsVariant = "default" | "empty";
+type AssistantVariant = "default" | "empty" | "loading";
+type ProjectsVariant = "default" | "empty" | "risk" | "sent";
+type ScreenVariantState = {
+  home: HomeVariant;
+  listings: ListingsVariant;
+  assistant: AssistantVariant;
+  projects: ProjectsVariant;
+};
 
 type DocumentStatus = {
   label: string;
@@ -32,6 +42,13 @@ const sellerDocumentStatuses: DocumentStatus[] = [
   { label: "Diagnostics", status: "A completer", tone: "dark" },
   { label: "PV d'AG et carnet d'entretien", status: "A demander", tone: "dark" },
 ];
+
+const defaultVariants: ScreenVariantState = {
+  home: "default",
+  listings: "default",
+  assistant: "default",
+  projects: "default",
+};
 
 function LogoMark() {
   return (
@@ -279,6 +296,23 @@ function AssistantVisual() {
   );
 }
 
+function EmptyStateVisual({
+  tone = "mint",
+}: {
+  tone?: "mint" | "sand" | "sage";
+}) {
+  return (
+    <div className={`empty-visual empty-visual--${tone}`} aria-hidden="true">
+      <div className="empty-visual__halo" />
+      <div className="empty-visual__bubble" />
+      <div className="empty-visual__ground" />
+      <div className="empty-visual__house" />
+      <div className="empty-visual__roof empty-visual__roof--left" />
+      <div className="empty-visual__roof empty-visual__roof--right" />
+    </div>
+  );
+}
+
 function SceneArtwork({ scene }: Pick<ActionCard, "scene">) {
   return (
     <div className={`scene-card scene-card--${scene}`}>
@@ -365,9 +399,39 @@ function AssistantThreadBubble({ message }: { message: AssistantMessage }) {
   );
 }
 
+function VariantSwitcher({
+  active,
+  options,
+  onChange,
+}: {
+  active: string;
+  options: Array<{ label: string; value: string }>;
+  onChange: (value: string) => void;
+}) {
+  if (options.length <= 1) {
+    return null;
+  }
+
+  return (
+    <div className="variant-switcher" role="toolbar" aria-label="Variantes de prototype">
+      {options.map((option) => (
+        <button
+          className={active === option.value ? "variant-switcher__item is-active" : "variant-switcher__item"}
+          key={option.value}
+          onClick={() => onChange(option.value)}
+          type="button"
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function HomeScreen({
   mode,
   activeAction,
+  variant,
   scenario,
   onModeChange,
   onActionChange,
@@ -375,11 +439,48 @@ function HomeScreen({
 }: {
   mode: ProjectMode;
   activeAction: ActionCard["id"];
+  variant: HomeVariant;
   scenario: ScenarioData;
   onModeChange: (mode: ProjectMode) => void;
   onActionChange: (id: ActionCard["id"]) => void;
   onPrimaryAction: () => void;
 }) {
+  if (variant === "empty") {
+    return (
+      <section className="screen-flow">
+        <div className="hero-shell">
+          <div className="hero-shell__copy">
+            <p className="eyebrow">{scenario.greeting}</p>
+            <h1>demarrons votre projet</h1>
+            <p className="body-copy">
+              Vous n&apos;avez pas encore initialise de parcours. En trois minutes, on vous pose une base
+              claire.
+            </p>
+          </div>
+
+          <EmptyStateVisual tone="mint" />
+        </div>
+
+        <ModeTabs activeAction={activeAction} mode={mode} onActionChange={onActionChange} onChange={onModeChange} />
+
+        <article className="dark-card">
+          <h2>Commencer mon projet</h2>
+          <p>
+            Renseignez votre budget, votre zone et votre horizon pour generer une premiere feuille de
+            route.
+          </p>
+        </article>
+
+        <article className="sheet-card">
+          <h2>Explorer sans engagement</h2>
+          <p>
+            Parcourez des exemples de biens, de questions et de comparables avant de creer votre projet.
+          </p>
+        </article>
+      </section>
+    );
+  }
+
   return (
     <section className="screen-flow">
       <div className="hero-shell">
@@ -424,12 +525,42 @@ function HomeScreen({
 function ListingsScreen({
   mode,
   scenario,
+  variant,
   onModeChange,
 }: {
   mode: ProjectMode;
   scenario: ScenarioData;
+  variant: ListingsVariant;
   onModeChange: (mode: ProjectMode) => void;
 }) {
+  if (variant === "empty") {
+    return (
+      <section className="screen-flow">
+        <header className="screen-intro">
+          <p className="eyebrow">Biens</p>
+          <h1>Aucun bien prioritaire pour le moment</h1>
+          <p className="body-copy">
+            Ajoutez un secteur ou affinez votre budget pour faire remonter une premiere selection utile.
+          </p>
+        </header>
+
+        <EmptyStateVisual tone="sand" />
+
+        <div className="chip-row">
+          <span className="filter-chip">Ajouter un secteur</span>
+          <span className="filter-chip">Ajuster budget</span>
+        </div>
+
+        <article className="sheet-card">
+          <h2>Creer ma premiere selection</h2>
+          <p>
+            Le produit peut faire remonter des biens a visiter ou a challenger selon vos criteres.
+          </p>
+        </article>
+      </section>
+    );
+  }
+
   return (
     <section className="screen-flow">
       <header className="screen-intro">
@@ -460,6 +591,7 @@ function ListingsScreen({
 function AssistantScreen({
   mode,
   scenario,
+  variant,
   draft,
   error,
   isLoading,
@@ -471,6 +603,7 @@ function AssistantScreen({
 }: {
   mode: ProjectMode;
   scenario: ScenarioData;
+  variant: AssistantVariant;
   draft: string;
   error: string | null;
   isLoading: boolean;
@@ -481,6 +614,36 @@ function AssistantScreen({
   onSubmit: () => void;
 }) {
   const runtime = getAssistantRuntime();
+  const showLoadingPreview = variant === "loading";
+
+  if (variant === "empty") {
+    return (
+      <section className="screen-flow">
+        <header className="screen-intro">
+          <p className="eyebrow">Assistant IA</p>
+          <h1>Posez votre premiere question</h1>
+          <p className="body-copy">
+            L&apos;assistant peut vous aider sur une visite, une offre, un document ou une strategie de prix.
+          </p>
+        </header>
+
+        <EmptyStateVisual tone="sage" />
+
+        <div className="chip-row">
+          {scenario.assistantPrompts.map((prompt) => (
+            <button className="filter-chip filter-chip--button" key={prompt} onClick={() => onPromptClick(prompt)} type="button">
+              {prompt}
+            </button>
+          ))}
+        </div>
+
+        <article className="dark-card">
+          <h2>Exemple de demande</h2>
+          <p>Quelle liste envoyer au syndic pour recuperer rapidement mes pieces copropriete ?</p>
+        </article>
+      </section>
+    );
+  }
 
   return (
     <section className="screen-flow">
@@ -506,7 +669,9 @@ function AssistantScreen({
           <AssistantThreadBubble key={`${message.content}-${index}`} message={message} />
         ))}
 
-        {isLoading ? <div className="message-bubble is-assistant">CoachImmoIA reflechit...</div> : null}
+        {isLoading || showLoadingPreview ? (
+          <div className="message-bubble is-assistant">CoachImmoIA reflechit...</div>
+        ) : null}
       </div>
 
       <div className="chip-row">
@@ -544,14 +709,114 @@ function AssistantScreen({
         />
 
         <button className="primary-button" disabled={isLoading || !draft.trim()} onClick={onSubmit} type="button">
-          {isLoading ? "Envoi..." : "Envoyer"}
+          {isLoading || showLoadingPreview ? "Envoi..." : "Envoyer"}
         </button>
       </div>
     </section>
   );
 }
 
-function BuyerProjectScreen({ scenario }: { scenario: ScenarioData }) {
+function BuyerProjectScreen({
+  scenario,
+  variant,
+}: {
+  scenario: ScenarioData;
+  variant: ProjectsVariant;
+}) {
+  if (variant === "empty") {
+    return (
+      <>
+        <header className="screen-intro">
+          <p className="eyebrow">Projet</p>
+          <h1>Votre feuille de route n&apos;existe pas encore</h1>
+          <p className="body-copy">
+            Sans projet initialise, vous pouvez explorer, mais vous ne profiterez pas des priorites et du
+            contexte IA.
+          </p>
+        </header>
+
+        <article className="dark-card">
+          <h2>Construire ma feuille de route</h2>
+          <p>On vous pose quelques questions puis on genere les prochaines etapes utiles.</p>
+        </article>
+
+        <article className="sheet-card">
+          <h2>Ce que vous debloquez</h2>
+          <p>
+            • timeline projet
+            <br />
+            • checklist documents
+            <br />
+            • prompts IA contextuels
+            <br />• relais coach au bon moment
+          </p>
+        </article>
+      </>
+    );
+  }
+
+  if (variant === "risk") {
+    return (
+      <>
+        <header className="screen-intro">
+          <p className="eyebrow">Preparation offre</p>
+          <h1>Alerte avant offre</h1>
+          <p className="body-copy">
+            Le dossier est presque pret, mais deux inconnues peuvent fragiliser votre offre : travaux et
+            timing banque.
+          </p>
+        </header>
+
+        <article className="dark-card">
+          <h2>Moment critique</h2>
+          <p>
+            Prix affiche 648 kEUR. Le bien reste interessant, mais la strategie d&apos;offre doit etre
+            securisee.
+          </p>
+        </article>
+
+        <article className="feedback-banner is-error">
+          • travaux non chiffres
+          <br />
+          • copropriete encore floue
+          <br />• calendrier de financement serre
+        </article>
+
+        <article className="sheet-card">
+          <h2>Action recommandee</h2>
+          <p>Faire relire la strategie par un coach humain avant envoi de l&apos;offre.</p>
+        </article>
+      </>
+    );
+  }
+
+  if (variant === "sent") {
+    return (
+      <>
+        <header className="screen-intro">
+          <p className="eyebrow">Coach humain</p>
+          <h1>Votre demande a bien ete transmise</h1>
+          <p className="body-copy">
+            Le coach recevra votre contexte, votre question et les points a arbitrer. Retour estime sous
+            24h.
+          </p>
+        </header>
+
+        <EmptyStateVisual tone="sage" />
+
+        <article className="dark-card">
+          <h2>En attendant</h2>
+          <p>Vous pouvez continuer avec l&apos;IA, ajouter des precisions ou preparer vos documents.</p>
+        </article>
+
+        <article className="sheet-card">
+          <h2>Statut</h2>
+          <p>Demande recue · contexte transmis · priorite strategique</p>
+        </article>
+      </>
+    );
+  }
+
   return (
     <>
       <header className="screen-intro">
@@ -588,7 +853,42 @@ function BuyerProjectScreen({ scenario }: { scenario: ScenarioData }) {
   );
 }
 
-function SellerProjectScreen({ scenario }: { scenario: ScenarioData }) {
+function SellerProjectScreen({
+  scenario,
+  variant,
+}: {
+  scenario: ScenarioData;
+  variant: ProjectsVariant;
+}) {
+  if (variant === "empty") {
+    return (
+      <>
+        <header className="screen-intro">
+          <p className="eyebrow">Projet vendeur</p>
+          <h1>Votre vente n&apos;est pas encore structuree</h1>
+          <p className="body-copy">
+            Creez le projet pour suivre les documents, cadrer le prix et arbitrer la mise en vente.
+          </p>
+        </header>
+
+        <article className="dark-card">
+          <h2>Initialiser le projet vendeur</h2>
+          <p>On vous aide a poser le cadre, les pieces manquantes et la premiere strategie.</p>
+        </article>
+
+        <article className="sheet-card">
+          <h2>Vous debloquerez</h2>
+          <p>
+            • dossier vendeur lisible
+            <br />
+            • estimation mieux contextualisee
+            <br />• relais coach sur le prix et les offres
+          </p>
+        </article>
+      </>
+    );
+  }
+
   return (
     <>
       <header className="screen-intro">
@@ -633,16 +933,22 @@ function SellerProjectScreen({ scenario }: { scenario: ScenarioData }) {
 function ProjectsScreen({
   mode,
   scenario,
+  variant,
   onModeChange,
 }: {
   mode: ProjectMode;
   scenario: ScenarioData;
+  variant: ProjectsVariant;
   onModeChange: (mode: ProjectMode) => void;
 }) {
   return (
     <section className="screen-flow">
       <ModeTabs mode={mode} onChange={onModeChange} />
-      {mode === "buyer" ? <BuyerProjectScreen scenario={scenario} /> : <SellerProjectScreen scenario={scenario} />}
+      {mode === "buyer" ? (
+        <BuyerProjectScreen scenario={scenario} variant={variant} />
+      ) : (
+        <SellerProjectScreen scenario={scenario} variant={variant} />
+      )}
     </section>
   );
 }
@@ -722,6 +1028,73 @@ function BottomNav({
   );
 }
 
+function PrototypeToolbar({
+  activeScreen,
+  variants,
+  onChange,
+}: {
+  activeScreen: AppScreen;
+  variants: ScreenVariantState;
+  onChange: <T extends keyof ScreenVariantState>(screen: T, variant: ScreenVariantState[T]) => void;
+}) {
+  if (activeScreen === "profile") {
+    return null;
+  }
+
+  if (activeScreen === "home") {
+    return (
+      <VariantSwitcher
+        active={variants.home}
+        onChange={(value) => onChange("home", value as HomeVariant)}
+        options={[
+          { label: "Default", value: "default" },
+          { label: "Empty", value: "empty" },
+        ]}
+      />
+    );
+  }
+
+  if (activeScreen === "listings") {
+    return (
+      <VariantSwitcher
+        active={variants.listings}
+        onChange={(value) => onChange("listings", value as ListingsVariant)}
+        options={[
+          { label: "Default", value: "default" },
+          { label: "Empty", value: "empty" },
+        ]}
+      />
+    );
+  }
+
+  if (activeScreen === "assistant") {
+    return (
+      <VariantSwitcher
+        active={variants.assistant}
+        onChange={(value) => onChange("assistant", value as AssistantVariant)}
+        options={[
+          { label: "Default", value: "default" },
+          { label: "Empty", value: "empty" },
+          { label: "Loading", value: "loading" },
+        ]}
+      />
+    );
+  }
+
+  return (
+    <VariantSwitcher
+      active={variants.projects}
+      onChange={(value) => onChange("projects", value as ProjectsVariant)}
+      options={[
+        { label: "Default", value: "default" },
+        { label: "Empty", value: "empty" },
+        { label: "Risk", value: "risk" },
+        { label: "Sent", value: "sent" },
+      ]}
+    />
+  );
+}
+
 function App() {
   const [mode, setMode] = useState<ProjectMode>("buyer");
   const [activeAction, setActiveAction] = useState<ActionCard["id"]>("buyer");
@@ -739,6 +1112,7 @@ function App() {
   }));
   const [assistantError, setAssistantError] = useState<string | null>(null);
   const [assistantLoading, setAssistantLoading] = useState(false);
+  const [screenVariants, setScreenVariants] = useState<ScreenVariantState>(defaultVariants);
 
   const scenario = scenarios[mode];
 
@@ -784,6 +1158,16 @@ function App() {
     }
 
     setActiveScreen("assistant");
+  };
+
+  const handleVariantChange = <T extends keyof ScreenVariantState>(
+    screen: T,
+    variant: ScreenVariantState[T],
+  ) => {
+    setScreenVariants((current) => ({
+      ...current,
+      [screen]: variant,
+    }));
   };
 
   const handleAssistantSubmit = async () => {
@@ -851,12 +1235,20 @@ function App() {
           onModeChange={handleModeChange}
           onPrimaryAction={handlePrimaryAction}
           scenario={scenario}
+          variant={screenVariants.home}
         />
       );
     }
 
     if (activeScreen === "listings") {
-      return <ListingsScreen mode={mode} onModeChange={handleModeChange} scenario={scenario} />;
+      return (
+        <ListingsScreen
+          mode={mode}
+          onModeChange={handleModeChange}
+          scenario={scenario}
+          variant={screenVariants.listings}
+        />
+      );
     }
 
     if (activeScreen === "assistant") {
@@ -872,12 +1264,20 @@ function App() {
           onPromptClick={setAssistantDraft}
           onSubmit={handleAssistantSubmit}
           scenario={scenario}
+          variant={screenVariants.assistant}
         />
       );
     }
 
     if (activeScreen === "projects") {
-      return <ProjectsScreen mode={mode} onModeChange={handleModeChange} scenario={scenario} />;
+      return (
+        <ProjectsScreen
+          mode={mode}
+          onModeChange={handleModeChange}
+          scenario={scenario}
+          variant={screenVariants.projects}
+        />
+      );
     }
 
     return <ProfileScreen />;
@@ -909,7 +1309,10 @@ function App() {
 
           <AppTopBar subtitle={mode === "buyer" ? "Parcours acheteur" : "Parcours vendeur"} />
 
-          <div className="screen-scroll">{renderScreen()}</div>
+          <div className="screen-scroll">
+            <PrototypeToolbar activeScreen={activeScreen} onChange={handleVariantChange} variants={screenVariants} />
+            {renderScreen()}
+          </div>
 
           <BottomNav activeScreen={activeScreen} onNavigate={setActiveScreen} />
         </div>
