@@ -10,6 +10,7 @@ export type AssistantMessage = {
 export type AssistantRequest = {
   mode: ProjectMode;
   messages: AssistantMessage[];
+  contextSnippets?: string[];
 };
 
 export type MistralContent =

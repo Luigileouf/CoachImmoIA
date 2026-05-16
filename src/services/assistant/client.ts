@@ -20,8 +20,17 @@ function extractContent(content: MistralContent | undefined) {
 export async function sendAssistantMessage({
   mode,
   messages,
+  contextSnippets = [],
 }: AssistantRequest): Promise<{ content: string; model: string }> {
   const runtime = getAssistantRuntime();
+  const contextMessage =
+    contextSnippets.length > 0
+      ? [
+          "Contexte dossier utilisateur :",
+          ...contextSnippets.map((snippet, index) => `${index + 1}. ${snippet}`),
+          "Utilise ce contexte en priorite si la question porte sur le dossier.",
+        ].join("\n")
+      : null;
 
   const response = await fetch(runtime.url, {
     method: "POST",
@@ -34,6 +43,14 @@ export async function sendAssistantMessage({
           role: "system",
           content: buildSystemPrompt(mode),
         },
+        ...(contextMessage
+          ? [
+              {
+                role: "system" as const,
+                content: contextMessage,
+              },
+            ]
+          : []),
         ...messages,
       ],
     }),

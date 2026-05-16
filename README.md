@@ -37,6 +37,11 @@ Variables disponibles :
 - `MISTRAL_API_KEY` : cle secrete Mistral, lue cote serveur
 - `MISTRAL_MODEL` : modele utilise par le proxy local
 - `VITE_MISTRAL_MODEL` : libelle public affiche dans l'interface
+- `SUPABASE_URL` : URL du projet Supabase cote serveur
+- `SUPABASE_ANON_KEY` : cle publique pour les usages non privilegies
+- `SUPABASE_SERVICE_ROLE_KEY` : cle serveur pour les endpoints metier
+- `VITE_SUPABASE_URL` : URL du projet Supabase cote navigateur
+- `VITE_SUPABASE_ANON_KEY` : cle publique exposee au front
 
 Exemple :
 
@@ -44,12 +49,36 @@ Exemple :
 MISTRAL_API_KEY=your_mistral_api_key
 MISTRAL_MODEL=mistral-small-latest
 VITE_MISTRAL_MODEL=mistral-small-latest
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 Important :
 
 - la cle n'est jamais envoyee au navigateur ;
 - le front appelle `/api/mistral`, un proxy local Vite qui relaie vers `https://api.mistral.ai/v1/chat/completions`.
+
+## Structure actuelle
+
+Le projet est maintenant organise en couches plus lisibles :
+
+- `src/features/...` : composants et donnees par domaine
+- `src/services/assistant` : logique Mistral
+- `src/services/api` : contrats clients pour les endpoints metier
+- `src/services/supabase` : acces navigateur a la future base
+- `api/documents`, `api/projects`, `api/social` : premiers endpoints metier
+- `supabase/migrations` : base SQL versionnee
+
+## Endpoints metier disponibles
+
+- `GET /api/documents?mode=buyer|seller`
+- `GET /api/projects?mode=buyer|seller`
+- `GET /api/social?mode=buyer|seller`
+
+Ces endpoints renvoient pour l'instant des donnees derivees du domaine produit local, afin de stabiliser les contrats avant le branchement complet de Supabase.
 
 ## Mettre en ligne gratuitement
 
@@ -95,6 +124,7 @@ Les specs UX principales sont dans :
 - [docs/brief-figma-hifi.md](/Users/lmetivier/Dev/CoachImoIA/docs/brief-figma-hifi.md)
 - [docs/front-backlog-ecran-par-ecran.md](/Users/lmetivier/Dev/CoachImoIA/docs/front-backlog-ecran-par-ecran.md)
 - [docs/architecture-front-backend.md](/Users/lmetivier/Dev/CoachImoIA/docs/architecture-front-backend.md)
+- [docs/supabase-postgres-setup.md](/Users/lmetivier/Dev/CoachImoIA/docs/supabase-postgres-setup.md)
 - [docs/ux-plateforme-web-architecture.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-plateforme-web-architecture.md)
 - [docs/ux-plateforme-web-ecrans-prioritaires.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-plateforme-web-ecrans-prioritaires.md)
 - [docs/ux-espace-social.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-espace-social.md)
