@@ -6,9 +6,11 @@ Prototype frontend pour un assistant immobilier hybride IA + coach humain.
 
 - Choix du parcours acheteur ou vendeur
 - Navigation produit mobile avec vues `Accueil`, `Biens`, `Assistant IA`, `Projets`, `Profil`
+- Version plateforme web avec `Dashboard`, `Biens`, `Assistant IA`, `Projet`, `Documents`, `Communaute`, `Profil`
 - Flux `Assistant IA` connecte a Mistral API via une cle serveur
 - Feuille de route par scenario
 - Checklist documentaire
+- Espace social modere pour acheteurs et vendeurs
 - Bloc de transmission vers un coach humain
 - Mention de cadrage reglementaire
 
@@ -94,6 +96,7 @@ Les specs UX principales sont dans :
 - [docs/front-backlog-ecran-par-ecran.md](/Users/lmetivier/Dev/CoachImoIA/docs/front-backlog-ecran-par-ecran.md)
 - [docs/ux-plateforme-web-architecture.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-plateforme-web-architecture.md)
 - [docs/ux-plateforme-web-ecrans-prioritaires.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-plateforme-web-ecrans-prioritaires.md)
+- [docs/ux-espace-social.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-espace-social.md)
 
 ## Source produit
 

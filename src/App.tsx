@@ -7,6 +7,10 @@ import {
   projectSteps,
   scenarios,
   securityMessage,
+  socialCircles,
+  socialHighlights,
+  socialStats,
+  socialThreads,
   type ActionCard,
   type AppScreen,
   type ProjectMode,
@@ -451,6 +455,22 @@ function DocumentIcon() {
       />
       <path d="M14.5 4.8V9h4.2" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
       <path d="M10 12h6M10 15.5h6M10 19h4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function SocialIcon() {
+  return (
+    <svg aria-hidden="true" className="nav-icon-svg" viewBox="0 0 24 24">
+      <path d="M7.5 9.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+      <path d="M16.8 11.5a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z" />
+      <path
+        d="M3.8 18.8a4.7 4.7 0 0 1 7.4-3.8M13.3 18.8a3.8 3.8 0 0 1 6.2-2.9"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.8"
+      />
     </svg>
   );
 }
@@ -1251,6 +1271,87 @@ function ProfileScreen() {
   );
 }
 
+function SocialScreen({
+  mode,
+  selectedCircleIndex,
+  selectedThreadIndex,
+  onModeChange,
+  onSelectCircle,
+  onSelectThread,
+}: {
+  mode: ProjectMode;
+  selectedCircleIndex: number;
+  selectedThreadIndex: number;
+  onModeChange: (mode: ProjectMode) => void;
+  onSelectCircle: (index: number) => void;
+  onSelectThread: (index: number) => void;
+}) {
+  const circles = socialCircles[mode];
+  const activeCircle = circles[selectedCircleIndex] ?? circles[0];
+  const threads = socialThreads[mode].filter((thread) => thread.circleId === activeCircle.id);
+  const activeThread = threads[selectedThreadIndex] ?? threads[0] ?? socialThreads[mode][0];
+
+  return (
+    <section className="screen-flow">
+      <header className="screen-intro">
+        <p className="eyebrow">Communaute</p>
+        <h1>Echanger sans bruit inutile</h1>
+        <p className="body-copy">{socialHighlights[mode].summary}</p>
+      </header>
+
+      <ModeTabs mode={mode} onChange={onModeChange} />
+
+      <article className="dark-card">
+        <h2>{socialHighlights[mode].title}</h2>
+        <p>{socialHighlights[mode].trustSignals.join(" · ")}</p>
+      </article>
+
+      <article className="sheet-card">
+        <h2>Cercles actifs</h2>
+        <div className="social-pill-list">
+          {circles.map((circle, index) => (
+            <button
+              className={selectedCircleIndex === index ? "social-pill is-active" : "social-pill"}
+              key={circle.id}
+              onClick={() => onSelectCircle(index)}
+              type="button"
+            >
+              {circle.title}
+            </button>
+          ))}
+        </div>
+        <p className="social-support-copy">{activeCircle.prompt}</p>
+      </article>
+
+      <article className="summary-card social-thread-card">
+        <div className="chip-row">
+          <span className="pill-badge">{activeThread.trust}</span>
+          <span className="pill-badge">{activeThread.replies}</span>
+        </div>
+        <h2>{activeThread.title}</h2>
+        <p>{activeThread.excerpt}</p>
+        <div className="social-pill-list">
+          {threads.map((thread, index) => (
+            <button
+              className={selectedThreadIndex === index ? "social-pill is-active" : "social-pill"}
+              key={thread.id}
+              onClick={() => onSelectThread(index)}
+              type="button"
+            >
+              {thread.author}
+            </button>
+          ))}
+        </div>
+      </article>
+
+      <article className="mint-card">
+        <h2>Synthese IA</h2>
+        <p>{activeThread.aiSummary}</p>
+      </article>
+    </section>
+  );
+}
+
 function BottomNav({
   activeScreen,
   onNavigate,
@@ -1267,6 +1368,7 @@ function BottomNav({
     { key: "listings", label: "Biens", icon: <GridIcon /> },
     { key: "assistant", label: "IA", icon: <ChatIcon /> },
     { key: "projects", label: "Projet", icon: <CheckIcon /> },
+    { key: "social", label: "Social", icon: <SocialIcon /> },
     { key: "profile", label: "Profil", icon: <UserIcon /> },
   ];
 
@@ -1296,7 +1398,7 @@ function PrototypeToolbar({
   variants: ScreenVariantState;
   onChange: <T extends keyof ScreenVariantState>(screen: T, variant: ScreenVariantState[T]) => void;
 }) {
-  if (activeScreen === "profile" || activeScreen === "documents") {
+  if (activeScreen === "profile" || activeScreen === "documents" || activeScreen === "social") {
     return null;
   }
 
@@ -1384,6 +1486,10 @@ function PlatformHeader({
       title: "Documents",
       subtitle: "Pilotage documentaire et preparation du futur socle RAG.",
     },
+    social: {
+      title: "Communaute",
+      subtitle: "Espace social modere pour echanger, debloquer des doutes et recadrer un projet.",
+    },
     profile: {
       title: "Profil",
       subtitle: "Compte, preferences d'accompagnement et cadrage securite.",
@@ -1429,6 +1535,7 @@ function PlatformSidebar({
     { key: "assistant", label: "Assistant IA", icon: <ChatIcon /> },
     { key: "projects", label: "Projet", icon: <CheckIcon /> },
     { key: "documents", label: "Documents", icon: <DocumentIcon /> },
+    { key: "social", label: "Communaute", icon: <SocialIcon /> },
     { key: "profile", label: "Profil", icon: <UserIcon /> },
   ];
 
@@ -1604,6 +1711,33 @@ function DashboardScreen({
             </button>
             <button className="platform-ghost-button" type="button">
               Demander arbitrage
+            </button>
+          </div>
+        </article>
+
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Communaute utile</h3>
+            <span className="platform-badge">Pairs verifies</span>
+          </div>
+          <p className="platform-summary-copy">
+            {mode === "buyer"
+              ? "Comparez vos questions de visite, d'offre ou de financement avec des retours vecus et moderes."
+              : "Cadrez vos doutes sur le prix, le dossier vendeur et les offres avec des retours terrain plus structures."}
+          </p>
+          <div className="platform-chip-row">
+            {socialHighlights[mode].trustSignals.map((signal) => (
+              <span className="platform-chip" key={signal}>
+                {signal}
+              </span>
+            ))}
+          </div>
+          <div className="platform-inline-actions">
+            <button className="platform-primary-button" onClick={() => onNavigate("social")} type="button">
+              Ouvrir la communaute
+            </button>
+            <button className="platform-ghost-button" onClick={() => onNavigate("assistant")} type="button">
+              Passer par l&apos;IA
             </button>
           </div>
         </article>
@@ -1866,11 +2000,13 @@ function ProjectsWorkspaceScreen({
   mode,
   scenario,
   selectedStepIndex,
+  onNavigate,
   onSelectStep,
 }: {
   mode: ProjectMode;
   scenario: ScenarioData;
   selectedStepIndex: number;
+  onNavigate: (screen: AppScreen) => void;
   onSelectStep: (index: number) => void;
 }) {
   const activeStep = projectSteps[mode][selectedStepIndex] ?? projectSteps[mode][0];
@@ -1957,7 +2093,10 @@ function ProjectsWorkspaceScreen({
           <div className="platform-inline-actions">
             <button className="platform-primary-button platform-primary-button--light" type="button">
               Escalader au coach
-              </button>
+            </button>
+            <button className="platform-ghost-button platform-ghost-button--dark" onClick={() => onNavigate("social")} type="button">
+              Ouvrir la communaute
+            </button>
             <button className="platform-ghost-button platform-ghost-button--dark" type="button">
               Ajouter un contexte
             </button>
@@ -1974,6 +2113,7 @@ function DocumentsScreen({
   documentFilter,
   documentContextSelection,
   onDocumentFilterChange,
+  onNavigate,
   onSelectDocument,
   onToggleDocumentContext,
 }: {
@@ -1982,6 +2122,7 @@ function DocumentsScreen({
   documentFilter: "all" | "action" | "rag";
   documentContextSelection: string[];
   onDocumentFilterChange: (filter: "all" | "action" | "rag") => void;
+  onNavigate: (screen: AppScreen) => void;
   onSelectDocument: (index: number) => void;
   onToggleDocumentContext: (label: string) => void;
 }) {
@@ -2125,8 +2266,216 @@ function DocumentsScreen({
             <button className="platform-primary-button" onClick={() => onToggleDocumentContext(activeDocument.label)} type="button">
               {documentContextSelection.includes(activeDocument.label) ? "Retirer du contexte IA" : "Ajouter au contexte IA"}
             </button>
+            <button className="platform-ghost-button" onClick={() => onNavigate("social")} type="button">
+              Demander aux pairs
+            </button>
             <button className="platform-ghost-button" type="button">
               {activeDocument.status === "Disponible" ? "Voir l'extrait" : "Generer relance"}
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function SocialWorkspaceScreen({
+  mode,
+  selectedCircleIndex,
+  selectedThreadIndex,
+  onModeChange,
+  onSelectCircle,
+  onSelectThread,
+  onNavigate,
+}: {
+  mode: ProjectMode;
+  selectedCircleIndex: number;
+  selectedThreadIndex: number;
+  onModeChange: (mode: ProjectMode) => void;
+  onSelectCircle: (index: number) => void;
+  onSelectThread: (index: number) => void;
+  onNavigate: (screen: AppScreen) => void;
+}) {
+  const circles = socialCircles[mode];
+  const highlight = socialHighlights[mode];
+  const activeCircle = circles[selectedCircleIndex] ?? circles[0];
+  const threads = socialThreads[mode].filter((thread) => thread.circleId === activeCircle.id);
+  const activeThread = threads[selectedThreadIndex] ?? threads[0] ?? socialThreads[mode][0];
+
+  return (
+    <section className="platform-screen platform-screen--social">
+      <article className="platform-hero-card">
+        <div className="platform-hero-card__copy">
+          <p className="platform-section-label">{highlight.eyebrow}</p>
+          <h2>{highlight.title}</h2>
+          <p>{highlight.summary}</p>
+        </div>
+
+        <div className="platform-hero-card__actions">
+          <button className="platform-primary-button" type="button">
+            {highlight.cta}
+          </button>
+          <button className="platform-ghost-button" onClick={() => onNavigate("assistant")} type="button">
+            {highlight.secondaryCta}
+          </button>
+        </div>
+      </article>
+
+      <div className="platform-toolbar-row">
+        <ModeTabs mode={mode} onChange={onModeChange} />
+        <div className="platform-chip-row">
+          {highlight.trustSignals.map((signal) => (
+            <span className="platform-chip" key={signal}>
+              {signal}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="platform-kpi-grid">
+        {socialStats[mode].map((stat) => (
+          <article className="platform-kpi-card" key={stat.label}>
+            <span>{stat.label}</span>
+            <strong>{stat.value}</strong>
+          </article>
+        ))}
+      </div>
+
+      <div className="platform-grid platform-grid--social">
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Cercles recommandes</h3>
+            <span className="platform-badge">{circles.length} groupes</span>
+          </div>
+
+          <div className="platform-social-list">
+            {circles.map((circle, index) => (
+              <button
+                className={selectedCircleIndex === index ? "platform-social-row is-active" : "platform-social-row"}
+                key={circle.id}
+                onClick={() => onSelectCircle(index)}
+                type="button"
+              >
+                <div>
+                  <strong>{circle.title}</strong>
+                  <p>{circle.audience}</p>
+                </div>
+                <span>{circle.members}</span>
+              </button>
+            ))}
+          </div>
+        </article>
+
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>{activeCircle.title}</h3>
+            <span className="platform-badge">{activeCircle.trust}</span>
+          </div>
+
+          <p className="platform-summary-copy">{activeCircle.description}</p>
+
+          <div className="platform-mini-metrics">
+            <div className="platform-mini-metric">
+              <span>Membres</span>
+              <strong>{activeCircle.members}</strong>
+            </div>
+            <div className="platform-mini-metric">
+              <span>Activite</span>
+              <strong>{activeCircle.activity}</strong>
+            </div>
+          </div>
+
+          <article className="platform-inline-panel">
+            <span className="platform-section-label">Pourquoi y aller</span>
+            <strong>{activeCircle.prompt}</strong>
+          </article>
+
+          <div className="platform-chip-row">
+            {activeCircle.tags.map((tag) => (
+              <span className="platform-chip" key={tag}>
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="platform-inline-actions">
+            <button className="platform-primary-button" onClick={() => onNavigate("projects")} type="button">
+              Lier au projet
+            </button>
+            <button className="platform-ghost-button" onClick={() => onNavigate("assistant")} type="button">
+              Passer par l&apos;IA
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <div className="platform-grid platform-grid--social-thread">
+        <article className="platform-surface">
+          <div className="platform-surface__header">
+            <h3>Fils de discussion</h3>
+            <span className="platform-badge">{threads.length} utiles</span>
+          </div>
+
+          <div className="platform-thread-stack">
+            {threads.map((thread, index) => (
+              <button
+                className={selectedThreadIndex === index ? "platform-thread-card is-active" : "platform-thread-card"}
+                key={thread.id}
+                onClick={() => onSelectThread(index)}
+                type="button"
+              >
+                <div className="platform-chip-row">
+                  <span className="platform-chip">{thread.trust}</span>
+                  <span className="platform-chip">{thread.replies}</span>
+                </div>
+                <strong>{thread.title}</strong>
+                <p>{thread.excerpt}</p>
+                <span className="platform-thread-meta">{thread.lastActivity}</span>
+              </button>
+            ))}
+          </div>
+        </article>
+
+        <article className="platform-surface is-dark">
+          <div className="platform-surface__header">
+            <h3>Fil actif</h3>
+            <span className="platform-badge is-contrast">{activeThread.trust}</span>
+          </div>
+
+          <div className="platform-context-list">
+            <div>
+              <span className="platform-context-list__label">Auteur</span>
+              <p>
+                {activeThread.author} · {activeThread.role}
+              </p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Question</span>
+              <p>{activeThread.title}</p>
+            </div>
+            <div>
+              <span className="platform-context-list__label">Synthese IA</span>
+              <p>{activeThread.aiSummary}</p>
+            </div>
+          </div>
+
+          <div className="platform-priority-list platform-priority-list--contrast">
+            <div className="platform-priority-item">
+              <span className="platform-priority-item__dot" />
+              <span>{activeThread.projectLink}</span>
+            </div>
+            <div className="platform-priority-item">
+              <span className="platform-priority-item__dot" />
+              <span>Escalader si le sujet touche au prix, au financement ou a un risque juridique.</span>
+            </div>
+          </div>
+
+          <div className="platform-inline-actions">
+            <button className="platform-primary-button platform-primary-button--light" type="button">
+              {activeThread.actionLabel}
+            </button>
+            <button className="platform-ghost-button platform-ghost-button--dark" onClick={() => onNavigate("assistant")} type="button">
+              Reprendre dans l&apos;IA
             </button>
           </div>
         </article>
@@ -2197,6 +2546,8 @@ function WebPlatformShell({
   selectedListingIndex,
   selectedProjectStepIndex,
   selectedDocumentIndex,
+  selectedSocialCircleIndex,
+  selectedSocialThreadIndex,
   documentFilter,
   documentContextSelection,
   draft,
@@ -2209,6 +2560,8 @@ function WebPlatformShell({
   onModeChange,
   onNavigate,
   onPromptClick,
+  onSelectSocialCircle,
+  onSelectSocialThread,
   onSelectProjectStep,
   onSelectListing,
   onToggleDocumentContext,
@@ -2220,6 +2573,8 @@ function WebPlatformShell({
   selectedListingIndex: number;
   selectedProjectStepIndex: number;
   selectedDocumentIndex: number;
+  selectedSocialCircleIndex: number;
+  selectedSocialThreadIndex: number;
   documentFilter: "all" | "action" | "rag";
   documentContextSelection: string[];
   draft: string;
@@ -2232,6 +2587,8 @@ function WebPlatformShell({
   onModeChange: (mode: ProjectMode) => void;
   onNavigate: (screen: AppScreen) => void;
   onPromptClick: (prompt: string) => void;
+  onSelectSocialCircle: (index: number) => void;
+  onSelectSocialThread: (index: number) => void;
   onSelectProjectStep: (index: number) => void;
   onSelectListing: (index: number) => void;
   onToggleDocumentContext: (label: string) => void;
@@ -2272,6 +2629,7 @@ function WebPlatformShell({
           {activeScreen === "projects" ? (
             <ProjectsWorkspaceScreen
               mode={mode}
+              onNavigate={onNavigate}
               onSelectStep={onSelectProjectStep}
               scenario={scenario}
               selectedStepIndex={selectedProjectStepIndex}
@@ -2283,9 +2641,21 @@ function WebPlatformShell({
               documentFilter={documentFilter}
               mode={mode}
               onDocumentFilterChange={onDocumentFilterChange}
+              onNavigate={onNavigate}
               onSelectDocument={onSelectDocument}
               onToggleDocumentContext={onToggleDocumentContext}
               selectedDocumentIndex={selectedDocumentIndex}
+            />
+          ) : null}
+          {activeScreen === "social" ? (
+            <SocialWorkspaceScreen
+              mode={mode}
+              onModeChange={onModeChange}
+              onNavigate={onNavigate}
+              onSelectCircle={onSelectSocialCircle}
+              onSelectThread={onSelectSocialThread}
+              selectedCircleIndex={selectedSocialCircleIndex}
+              selectedThreadIndex={selectedSocialThreadIndex}
             />
           ) : null}
           {activeScreen === "profile" ? <ProfileWorkspaceScreen /> : null}
@@ -2302,6 +2672,8 @@ function App() {
   const [selectedListingIndex, setSelectedListingIndex] = useState(0);
   const [selectedProjectStepIndex, setSelectedProjectStepIndex] = useState(0);
   const [selectedDocumentIndex, setSelectedDocumentIndex] = useState(0);
+  const [selectedSocialCircleIndex, setSelectedSocialCircleIndex] = useState(0);
+  const [selectedSocialThreadIndex, setSelectedSocialThreadIndex] = useState(0);
   const [documentFilter, setDocumentFilter] = useState<"all" | "action" | "rag">("all");
   const [documentContextSelection, setDocumentContextSelection] = useState<Record<ProjectMode, string[]>>({
     buyer: ["Piece d'identite", "Simulation bancaire"],
@@ -2329,6 +2701,8 @@ function App() {
     setSelectedListingIndex(0);
     setSelectedProjectStepIndex(0);
     setSelectedDocumentIndex(0);
+    setSelectedSocialCircleIndex(0);
+    setSelectedSocialThreadIndex(0);
     setDocumentFilter("all");
     setAssistantDraft(scenarios[nextMode].assistantPrompts[0]);
     setAssistantError(null);
@@ -2347,6 +2721,8 @@ function App() {
       setSelectedListingIndex(0);
       setSelectedProjectStepIndex(0);
       setSelectedDocumentIndex(0);
+      setSelectedSocialCircleIndex(0);
+      setSelectedSocialThreadIndex(0);
       setDocumentFilter("all");
       setAssistantDraft(scenarios.buyer.assistantPrompts[0]);
       return;
@@ -2357,6 +2733,8 @@ function App() {
       setSelectedListingIndex(0);
       setSelectedProjectStepIndex(0);
       setSelectedDocumentIndex(0);
+      setSelectedSocialCircleIndex(0);
+      setSelectedSocialThreadIndex(0);
       setDocumentFilter("all");
       setAssistantDraft(scenarios.seller.assistantPrompts[0]);
       return;
@@ -2366,6 +2744,8 @@ function App() {
     setSelectedListingIndex(0);
     setSelectedProjectStepIndex(0);
     setSelectedDocumentIndex(0);
+    setSelectedSocialCircleIndex(0);
+    setSelectedSocialThreadIndex(0);
     setDocumentFilter("all");
     setAssistantDraft("J'aimerais estimer mon bien avant de choisir une strategie de vente.");
   };
@@ -2411,6 +2791,11 @@ function App() {
         [mode]: nextSelection,
       };
     });
+  };
+
+  const handleSocialCircleSelect = (index: number) => {
+    setSelectedSocialCircleIndex(index);
+    setSelectedSocialThreadIndex(0);
   };
 
   const handleAssistantSubmit = async () => {
@@ -2530,9 +2915,23 @@ function App() {
           documentFilter={documentFilter}
           mode={mode}
           onDocumentFilterChange={handleDocumentFilterChange}
+          onNavigate={setActiveScreen}
           onSelectDocument={setSelectedDocumentIndex}
           onToggleDocumentContext={handleToggleDocumentContext}
           selectedDocumentIndex={selectedDocumentIndex}
+        />
+      );
+    }
+
+    if (activeScreen === "social") {
+      return (
+        <SocialScreen
+          mode={mode}
+          onModeChange={handleModeChange}
+          onSelectCircle={handleSocialCircleSelect}
+          onSelectThread={setSelectedSocialThreadIndex}
+          selectedCircleIndex={selectedSocialCircleIndex}
+          selectedThreadIndex={selectedSocialThreadIndex}
         />
       );
     }
@@ -2561,6 +2960,8 @@ function App() {
           onNavigate={setActiveScreen}
           onPromptClick={setAssistantDraft}
           onSelectDocument={setSelectedDocumentIndex}
+          onSelectSocialCircle={handleSocialCircleSelect}
+          onSelectSocialThread={setSelectedSocialThreadIndex}
           onSelectProjectStep={setSelectedProjectStepIndex}
           onSelectListing={setSelectedListingIndex}
           onToggleDocumentContext={handleToggleDocumentContext}
@@ -2569,6 +2970,8 @@ function App() {
           selectedDocumentIndex={selectedDocumentIndex}
           selectedListingIndex={selectedListingIndex}
           selectedProjectStepIndex={selectedProjectStepIndex}
+          selectedSocialCircleIndex={selectedSocialCircleIndex}
+          selectedSocialThreadIndex={selectedSocialThreadIndex}
         />
 
         <aside className="mobile-preview" aria-label="Apercu mobile">

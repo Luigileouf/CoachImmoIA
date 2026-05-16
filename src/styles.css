@@ -523,6 +523,11 @@ svg {
   grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
 }
 
+.platform-grid--social,
+.platform-grid--social-thread {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.94fr);
+}
+
 .platform-surface {
   gap: 18px;
   padding: 24px;
@@ -717,6 +722,12 @@ svg {
   gap: 14px;
 }
 
+.platform-social-list,
+.platform-thread-stack {
+  display: grid;
+  gap: 14px;
+}
+
 .platform-listing-row {
   display: grid;
   grid-template-columns: 102px minmax(0, 1fr) auto;
@@ -739,6 +750,55 @@ svg {
 
 .platform-listing-row .scene-card {
   width: 102px;
+}
+
+.platform-social-row,
+.platform-thread-card {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid rgba(228, 221, 213, 0.92);
+  border-radius: 24px;
+  padding: 18px;
+  background: rgba(255, 252, 248, 0.88);
+  text-align: left;
+}
+
+.platform-social-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.platform-social-row strong,
+.platform-thread-card strong {
+  color: var(--ink);
+}
+
+.platform-social-row p,
+.platform-thread-card p,
+.platform-thread-meta {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.platform-social-row.is-active,
+.platform-thread-card.is-active {
+  background: rgba(19, 36, 44, 0.96);
+  border-color: transparent;
+}
+
+.platform-social-row.is-active strong,
+.platform-social-row.is-active p,
+.platform-social-row.is-active span,
+.platform-thread-card.is-active strong,
+.platform-thread-card.is-active p,
+.platform-thread-card.is-active span {
+  color: #fff;
+}
+
+.platform-thread-meta {
+  font-size: 0.84rem;
 }
 
 .platform-listing-detail {
@@ -1483,6 +1543,12 @@ svg {
   gap: 10px;
 }
 
+.social-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .mode-tabs {
   width: fit-content;
   padding: 4px;
@@ -1503,6 +1569,27 @@ svg {
   background: var(--ink);
   color: #fff;
   font-weight: 700;
+}
+
+.social-pill {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.social-pill.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.social-support-copy {
+  color: var(--ink-soft);
+  line-height: 1.55;
 }
 
 .card-stack {
@@ -2106,7 +2193,7 @@ svg {
 
 .bottom-nav {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: end;
   gap: 4px;
   margin-top: 10px;
@@ -2128,7 +2215,7 @@ svg {
 }
 
 .bottom-nav__item span:last-child {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
 }
 
 .bottom-nav__icon {
@@ -2222,6 +2309,8 @@ svg {
   .platform-grid--projects,
   .platform-grid--listings,
   .platform-grid--assistant,
+  .platform-grid--social,
+  .platform-grid--social-thread,
   .platform-grid--profile,
   .platform-grid--documents-workspace,
   .platform-detail-columns {
