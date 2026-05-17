@@ -23,6 +23,75 @@ function dedupeDocumentLabels(sources: RagContextResponse["sources"]) {
   return Array.from(new Set(sources.map((source) => source.label)));
 }
 
+function buildSourceCorpus(sources: RagContextResponse["sources"]) {
+  return sources.map((source) => `${source.label} ${source.summary} ${source.excerpt}`).join(" ");
+}
+
+function filterSourcesByTerms(
+  sources: RagContextResponse["sources"],
+  terms: string[],
+) {
+  return sources.filter((source) => {
+    const haystack = normalize(`${source.label} ${source.summary} ${source.excerpt}`).toLowerCase();
+    return terms.some((term) => haystack.includes(term));
+  });
+}
+
+function sanitizeExcerpt(text: string) {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function buildExtractiveSourceAnswer({
+  intro,
+  sources,
+  limit = 3,
+  fallbackSummary,
+  vigilance,
+}: {
+  intro: string;
+  sources: RagContextResponse["sources"];
+  limit?: number;
+  fallbackSummary?: string;
+  vigilance?: string;
+}) {
+  if (sources.length === 0) {
+    return null;
+  }
+
+  const lines = [intro];
+  const seen = new Set<string>();
+
+  for (const source of sources) {
+    const key = `${source.label}:${source.excerpt}`;
+    if (seen.has(key)) {
+      continue;
+    }
+
+    const detail = sanitizeExcerpt(source.excerpt || source.summary);
+
+    if (!detail) {
+      continue;
+    }
+
+    lines.push(`- ${source.label} : ${detail}`);
+    seen.add(key);
+
+    if (seen.size >= limit) {
+      break;
+    }
+  }
+
+  if (lines.length === 1 && fallbackSummary) {
+    lines.push(`- ${fallbackSummary}`);
+  }
+
+  if (vigilance) {
+    lines.push(`Point de vigilance : ${vigilance}`);
+  }
+
+  return lines.length > 1 ? lines.join("\n") : null;
+}
+
 export function buildGroundedFinancialAnswer(
   query: string,
   sources: RagContextResponse["sources"],
@@ -41,10 +110,8 @@ export function buildGroundedFinancialAnswer(
     return null;
   }
 
-  const rawCorpus = sources.map((source) => `${source.label} ${source.summary} ${source.excerpt}`).join(" ");
-  const corpus = normalize(
-    sources.map((source) => `${source.label} ${source.summary} ${source.excerpt}`).join(" "),
-  );
+  const rawCorpus = buildSourceCorpus(sources);
+  const corpus = normalize(rawCorpus);
 
   const borrowedAmount = findPattern(corpus, [
     /montant emprunte retenu ([0-9 ]+ eur)/i,
@@ -125,4 +192,152 @@ export function buildGroundedFinancialAnswer(
   );
 
   return lines.join("\n");
+}
+
+export function buildGroundedCoproAnswer(
+  query: string,
+  sources: RagContextResponse["sources"],
+) {
+  const normalizedQuery = normalize(query).toLowerCase();
+  const isCoproQuestion =
+    normalizedQuery.includes("copro") ||
+    normalizedQuery.includes("copropriete") ||
+    normalizedQuery.includes("syndic") ||
+    normalizedQuery.includes("pv d ag") ||
+    normalizedQuery.includes("pv ag") ||
+    normalizedQuery.includes("charges");
+
+  if (!isCoproQuestion || sources.length === 0) {
+    return null;
+  }
+
+  const relatedSources = filterSourcesByTerms(sources, [
+    "copro",
+    "copropriete",
+    "syndic",
+    "pv ag",
+    "assemblee generale",
+    "carnet d entretien",
+    "charges",
+    "travaux",
+  ]);
+
+  return buildExtractiveSourceAnswer({
+    intro: "D'apres les documents de copropriete disponibles :",
+    sources: relatedSources,
+    fallbackSummary:
+      "Les pieces de copropriete pointent des elements a verifier avec le syndic avant engagement.",
+    vigilance:
+      "verifiez les travaux votes, les charges recurrentes et toute decision recente d'assemblee generale.",
+  });
+}
+
+export function buildGroundedDiagnosticsAnswer(
+  query: string,
+  sources: RagContextResponse["sources"],
+) {
+  const normalizedQuery = normalize(query).toLowerCase();
+  const isDiagnosticsQuestion =
+    normalizedQuery.includes("diagnostic") ||
+    normalizedQuery.includes("diagnostics") ||
+    normalizedQuery.includes("dpe") ||
+    normalizedQuery.includes("amiante") ||
+    normalizedQuery.includes("plomb") ||
+    normalizedQuery.includes("gaz") ||
+    normalizedQuery.includes("electricite");
+
+  if (!isDiagnosticsQuestion || sources.length === 0) {
+    return null;
+  }
+
+  const relatedSources = filterSourcesByTerms(sources, [
+    "diagnostic",
+    "diagnostics",
+    "dpe",
+    "amiante",
+    "plomb",
+    "gaz",
+    "electricite",
+    "energetique",
+    "termites",
+  ]);
+
+  return buildExtractiveSourceAnswer({
+    intro: "D'apres les diagnostics ou extraits relies a ce sujet :",
+    sources: relatedSources,
+    fallbackSummary:
+      "Les diagnostics charges doivent etre relus point par point avant diffusion ou engagement.",
+    vigilance:
+      "confirmez la date de validite, les anomalies relevees et les obligations de mise a jour avant partage.",
+  });
+}
+
+export function buildGroundedCompromiseAnswer(
+  query: string,
+  sources: RagContextResponse["sources"],
+) {
+  const normalizedQuery = normalize(query).toLowerCase();
+  const isCompromiseQuestion =
+    normalizedQuery.includes("compromis") ||
+    normalizedQuery.includes("promesse") ||
+    normalizedQuery.includes("condition suspensive") ||
+    normalizedQuery.includes("conditions suspensives");
+
+  if (!isCompromiseQuestion || sources.length === 0) {
+    return null;
+  }
+
+  const relatedSources = filterSourcesByTerms(sources, [
+    "compromis",
+    "promesse",
+    "condition suspensive",
+    "conditions suspensives",
+    "offre",
+    "signature",
+  ]);
+
+  return buildExtractiveSourceAnswer({
+    intro: "D'apres les pieces liees au compromis ou a l'offre :",
+    sources: relatedSources,
+    fallbackSummary:
+      "Les passages recuperes montrent des points contractuels a valider avant signature.",
+    vigilance:
+      "confirmez toujours les conditions suspensives, le calendrier et les clauses sensibles avec le coach ou le notaire.",
+  });
+}
+
+export function buildGroundedSellerDocumentsAnswer(
+  query: string,
+  sources: RagContextResponse["sources"],
+) {
+  const normalizedQuery = normalize(query).toLowerCase();
+  const isSellerDocumentsQuestion =
+    normalizedQuery.includes("titre de propriete") ||
+    normalizedQuery.includes("taxe fonciere") ||
+    normalizedQuery.includes("dossier vendeur") ||
+    normalizedQuery.includes("documents vendeur") ||
+    normalizedQuery.includes("pieces vendeur");
+
+  if (!isSellerDocumentsQuestion || sources.length === 0) {
+    return null;
+  }
+
+  const relatedSources = filterSourcesByTerms(sources, [
+    "titre de propriete",
+    "taxe fonciere",
+    "diagnostics",
+    "pv ag",
+    "carnet d entretien",
+    "dossier vendeur",
+    "pieces vendeur",
+  ]);
+
+  return buildExtractiveSourceAnswer({
+    intro: "D'apres les documents vendeur retrouves :",
+    sources: relatedSources,
+    fallbackSummary:
+      "Le dossier vendeur contient plusieurs pieces utiles, mais il faut verifier qu'elles sont toutes a jour.",
+    vigilance:
+      "verifiez quelles pieces sont completes, lesquelles manquent encore, et qui doit les fournir avant mise en vente.",
+  });
 }

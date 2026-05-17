@@ -7,7 +7,6 @@ import {
   type ProjectMode,
 } from "./data/content";
 import {
-  sendAssistantMessage,
   type AssistantMessage,
 } from "./lib/assistant";
 import {
@@ -16,7 +15,6 @@ import {
   createSocialThread,
   fetchDocuments,
   fetchProjects,
-  fetchRagContext,
   fetchSocial,
   indexDocument,
   type DocumentsResponse,
@@ -24,6 +22,7 @@ import {
   type RagContextResponse,
   type SocialResponse,
 } from "./services/api";
+import { runCoachImmoAgent } from "./services/agent";
 import {
   getCurrentSession,
   signInWithPassword,
@@ -32,7 +31,6 @@ import {
   subscribeToAuthChanges,
 } from "./services/auth/client";
 import { uploadProjectDocument } from "./services/supabase/storage";
-import { buildGroundedFinancialAnswer } from "./services/assistant/grounding";
 import {
   defaultScreenVariants,
   type AssistantThread,
@@ -43,30 +41,6 @@ import { MobilePreviewShell } from "./features/mobile/components/mobile-screens"
 import { WebPlatformShell } from "./features/platform/components/web-shell";
 
 type ModeRecord<T> = Record<ProjectMode, T>;
-
-function asksAboutLoadedDocuments(input: string) {
-  const normalized = input.toLowerCase();
-
-  const dossierSignals = [
-    "mon dossier",
-    "mes documents",
-    "ce document",
-    "ce pdf",
-    "ce fichier",
-    "que dit",
-    "que contient",
-    "selon le document",
-    "selon mes documents",
-    "d'apres mon dossier",
-    "d'après mon dossier",
-    "dans mon dossier",
-    "dans mes documents",
-    "sur ma simulation",
-    "sur mon document",
-  ];
-
-  return dossierSignals.some((signal) => normalized.includes(signal));
-}
 
 function App() {
   const [mode, setMode] = useState<ProjectMode>("buyer");
@@ -494,55 +468,17 @@ function App() {
     }));
 
     try {
-      const rag = await fetchRagContext({
+      const agentResult = await runCoachImmoAgent({
         mode,
         query: content,
-        labels: documentContextSelection[mode],
+        messages: nextThread,
+        contextLabels: documentContextSelection[mode],
       });
 
       setAssistantSources((current) => ({
         ...current,
-        [mode]: rag.data.sources,
+        [mode]: agentResult.sources,
       }));
-
-      if (rag.data.sources.length === 0 && asksAboutLoadedDocuments(content)) {
-        setAssistantThreads((current) => ({
-          ...current,
-          [mode]: [
-            ...current[mode],
-            {
-              role: "assistant",
-              content:
-                "Je ne trouve pas cette information dans les documents charges pour le moment. Le PDF est bien televerse, mais dans ce MVP son texte n'est pas encore extrait automatiquement. Si vous voulez une reponse fiable sur ce document, ajoutez un resume factuel dans Documents ou je peux maintenant brancher la vraie extraction PDF.",
-            },
-          ],
-        }));
-        return;
-      }
-
-      const groundedFinancialAnswer = buildGroundedFinancialAnswer(content, rag.data.sources);
-
-      if (groundedFinancialAnswer) {
-        setAssistantThreads((current) => ({
-          ...current,
-          [mode]: [
-            ...current[mode],
-            {
-              role: "assistant",
-              content: groundedFinancialAnswer,
-            },
-          ],
-        }));
-        return;
-      }
-
-      const response = await sendAssistantMessage({
-        mode,
-        messages: nextThread,
-        contextSnippets: rag.data.sources.map(
-          (source) => `${source.label} (${source.source}) : ${source.summary || source.excerpt}`,
-        ),
-      });
 
       setAssistantThreads((current) => ({
         ...current,
@@ -550,7 +486,7 @@ function App() {
           ...current[mode],
           {
             role: "assistant",
-            content: response.content,
+            content: agentResult.reply,
           },
         ],
       }));
