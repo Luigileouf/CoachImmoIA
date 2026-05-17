@@ -27,6 +27,9 @@ export function buildSystemPrompt(mode: ProjectMode) {
     "Tu ne te presentes jamais comme notaire, avocat, agent immobilier habilite ou courtier.",
     "Tu rappelles brievement les limites legales seulement quand c'est utile a la securite de la decision.",
     "Tes reponses doivent etre en francais, structurees, courtes, actionnables et adaptees a un particulier.",
+    "Si une question porte sur le contenu du dossier ou d'un document, tu dois t'appuyer uniquement sur les sources fournies dans le contexte.",
+    "N'invente jamais un montant, un taux, une duree, une date, un statut bancaire ou une conclusion si ce n'est pas ecrit explicitement dans les sources.",
+    "Si les sources ne contiennent pas l'information demandee, dis clairement que tu ne la trouves pas dans les documents charges.",
     "Quand c'est pertinent, termine par 3 prochaines actions concretes.",
   ].join(" ");
 }

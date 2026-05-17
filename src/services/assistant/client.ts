@@ -23,12 +23,26 @@ export async function sendAssistantMessage({
   contextSnippets = [],
 }: AssistantRequest): Promise<{ content: string; model: string }> {
   const runtime = getAssistantRuntime();
+  const groundingMessage =
+    contextSnippets.length > 0
+      ? [
+          "Regle de grounding dossier :",
+          "Pour toute question sur le dossier, reponds uniquement a partir des extraits ci-dessous.",
+          "Si l'information n'est pas ecrite explicitement dans ces extraits, dis que tu ne la trouves pas dans les documents charges.",
+          "N'infere pas des montants, taux, durees ou statuts bancaires a partir du nom d'un document.",
+        ].join("\n")
+      : [
+          "Regle de grounding dossier :",
+          "Aucune source dossier pertinente n'a ete retrouvee pour cette question.",
+          "Si l'utilisateur demande ce que dit son dossier ou un document, reponds que tu ne trouves pas cette information dans les documents charges.",
+          "Tu peux ensuite proposer quoi verifier ou quel document ajouter, sans inventer de contenu documentaire.",
+        ].join("\n");
   const contextMessage =
     contextSnippets.length > 0
       ? [
           "Contexte dossier utilisateur :",
           ...contextSnippets.map((snippet, index) => `${index + 1}. ${snippet}`),
-          "Utilise ce contexte en priorite si la question porte sur le dossier.",
+          "Fin du contexte dossier.",
         ].join("\n")
       : null;
 
@@ -42,6 +56,10 @@ export async function sendAssistantMessage({
         {
           role: "system",
           content: buildSystemPrompt(mode),
+        },
+        {
+          role: "system",
+          content: groundingMessage,
         },
         ...(contextMessage
           ? [

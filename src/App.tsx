@@ -32,6 +32,7 @@ import {
   subscribeToAuthChanges,
 } from "./services/auth/client";
 import { uploadProjectDocument } from "./services/supabase/storage";
+import { buildGroundedFinancialAnswer } from "./services/assistant/grounding";
 import {
   defaultScreenVariants,
   type AssistantThread,
@@ -42,6 +43,30 @@ import { MobilePreviewShell } from "./features/mobile/components/mobile-screens"
 import { WebPlatformShell } from "./features/platform/components/web-shell";
 
 type ModeRecord<T> = Record<ProjectMode, T>;
+
+function asksAboutLoadedDocuments(input: string) {
+  const normalized = input.toLowerCase();
+
+  const dossierSignals = [
+    "mon dossier",
+    "mes documents",
+    "ce document",
+    "ce pdf",
+    "ce fichier",
+    "que dit",
+    "que contient",
+    "selon le document",
+    "selon mes documents",
+    "d'apres mon dossier",
+    "d'après mon dossier",
+    "dans mon dossier",
+    "dans mes documents",
+    "sur ma simulation",
+    "sur mon document",
+  ];
+
+  return dossierSignals.some((signal) => normalized.includes(signal));
+}
 
 function App() {
   const [mode, setMode] = useState<ProjectMode>("buyer");
@@ -240,6 +265,7 @@ function App() {
   };
 
   const handleCreateProject = async () => {
+    setAssistantError(null);
     setProjectBusy(true);
     try {
       const response = await createProject({
@@ -251,6 +277,7 @@ function App() {
         ...current,
         [mode]: response.data,
       }));
+      setSelectedProjectStepIndex(0);
     } catch (error) {
       setAssistantError(error instanceof Error ? error.message : "Creation du projet impossible.");
     } finally {
@@ -269,23 +296,73 @@ function App() {
     source: string;
     file?: File | null;
   }) => {
+    setAssistantError(null);
     setDocumentBusy(true);
     try {
+      let extractionWarning: string | null = null;
+      let extractedPdf:
+        | {
+            summary: string;
+            chunks: string[];
+            notes: string[];
+          }
+        | null = null;
+
+      if (file && (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) {
+        try {
+          const { extractPdfKnowledge } = await import("./services/documents/pdf");
+          const extraction = await extractPdfKnowledge(file);
+          extractedPdf = {
+            summary: extraction.summary,
+            chunks: extraction.chunks,
+            notes: extraction.notes,
+          };
+        } catch (error) {
+          extractionWarning =
+            error instanceof Error ? error.message : "Extraction PDF impossible pour ce document.";
+        }
+      }
+
       const storagePath =
         file && authConfigured ? await uploadProjectDocument(file) : undefined;
-      const response = await createDocument({
+      const createdDocumentResponse = await createDocument({
         mode,
         projectId: projectsData[mode]?.projectId || null,
         label,
         source,
-        summary,
+        summary: summary.trim() || extractedPdf?.summary || "",
+        notes: extractedPdf?.notes,
+        nextAction: extractedPdf
+          ? "Verifier les extraits indexes et poser une question a l'assistant."
+          : undefined,
         storagePath,
       });
 
+      const finalResponse =
+        extractedPdf && extractedPdf.chunks.length > 0
+          ? await indexDocument({
+              mode,
+              projectId: createdDocumentResponse.data.projectId || projectsData[mode]?.projectId || null,
+              label,
+              chunks: extractedPdf.chunks,
+              summary: summary.trim() || extractedPdf.summary,
+            })
+          : createdDocumentResponse;
+
       setDocumentsData((current) => ({
         ...current,
-        [mode]: response.data,
+        [mode]: finalResponse.data,
       }));
+      setDocumentContextSelection((current) => ({
+        ...current,
+        [mode]: current[mode].includes(label) ? current[mode] : [...current[mode], label],
+      }));
+
+      if (extractionWarning) {
+        setAssistantError(
+          `Document ajoute, mais ${extractionWarning}`,
+        );
+      }
     } catch (error) {
       setAssistantError(error instanceof Error ? error.message : "Ajout du document impossible.");
     } finally {
@@ -294,6 +371,7 @@ function App() {
   };
 
   const handleIndexDocument = async (label: string) => {
+    setAssistantError(null);
     setDocumentBusy(true);
     try {
       const document = documentsData[mode]?.items.find((item) => item.label === label);
@@ -311,6 +389,10 @@ function App() {
         ...current,
         [mode]: response.data,
       }));
+      setDocumentContextSelection((current) => ({
+        ...current,
+        [mode]: current[mode].includes(label) ? current[mode] : [...current[mode], label],
+      }));
     } catch (error) {
       setAssistantError(error instanceof Error ? error.message : "Indexation impossible.");
     } finally {
@@ -327,6 +409,7 @@ function App() {
     title: string;
     body: string;
   }) => {
+    setAssistantError(null);
     setSocialBusy(true);
     try {
       const response = await createSocialThread({
@@ -421,6 +504,37 @@ function App() {
         ...current,
         [mode]: rag.data.sources,
       }));
+
+      if (rag.data.sources.length === 0 && asksAboutLoadedDocuments(content)) {
+        setAssistantThreads((current) => ({
+          ...current,
+          [mode]: [
+            ...current[mode],
+            {
+              role: "assistant",
+              content:
+                "Je ne trouve pas cette information dans les documents charges pour le moment. Le PDF est bien televerse, mais dans ce MVP son texte n'est pas encore extrait automatiquement. Si vous voulez une reponse fiable sur ce document, ajoutez un resume factuel dans Documents ou je peux maintenant brancher la vraie extraction PDF.",
+            },
+          ],
+        }));
+        return;
+      }
+
+      const groundedFinancialAnswer = buildGroundedFinancialAnswer(content, rag.data.sources);
+
+      if (groundedFinancialAnswer) {
+        setAssistantThreads((current) => ({
+          ...current,
+          [mode]: [
+            ...current[mode],
+            {
+              role: "assistant",
+              content: groundedFinancialAnswer,
+            },
+          ],
+        }));
+        return;
+      }
 
       const response = await sendAssistantMessage({
         mode,

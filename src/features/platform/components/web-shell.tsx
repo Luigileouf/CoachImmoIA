@@ -172,6 +172,7 @@ function DashboardScreen({
   scenario,
   projectsData,
   socialData,
+  error,
   projectBusy,
   onCreateProject,
   onNavigate,
@@ -180,6 +181,7 @@ function DashboardScreen({
   scenario: ScenarioData;
   projectsData: ProjectsResponse | null;
   socialData: SocialResponse | null;
+  error: string | null;
   projectBusy: boolean;
   onCreateProject: () => void;
   onNavigate: (screen: AppScreen) => void;
@@ -216,6 +218,8 @@ function DashboardScreen({
             </button>
           ) : null}
         </div>
+
+        {error ? <div className="feedback-banner is-error">{error}</div> : null}
       </article>
 
       <article className="platform-focus-strip">
@@ -541,21 +545,23 @@ function AssistantWorkspaceScreen({
           </div>
 
           <div className="platform-source-stack">
-            {(assistantSources.length > 0
-              ? assistantSources
-              : scenario.projectDocuments.slice(0, 3).map((item) => ({
-                  label: item,
-                  source: "Prototype",
-                  summary: "Source prete a etre utilisee par l'assistant.",
-                  excerpt: "Aucun extrait dossier charge pour le moment.",
-                }))
-            ).map((item) => (
-              <article className="platform-source-card" key={`${item.label}-${item.excerpt}`}>
-                <span className="platform-context-list__label">{item.source}</span>
-                <strong>{item.label}</strong>
-                <p>{item.summary || item.excerpt}</p>
+            {assistantSources.length > 0 ? (
+              assistantSources.map((item) => (
+                <article className="platform-source-card" key={`${item.label}-${item.excerpt}`}>
+                  <span className="platform-context-list__label">{item.source}</span>
+                  <strong>{item.label}</strong>
+                  <p>{item.summary || item.excerpt}</p>
+                </article>
+              ))
+            ) : (
+              <article className="platform-source-card">
+                <span className="platform-context-list__label">Aucune source</span>
+                <strong>Pas de contexte dossier retrouve</strong>
+                <p>
+                  L'assistant n'a trouve aucun extrait pertinent dans les documents charges pour cette question.
+                </p>
               </article>
-            ))}
+            )}
           </div>
         </article>
       </div>
@@ -568,6 +574,7 @@ function ProjectsWorkspaceScreen({
   scenario,
   projectsData,
   selectedStepIndex,
+  error,
   projectBusy,
   onCreateProject,
   onNavigate,
@@ -577,6 +584,7 @@ function ProjectsWorkspaceScreen({
   scenario: ScenarioData;
   projectsData: ProjectsResponse | null;
   selectedStepIndex: number;
+  error: string | null;
   projectBusy: boolean;
   onCreateProject: () => void;
   onNavigate: (screen: AppScreen) => void;
@@ -656,6 +664,7 @@ function ProjectsWorkspaceScreen({
             <h3>Risque principal</h3>
             <span className="platform-badge is-contrast">Coach recommande</span>
           </div>
+          {error ? <div className="feedback-banner is-error">{error}</div> : null}
           <p className="platform-summary-copy">
             {mode === "buyer"
               ? "Le bien cible reste prometteur, mais la copropriete et le timing banque doivent etre verifies avant arbitrage d'offre."
@@ -694,6 +703,7 @@ function DocumentsScreen({
   selectedDocumentIndex,
   documentFilter,
   documentContextSelection,
+  error,
   documentBusy,
   onCreateDocument,
   onDocumentFilterChange,
@@ -707,6 +717,7 @@ function DocumentsScreen({
   selectedDocumentIndex: number;
   documentFilter: DocumentFilter;
   documentContextSelection: string[];
+  error: string | null;
   documentBusy: boolean;
   onCreateDocument: (payload: { label: string; summary: string; source: string; file?: File | null }) => void;
   onDocumentFilterChange: (filter: DocumentFilter) => void;
@@ -737,6 +748,8 @@ function DocumentsScreen({
             : "Les documents vendeur sont classes par statut pour preparer la diffusion et le futur RAG."}
         </strong>
       </article>
+
+      {error ? <div className="feedback-banner is-error">{error}</div> : null}
 
       <div className="platform-toolbar-row">
         <div className="platform-chip-row">
@@ -808,6 +821,10 @@ function DocumentsScreen({
           <article className="platform-inline-panel">
             <span className="platform-section-label">Ajouter un document</span>
             <strong>Chargez un fichier ou referencez une nouvelle piece pour la suite du RAG.</strong>
+            <p className="platform-summary-copy">
+              Les PDF textuels sont maintenant analyses automatiquement pour alimenter le contexte IA.
+              Si un fichier ne contient pas de texte exploitable, un avertissement s'affichera ici.
+            </p>
             <div className="platform-composer">
               <input
                 className="platform-composer__input"
@@ -1381,6 +1398,7 @@ export function WebPlatformShell({
         <div className="web-shell__content">
           {activeScreen === "home" ? (
             <DashboardScreen
+              error={error}
               mode={mode}
               onCreateProject={onCreateProject}
               onNavigate={onNavigate}
@@ -1416,6 +1434,7 @@ export function WebPlatformShell({
           ) : null}
           {activeScreen === "projects" ? (
             <ProjectsWorkspaceScreen
+              error={error}
               mode={mode}
               onCreateProject={onCreateProject}
               onNavigate={onNavigate}
@@ -1428,6 +1447,7 @@ export function WebPlatformShell({
           ) : null}
           {activeScreen === "documents" ? (
             <DocumentsScreen
+              error={error}
               documentBusy={documentBusy}
               documentContextSelection={documentContextSelection}
               documentFilter={documentFilter}
