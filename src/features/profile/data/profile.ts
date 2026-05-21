@@ -1,4 +1,4 @@
-import type { ProfileSection } from "../../../types/product";
+import type { ProfileSection } from "../../../types/product.js";
 
 export const profileSections: ProfileSection[] = [
   {

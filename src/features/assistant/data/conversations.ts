@@ -1,4 +1,4 @@
-import type { AssistantConversationMessage, ProjectMode } from "../../../types/product";
+import type { AssistantConversationMessage, ProjectMode } from "../../../types/product.js";
 
 export const assistantConversations: Record<ProjectMode, AssistantConversationMessage[]> = {
   buyer: [

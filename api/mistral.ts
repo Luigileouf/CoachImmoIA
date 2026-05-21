@@ -1,5 +1,5 @@
-import { forwardMistralChat, getMistralRuntimeConfig } from "./_lib/mistral";
-import type { MistralRequestBody } from "./_lib/mistral-types";
+import { forwardMistralChat, getMistralRuntimeConfig } from "./_lib/mistral.js";
+import type { MistralRequestBody } from "./_lib/mistral-types.js";
 
 export const config = {
   runtime: "nodejs",

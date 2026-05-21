@@ -11,17 +11,16 @@ export type {
   SocialCircle,
   SocialHighlight,
   SocialThread,
-} from "../types/product";
-
-export { scenarios } from "../features/core/data/scenarios";
-export { actionCards } from "../features/home/data/action-cards";
-export { listingFeeds } from "../features/listings/data/listings";
-export { assistantConversations } from "../features/assistant/data/conversations";
-export { projectSteps } from "../features/projects/data/steps";
-export { profileSections, securityMessage } from "../features/profile/data/profile";
+} from "../types/product.js";
+export { scenarios } from "../features/core/data/scenarios.js";
+export { actionCards } from "../features/home/data/action-cards.js";
+export { listingFeeds } from "../features/listings/data/listings.js";
+export { assistantConversations } from "../features/assistant/data/conversations.js";
+export { projectSteps } from "../features/projects/data/steps.js";
+export { profileSections, securityMessage } from "../features/profile/data/profile.js";
 export {
   socialCircles,
   socialHighlights,
   socialStats,
   socialThreads,
-} from "../features/social/data/social";
+} from "../features/social/data/social.js";

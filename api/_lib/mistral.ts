@@ -1,4 +1,4 @@
-import type { MistralRequestBody } from "./mistral-types";
+import type { MistralRequestBody } from "./mistral-types.js";
 
 type MistralRuntimeConfig = {
   apiKey?: string;

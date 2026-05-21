@@ -3,8 +3,8 @@ import type {
   DocumentWorkspaceItem,
   ListingWorkspaceMeta,
   ProjectStepMeta,
-} from "../../app/types";
-import type { ProjectMode } from "../../../types/product";
+} from "../../app/types.js";
+import type { ProjectMode } from "../../../types/product.js";
 
 export const sellerDocumentStatuses: DocumentStatus[] = [
   { label: "Titre de propriete", status: "Disponible", tone: "mint" },

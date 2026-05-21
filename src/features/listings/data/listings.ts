@@ -1,4 +1,4 @@
-import type { ListingItem, ProjectMode } from "../../../types/product";
+import type { ListingItem, ProjectMode } from "../../../types/product.js";
 
 export const listingFeeds: Record<ProjectMode, ListingItem[]> = {
   buyer: [

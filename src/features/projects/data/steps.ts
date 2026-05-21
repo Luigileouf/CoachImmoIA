@@ -1,4 +1,4 @@
-import type { ProjectMode, ProjectStep } from "../../../types/product";
+import type { ProjectMode, ProjectStep } from "../../../types/product.js";
 
 export const projectSteps: Record<ProjectMode, ProjectStep[]> = {
   buyer: [

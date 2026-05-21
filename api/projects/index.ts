@@ -1,8 +1,8 @@
-import { getProjectsPayload } from "../_lib/domain";
-import { json, methodNotAllowed } from "../_lib/http";
-import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase";
-import { projectSteps, scenarios, type ProjectMode } from "../../src/data/content";
-import { projectStepMeta } from "../../src/features/platform/data/workspace";
+import { getProjectsPayload } from "../_lib/domain.js";
+import { json, methodNotAllowed } from "../_lib/http.js";
+import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase.js";
+import { projectSteps, scenarios, type ProjectMode } from "../../src/data/content.js";
+import { projectStepMeta } from "../../src/features/platform/data/workspace.js";
 
 export const config = {
   runtime: "nodejs",

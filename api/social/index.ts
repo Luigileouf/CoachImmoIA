@@ -1,12 +1,12 @@
-import { getSocialPayload } from "../_lib/domain";
-import { json, methodNotAllowed } from "../_lib/http";
-import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase";
+import { getSocialPayload } from "../_lib/domain.js";
+import { json, methodNotAllowed } from "../_lib/http.js";
+import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase.js";
 import {
   socialCircles as socialCircleSeeds,
   socialHighlights,
   socialStats,
   type ProjectMode,
-} from "../../src/data/content";
+} from "../../src/data/content.js";
 
 export const config = {
   runtime: "nodejs",

@@ -1,4 +1,4 @@
-import type { ActionCard } from "../../../types/product";
+import type { ActionCard } from "../../../types/product.js";
 
 export const actionCards: ActionCard[] = [
   {

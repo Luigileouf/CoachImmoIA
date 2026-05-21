@@ -1,4 +1,4 @@
-import type { ProjectMode, Scenario } from "../../../types/product";
+import type { ProjectMode, Scenario } from "../../../types/product.js";
 
 export const scenarios: Record<ProjectMode, Scenario> = {
   buyer: {

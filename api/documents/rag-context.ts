@@ -1,7 +1,7 @@
-import { documentWorkspaceData } from "../../src/features/platform/data/workspace";
-import { json, methodNotAllowed } from "../_lib/http";
-import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase";
-import type { ProjectMode } from "../../src/data/content";
+import { documentWorkspaceData } from "../../src/features/platform/data/workspace.js";
+import { json, methodNotAllowed } from "../_lib/http.js";
+import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase.js";
+import type { ProjectMode } from "../../src/data/content.js";
 
 const FRENCH_STOP_WORDS = new Set([
   "alors",

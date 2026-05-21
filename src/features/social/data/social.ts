@@ -4,7 +4,7 @@ import type {
   SocialCircle,
   SocialHighlight,
   SocialThread,
-} from "../../../types/product";
+} from "../../../types/product.js";
 
 export const socialHighlights: Record<ProjectMode, SocialHighlight> = {
   buyer: {

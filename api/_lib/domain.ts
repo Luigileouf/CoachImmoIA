@@ -7,11 +7,11 @@ import {
   socialStats,
   socialThreads,
   type ProjectMode,
-} from "../../src/data/content";
+} from "../../src/data/content.js";
 import {
   documentWorkspaceData,
   projectStepMeta,
-} from "../../src/features/platform/data/workspace";
+} from "../../src/features/platform/data/workspace.js";
 
 function countByStatus(mode: ProjectMode) {
   const rows = documentWorkspaceData[mode];

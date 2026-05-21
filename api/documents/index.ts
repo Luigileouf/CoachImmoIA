@@ -1,7 +1,7 @@
-import { getDocumentsPayload } from "../_lib/domain";
-import { json, methodNotAllowed } from "../_lib/http";
-import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase";
-import { scenarios, type ProjectMode } from "../../src/data/content";
+import { getDocumentsPayload } from "../_lib/domain.js";
+import { json, methodNotAllowed } from "../_lib/http.js";
+import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase.js";
+import { scenarios, type ProjectMode } from "../../src/data/content.js";
 
 function mapDocumentRow(row: {
   label: string;
