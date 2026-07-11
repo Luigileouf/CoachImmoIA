@@ -514,6 +514,7 @@ function App() {
 
       <div className="app-stage__layout">
         <WebPlatformShell
+          activeAction={activeAction}
           activeScreen={activeScreen}
           assistantSources={assistantSources[mode]}
           authConfigured={authConfigured}
@@ -528,6 +529,7 @@ function App() {
           isLoading={assistantLoading}
           messages={assistantThreads[mode]}
           mode={mode}
+          onActionChange={handleActionChange}
           onCreateDocument={handleCreateDocument}
           onCreateProject={handleCreateProject}
           onCreateSocialThread={handleCreateSocialThread}
@@ -536,6 +538,7 @@ function App() {
           onIndexDocument={handleIndexDocument}
           onModeChange={handleModeChange}
           onNavigate={setActiveScreen}
+          onPrimaryAction={handlePrimaryAction}
           onPromptClick={setAssistantDraft}
           onSelectDocument={setSelectedDocumentIndex}
           onSelectSocialCircle={handleSocialCircleSelect}

@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import {
+  actionCards,
   listingFeeds,
   profileSections,
   projectSteps,
@@ -16,11 +17,16 @@ import {
   projectStepMeta,
 } from "../data/workspace";
 import {
+  AppTopBar,
+  AssistantThreadBubble,
+  AssistantVisual,
   ChatIcon,
   CheckIcon,
   DocumentIcon,
   GridIcon,
+  HomeActionCard,
   HomeGlyph,
+  ListingCard,
   LogoMark,
   ModeTabs,
   SceneArtwork,
@@ -106,23 +112,29 @@ function PlatformSidebar({
 }
 
 function DashboardScreen({
+  activeAction,
   mode,
   scenario,
   projectsData,
   socialData,
   error,
   projectBusy,
+  onActionChange,
   onCreateProject,
   onNavigate,
+  onPrimaryAction,
 }: {
+  activeAction: "buyer" | "seller" | "estimate";
   mode: ProjectMode;
   scenario: ScenarioData;
   projectsData: ProjectsResponse | null;
   socialData: SocialResponse | null;
   error: string | null;
   projectBusy: boolean;
+  onActionChange: (id: "buyer" | "seller" | "estimate") => void;
   onCreateProject: () => void;
   onNavigate: (screen: AppScreen) => void;
+  onPrimaryAction: () => void;
 }) {
   const roadmap = projectsData?.steps.length ? projectsData.steps : projectSteps[mode].map((step, index) => ({
     ...step,
@@ -132,23 +144,41 @@ function DashboardScreen({
 
   return (
     <section className="platform-screen platform-screen--dashboard">
+      <AppTopBar subtitle={mode === "buyer" ? "Parcours acheteur" : "Parcours vendeur"} />
+
       <article className="platform-hero-card">
-        <div className="platform-hero-card__copy">
-          <p className="platform-section-label">{scenario.greeting}</p>
-          <h2>
-            {mode === "buyer"
-              ? "Pilotez votre projet acheteur sans dispersion."
-              : "Cadrez votre vente avec une vue claire sur les priorites."}
-          </h2>
-          <p>{projectsData?.scenario.projectNote || scenario.projectNote}</p>
+        <div className="hero-shell">
+          <div className="hero-shell__copy">
+            <p className="eyebrow">{scenario.greeting}</p>
+            <h1>
+              {scenario.title} <span>{scenario.accent}</span>
+            </h1>
+            <p className="body-copy">{projectsData?.scenario.projectNote || scenario.projectNote}</p>
+          </div>
+
+          <AssistantVisual />
         </div>
 
-        <div className="platform-hero-card__actions">
-          <button className="platform-primary-button" onClick={() => onNavigate("assistant")} type="button">
-            Ouvrir l&apos;assistant
+        <ModeTabs
+          activeAction={activeAction}
+          includeEstimate
+          mode={mode}
+          onActionChange={onActionChange}
+          onChange={() => undefined}
+        />
+
+        <div className="card-stack">
+          {actionCards.map((card) => (
+            <HomeActionCard active={card.id === activeAction} card={card} key={card.id} onClick={onActionChange} />
+          ))}
+        </div>
+
+        <div className="platform-inline-actions">
+          <button className="platform-primary-button" onClick={onPrimaryAction} type="button">
+            {scenario.cta}
           </button>
-          <button className="platform-ghost-button" onClick={() => onNavigate("projects")} type="button">
-            Voir le projet
+          <button className="platform-ghost-button" onClick={() => onNavigate("assistant")} type="button">
+            Ouvrir l&apos;assistant
           </button>
           {!projectsData?.projectId ? (
             <button className="platform-ghost-button" disabled={projectBusy} onClick={onCreateProject} type="button">
@@ -296,6 +326,14 @@ function ListingsWorkspaceScreen({
 
   return (
     <section className="platform-screen platform-screen--listings">
+      <AppTopBar subtitle={mode === "buyer" ? "Biens a prioriser" : "Comparables vendeur"} />
+
+      <header className="screen-intro">
+        <p className="eyebrow">Biens</p>
+        <h1>{scenario.listingsTitle}</h1>
+        <p className="body-copy">{scenario.listingsSubtitle}</p>
+      </header>
+
       <div className="platform-toolbar-row">
         <ModeTabs mode={mode} onChange={onModeChange} />
         <div className="platform-chip-row">
@@ -316,17 +354,12 @@ function ListingsWorkspaceScreen({
           <div className="platform-listing-stack">
             {listingFeeds[mode].map((item, index) => (
               <button
-                className={selectedIndex === index ? "platform-listing-row is-active" : "platform-listing-row"}
+                className={selectedIndex === index ? "platform-listing-picker is-active" : "platform-listing-picker"}
                 key={`${item.title}-${item.location}`}
                 onClick={() => onSelectListing(index)}
                 type="button"
               >
-                <SceneArtwork scene={item.scene} />
-                <div>
-                  <strong>{item.title}</strong>
-                  <p>{item.location}</p>
-                </div>
-                <span>{item.price}</span>
+                <ListingCard compact item={item} />
               </button>
             ))}
           </div>
@@ -402,6 +435,14 @@ function AssistantWorkspaceScreen({
 
   return (
     <section className="platform-screen platform-screen--assistant">
+      <AppTopBar subtitle={`Mistral · parcours ${mode === "buyer" ? "acheteur" : "vendeur"}`} />
+
+      <header className="screen-intro">
+        <p className="eyebrow">Assistant IA</p>
+        <h1>Je peux cadrer une visite, negocier une offre et securiser votre dossier.</h1>
+        <p className="body-copy">{scenario.assistantIntro}</p>
+      </header>
+
       <div className="platform-toolbar-row">
         <ModeTabs mode={mode} onChange={onModeChange} />
         <span className="platform-chip">Modele actif : {runtime.label}</span>
@@ -423,17 +464,12 @@ function AssistantWorkspaceScreen({
             </strong>
           </article>
 
-          <div className="platform-chat-thread">
+          <div className="chat-thread">
             {messages.map((message, index) => (
-              <div
-                className={message.role === "assistant" ? "platform-chat-bubble is-assistant" : "platform-chat-bubble is-user"}
-                key={`${message.content}-${index}`}
-              >
-                {message.content}
-              </div>
+              <AssistantThreadBubble key={`${message.content}-${index}`} message={message} />
             ))}
 
-            {isLoading ? <div className="platform-chat-bubble is-assistant">CoachImmoIA reflechit...</div> : null}
+            {isLoading ? <div className="message-bubble is-assistant">CoachImmoIA reflechit...</div> : null}
           </div>
 
           <div className="platform-chip-row">
@@ -446,9 +482,13 @@ function AssistantWorkspaceScreen({
 
           {error ? <div className="feedback-banner is-error">{error}</div> : null}
 
-          <div className="platform-composer">
+          <div className="composer-card">
+            <label className="composer-card__label" htmlFor="platform-assistant-message">
+              Message a envoyer
+            </label>
             <textarea
               className="platform-composer__input"
+              id="platform-assistant-message"
               onChange={(event) => onDraftChange(event.target.value)}
               placeholder="Posez une question sur votre projet immobilier..."
               rows={4}
@@ -539,6 +579,14 @@ function ProjectsWorkspaceScreen({
 
   return (
     <section className="platform-screen platform-screen--projects">
+      <AppTopBar subtitle={mode === "buyer" ? "Projet acheteur" : "Projet vendeur"} />
+
+      <header className="screen-intro">
+        <p className="eyebrow">Projet</p>
+        <h1>{mode === "buyer" ? "Mon projet acheteur" : "Ma feuille de route vendeur"}</h1>
+        <p className="body-copy">{projectsData?.scenario.projectStatus || scenario.projectStatus}</p>
+      </header>
+
       <div className="platform-grid platform-grid--projects">
         <article className="platform-surface">
           <div className="platform-surface__header">
@@ -1235,6 +1283,7 @@ function ProfileWorkspaceScreen({
 
 type WebPlatformShellProps = {
   activeScreen: AppScreen;
+  activeAction: "buyer" | "seller" | "estimate";
   mode: ProjectMode;
   scenario: ScenarioData;
   selectedListingIndex: number;
@@ -1262,6 +1311,7 @@ type WebPlatformShellProps = {
   onCreateDocument: (payload: { label: string; summary: string; source: string; file?: File | null }) => void;
   onCreateProject: () => void;
   onCreateSocialThread: (payload: { circleId: string; title: string; body: string }) => void;
+  onActionChange: (id: "buyer" | "seller" | "estimate") => void;
   onDraftChange: (value: string) => void;
   onDocumentFilterChange: (filter: DocumentFilter) => void;
   onIndexDocument: (label: string) => void;
@@ -1278,10 +1328,12 @@ type WebPlatformShellProps = {
   onSignUp: (email: string, password: string) => void;
   onToggleDocumentContext: (label: string) => void;
   onSubmit: () => void;
+  onPrimaryAction: () => void;
 };
 
 export function WebPlatformShell({
   activeScreen,
+  activeAction,
   mode,
   scenario,
   selectedListingIndex,
@@ -1309,6 +1361,7 @@ export function WebPlatformShell({
   onCreateDocument,
   onCreateProject,
   onCreateSocialThread,
+  onActionChange,
   onDraftChange,
   onDocumentFilterChange,
   onIndexDocument,
@@ -1325,6 +1378,7 @@ export function WebPlatformShell({
   onSignUp,
   onToggleDocumentContext,
   onSubmit,
+  onPrimaryAction,
 }: WebPlatformShellProps) {
   return (
     <section className="web-shell" aria-label="Plateforme web CoachImmoIA">
@@ -1334,10 +1388,13 @@ export function WebPlatformShell({
         <div className="web-shell__content">
           {activeScreen === "home" ? (
             <DashboardScreen
+              activeAction={activeAction}
               error={error}
               mode={mode}
+              onActionChange={onActionChange}
               onCreateProject={onCreateProject}
               onNavigate={onNavigate}
+              onPrimaryAction={onPrimaryAction}
               projectBusy={projectBusy}
               projectsData={projectsData}
               scenario={scenario}
