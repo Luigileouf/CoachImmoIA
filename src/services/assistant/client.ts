@@ -26,16 +26,16 @@ export async function sendAssistantMessage({
   const groundingMessage =
     contextSnippets.length > 0
       ? [
-          "Regle de grounding dossier :",
-          "Pour toute question sur le dossier, reponds uniquement a partir des extraits ci-dessous.",
-          "Si l'information n'est pas ecrite explicitement dans ces extraits, dis que tu ne la trouves pas dans les documents charges.",
-          "N'infere pas des montants, taux, durees ou statuts bancaires a partir du nom d'un document.",
+          "Règle d'ancrage au dossier :",
+          "Pour toute question sur le dossier, réponds uniquement à partir des extraits ci-dessous.",
+          "Si l'information n'est pas écrite explicitement dans ces extraits, dis que tu ne la trouves pas dans les documents chargés.",
+          "N'infère pas de montants, taux, durées ou statuts bancaires à partir du nom d'un document.",
         ].join("\n")
       : [
-          "Regle de grounding dossier :",
-          "Aucune source dossier pertinente n'a ete retrouvee pour cette question.",
-          "Si l'utilisateur demande ce que dit son dossier ou un document, reponds que tu ne trouves pas cette information dans les documents charges.",
-          "Tu peux ensuite proposer quoi verifier ou quel document ajouter, sans inventer de contenu documentaire.",
+          "Règle d'ancrage au dossier :",
+          "Aucune source dossier pertinente n'a été retrouvée pour cette question.",
+          "Si l'utilisateur demande ce que dit son dossier ou un document, réponds que tu ne trouves pas cette information dans les documents chargés.",
+          "Tu peux ensuite proposer quoi vérifier ou quel document ajouter, sans inventer de contenu documentaire.",
         ].join("\n");
   const contextMessage =
     contextSnippets.length > 0
@@ -79,14 +79,14 @@ export async function sendAssistantMessage({
   if (!response.ok) {
     throw new Error(
       payload.error ||
-        `L'API Mistral a repondu avec ${response.status}. Verifiez la cle API et le modele configure.`,
+        `L'API Mistral a répondu avec ${response.status}. Vérifiez la clé API et le modèle configuré.`,
     );
   }
 
   const content = extractContent(payload.choices?.[0]?.message?.content);
 
   if (!content) {
-    throw new Error("Le modele n'a pas retourne de reponse exploitable.");
+    throw new Error("Le modèle n'a pas retourné de réponse exploitable.");
   }
 
   return {

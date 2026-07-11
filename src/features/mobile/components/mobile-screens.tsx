@@ -65,7 +65,7 @@ export function HomeScreen({
             <p className="eyebrow">{scenario.greeting}</p>
             <h1>demarrons votre projet</h1>
             <p className="body-copy">
-              Vous n&apos;avez pas encore initialise de parcours. En trois minutes, on vous pose une base
+              Vous n&apos;avez pas encore initialisé de parcours. En trois minutes, on vous pose une base
               claire.
             </p>
           </div>
@@ -78,7 +78,7 @@ export function HomeScreen({
         <article className="dark-card">
           <h2>Commencer mon projet</h2>
           <p>
-            Renseignez votre budget, votre zone et votre horizon pour generer une premiere feuille de
+            Renseignez votre budget, votre zone et votre horizon pour générer une première feuille de
             route.
           </p>
         </article>
@@ -152,7 +152,7 @@ export function ListingsScreen({
           <p className="eyebrow">Biens</p>
           <h1>Aucun bien prioritaire pour le moment</h1>
           <p className="body-copy">
-            Ajoutez un secteur ou affinez votre budget pour faire remonter une premiere selection utile.
+            Ajoutez un secteur ou affinez votre budget pour faire remonter une première sélection utile.
           </p>
         </header>
 
@@ -164,9 +164,9 @@ export function ListingsScreen({
         </div>
 
         <article className="sheet-card">
-          <h2>Creer ma premiere selection</h2>
+          <h2>Créer ma première sélection</h2>
           <p>
-            Le produit peut faire remonter des biens a visiter ou a challenger selon vos criteres.
+            Le produit peut faire remonter des biens à visiter ou à challenger selon vos critères.
           </p>
         </article>
       </section>
@@ -233,9 +233,9 @@ export function AssistantScreen({
       <section className="screen-flow">
         <header className="screen-intro">
           <p className="eyebrow">Assistant IA</p>
-          <h1>Posez votre premiere question</h1>
+          <h1>Posez votre première question</h1>
           <p className="body-copy">
-            L&apos;assistant peut vous aider sur une visite, une offre, un document ou une strategie de prix.
+            L&apos;assistant peut vous aider sur une visite, une offre, un document ou une stratégie de prix.
           </p>
         </header>
 
@@ -251,7 +251,7 @@ export function AssistantScreen({
 
         <article className="dark-card">
           <h2>Exemple de demande</h2>
-          <p>Quelle liste envoyer au syndic pour recuperer rapidement mes pieces copropriete ?</p>
+          <p>Quelle liste envoyer au syndic pour récupérer rapidement mes pièces de copropriété ?</p>
         </article>
       </section>
     );
@@ -269,11 +269,11 @@ export function AssistantScreen({
 
       <article className="assistant-hero-card">
         <div>
-          <p className="assistant-hero-card__label">Modele actif</p>
+          <p className="assistant-hero-card__label">Modèle actif</p>
           <strong>{runtime.label}</strong>
-          <span>Reponses courtes, structurees et actionnables</span>
+          <span>Réponses courtes, structurées et actionnables</span>
         </div>
-        <div className="assistant-hero-card__tag">Reponse claire</div>
+        <div className="assistant-hero-card__tag">Réponse claire</div>
       </article>
 
       <div className="chat-thread">
@@ -299,17 +299,17 @@ export function AssistantScreen({
       <article className="summary-card">
         <h2>Prochaines actions</h2>
         <p>
-          1. Preparer vos questions de visite
+          1. Préparer vos questions de visite
           <br />
           2. Relever les points de risque
           <br />
-          3. Securiser le timing du financement
+          3. Sécuriser le calendrier du financement
         </p>
       </article>
 
       <div className="composer-card">
         <label className="composer-card__label" htmlFor="assistant-message">
-          Message a envoyer
+          Message à envoyer
         </label>
         <textarea
           className="composer-input"
@@ -342,14 +342,14 @@ function BuyerProjectScreen({
           <p className="eyebrow">Projet</p>
           <h1>Votre feuille de route n&apos;existe pas encore</h1>
           <p className="body-copy">
-            Sans projet initialise, vous pouvez explorer, mais vous ne profiterez pas des priorites et du
+            Sans projet initialisé, vous pouvez explorer, mais vous ne profiterez pas des priorités et du
             contexte IA.
           </p>
         </header>
 
         <article className="dark-card">
           <h2>Construire ma feuille de route</h2>
-          <p>On vous pose quelques questions puis on genere les prochaines etapes utiles.</p>
+          <p>On vous pose quelques questions puis on génère les prochaines étapes utiles.</p>
         </article>
 
         <article className="sheet-card">
@@ -371,10 +371,10 @@ function BuyerProjectScreen({
     return (
       <>
         <header className="screen-intro">
-          <p className="eyebrow">Preparation offre</p>
+          <p className="eyebrow">Préparation de l'offre</p>
           <h1>Alerte avant offre</h1>
           <p className="body-copy">
-            Le dossier est presque pret, mais deux inconnues peuvent fragiliser votre offre : travaux et
+            Le dossier est presque prêt, mais deux inconnues peuvent fragiliser votre offre : travaux et
             timing banque.
           </p>
         </header>
@@ -382,7 +382,7 @@ function BuyerProjectScreen({
         <article className="dark-card">
           <h2>Moment critique</h2>
           <p>
-            Prix affiche 648 kEUR. Le bien reste interessant, mais la strategie d&apos;offre doit etre
+            Prix affiché : 648 kEUR. Le bien reste intéressant, mais la stratégie d&apos;offre doit être
             securisee.
           </p>
         </article>
@@ -390,13 +390,13 @@ function BuyerProjectScreen({
         <article className="feedback-banner is-error">
           • travaux non chiffres
           <br />
-          • copropriete encore floue
+          • copropriété encore floue
           <br />• calendrier de financement serre
         </article>
 
         <article className="sheet-card">
-          <h2>Action recommandee</h2>
-          <p>Faire relire la strategie par un coach humain avant envoi de l&apos;offre.</p>
+          <h2>Action recommandée</h2>
+          <p>Faire relire la stratégie par un coach humain avant l&apos;envoi de l&apos;offre.</p>
         </article>
       </>
     );
@@ -407,9 +407,9 @@ function BuyerProjectScreen({
       <>
         <header className="screen-intro">
           <p className="eyebrow">Coach humain</p>
-          <h1>Votre demande a bien ete transmise</h1>
+          <h1>Votre demande a bien été transmise</h1>
           <p className="body-copy">
-            Le coach recevra votre contexte, votre question et les points a arbitrer. Retour estime sous
+            Le coach recevra votre contexte, votre question et les points à arbitrer. Retour estimé sous
             24h.
           </p>
         </header>
@@ -418,12 +418,12 @@ function BuyerProjectScreen({
 
         <article className="dark-card">
           <h2>En attendant</h2>
-          <p>Vous pouvez continuer avec l&apos;IA, ajouter des precisions ou preparer vos documents.</p>
+          <p>Vous pouvez continuer avec l&apos;IA, ajouter des précisions ou préparer vos documents.</p>
         </article>
 
         <article className="sheet-card">
           <h2>Statut</h2>
-          <p>Demande recue · contexte transmis · priorite strategique</p>
+          <p>Demande reçue · contexte transmis · priorité stratégique</p>
         </article>
       </>
     );
@@ -453,7 +453,7 @@ function BuyerProjectScreen({
       </article>
 
       <article className="dark-card">
-        <h2>Documents a preparer</h2>
+        <h2>Documents à préparer</h2>
         <p className="dark-card__note">
           {scenario.projectDocuments.map((document) => `- ${document}`).join("\n")}
         </p>
@@ -485,7 +485,7 @@ function SellerProjectScreen({
 
         <article className="dark-card">
           <h2>Initialiser le projet vendeur</h2>
-          <p>On vous aide a poser le cadre, les pieces manquantes et la premiere strategie.</p>
+          <p>On vous aide à poser le cadre, les pièces manquantes et la première stratégie.</p>
         </article>
 
         <article className="sheet-card">
@@ -493,7 +493,7 @@ function SellerProjectScreen({
           <p>
             • dossier vendeur lisible
             <br />
-            • estimation mieux contextualisee
+            • estimation mieux contextualisée
             <br />• relais coach sur le prix et les offres
           </p>
         </article>
@@ -536,7 +536,7 @@ function SellerProjectScreen({
 
       <article className="mint-card">
         <h2>Prochaine action</h2>
-        <p>Generer un message syndic clair pour recuperer rapidement les pieces copro manquantes.</p>
+        <p>Générer un message clair au syndic pour récupérer rapidement les pièces de copropriété manquantes.</p>
       </article>
     </>
   );
@@ -577,7 +577,7 @@ export function ProfileScreen() {
       <article className="profile-hero">
         <div className="profile-hero__avatar">LM</div>
         <div>
-          <h2>Loic Metivier</h2>
+          <h2>Loïc Métivier</h2>
           <p>Projet acheteur · Coaching assiste par IA</p>
         </div>
       </article>
@@ -597,7 +597,7 @@ export function ProfileScreen() {
       ))}
 
       <article className="mint-card">
-        <h2>Cadrage securite</h2>
+        <h2>Cadrage sécurité</h2>
         <p>{securityMessage}</p>
       </article>
     </section>
@@ -627,7 +627,7 @@ export function SocialScreen({
   return (
     <section className="screen-flow">
       <header className="screen-intro">
-        <p className="eyebrow">Communaute</p>
+        <p className="eyebrow">Communauté</p>
         <h1>Echanger sans bruit inutile</h1>
         <p className="body-copy">{socialHighlights[mode].summary}</p>
       </header>
@@ -678,7 +678,7 @@ export function SocialScreen({
       </article>
 
       <article className="mint-card">
-        <h2>Synthese IA</h2>
+        <h2>Synthèse IA</h2>
         <p>{activeThread.aiSummary}</p>
       </article>
     </section>
@@ -908,7 +908,7 @@ export function MobilePreviewShell({
   };
 
   return (
-    <aside className="mobile-preview" aria-label="Apercu mobile">
+    <aside className="mobile-preview" aria-label="Aperçu mobile">
       <section className="device-shell" aria-label="Application mobile CoachImmoIA">
         <div className="device-shell__chrome" />
         <div className="device-shell__speaker" />

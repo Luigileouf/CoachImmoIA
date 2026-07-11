@@ -73,7 +73,7 @@ export async function extractPdfKnowledge(file: File): Promise<PdfKnowledge> {
 
   if (!fullText) {
     throw new Error(
-      "Le PDF a ete televerse, mais aucun texte exploitable n'a pu etre extrait. Il s'agit peut-etre d'un scan image ou d'un PDF non textuel.",
+      "Le PDF a été téléversé, mais aucun texte exploitable n'a pu être extrait. Il s'agit peut-être d'une image numérisée ou d'un PDF non textuel.",
     );
   }
 

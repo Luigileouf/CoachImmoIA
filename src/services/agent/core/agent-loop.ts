@@ -53,7 +53,7 @@ export async function runGameAgent({
 
   if (!finalState.response) {
     throw new Error(
-      "L'agent n'a pas produit de reponse exploitable. Verifiez les objectifs, les actions ou la memoire GAME.",
+      "L'agent n'a pas produit de réponse exploitable. Vérifiez les objectifs, les actions ou la mémoire GAME.",
     );
   }
 

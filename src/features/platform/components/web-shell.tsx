@@ -57,7 +57,7 @@ function PlatformSidebar({
     { key: "assistant", label: "Assistant IA", icon: <ChatIcon /> },
     { key: "projects", label: "Projet", icon: <CheckIcon /> },
     { key: "documents", label: "Documents", icon: <DocumentIcon /> },
-    { key: "social", label: "Communaute", icon: <SocialIcon /> },
+    { key: "social", label: "Communauté", icon: <SocialIcon /> },
     { key: "profile", label: "Profil", icon: <UserIcon /> },
   ];
 
@@ -182,7 +182,7 @@ function DashboardScreen({
           </button>
           {!projectsData?.projectId ? (
             <button className="platform-ghost-button" disabled={projectBusy} onClick={onCreateProject} type="button">
-              {projectBusy ? "Creation..." : "Creer un projet"}
+              {projectBusy ? "Création..." : "Créer un projet"}
             </button>
           ) : null}
         </div>
@@ -195,13 +195,13 @@ function DashboardScreen({
           <span className="platform-section-label">Focus du jour</span>
           <strong>
             {mode === "buyer"
-              ? "Preparer la visite de demain et cadrer les questions de copropriete."
-              : "Verifier les pieces copropriete avant de figer la strategie de mise en vente."}
+              ? "Préparer la visite de demain et cadrer les questions de copropriété."
+              : "Vérifier les pièces de copropriété avant de figer la stratégie de mise en vente."}
           </strong>
         </div>
         <div className="platform-inline-actions">
           <button className="platform-primary-button" onClick={() => onNavigate("assistant")} type="button">
-            Generer checklist IA
+            Générer la check-list IA
           </button>
           <button className="platform-ghost-button" onClick={() => onNavigate("documents")} type="button">
             Ouvrir documents
@@ -242,7 +242,7 @@ function DashboardScreen({
 
         <article className="platform-surface">
           <div className="platform-surface__header">
-            <h3>Priorites du moment</h3>
+            <h3>Priorités du moment</h3>
             <button className="platform-text-button" onClick={() => onNavigate("documents")} type="button">
               Documents
             </button>
@@ -271,20 +271,20 @@ function DashboardScreen({
             </div>
             <div className="platform-mini-metric">
               <span>Projet</span>
-              <strong>{projectsData?.projectTitle || "A initialiser"}</strong>
+              <strong>{projectsData?.projectTitle || "À initialiser"}</strong>
             </div>
           </div>
         </article>
 
         <article className="platform-surface">
           <div className="platform-surface__header">
-            <h3>Communaute utile</h3>
-            <span className="platform-badge">Pairs verifies</span>
+            <h3>Communauté utile</h3>
+            <span className="platform-badge">Pairs vérifiés</span>
           </div>
           <p className="platform-summary-copy">
             {socialData?.highlight.summary ||
               (mode === "buyer"
-                ? "Comparez vos questions de visite, d'offre ou de financement avec des retours vecus et moderes."
+                ? "Comparez vos questions de visite, d'offre ou de financement avec des retours vécus et modérés."
                 : "Cadrez vos doutes sur le prix, le dossier vendeur et les offres avec des retours terrain plus structures.")}
           </p>
           <div className="platform-chip-row">
@@ -296,7 +296,7 @@ function DashboardScreen({
           </div>
           <div className="platform-inline-actions">
             <button className="platform-primary-button" onClick={() => onNavigate("social")} type="button">
-              Ouvrir la communaute
+              Ouvrir la communauté
             </button>
             <button className="platform-ghost-button" onClick={() => onNavigate("assistant")} type="button">
               Passer par l&apos;IA
@@ -326,7 +326,7 @@ function ListingsWorkspaceScreen({
 
   return (
     <section className="platform-screen platform-screen--listings">
-      <AppTopBar subtitle={mode === "buyer" ? "Biens a prioriser" : "Comparables vendeur"} />
+      <AppTopBar subtitle={mode === "buyer" ? "Biens à prioriser" : "Comparables vendeur"} />
 
       <header className="screen-intro">
         <p className="eyebrow">Biens</p>
@@ -367,7 +367,7 @@ function ListingsWorkspaceScreen({
 
         <article className="platform-surface">
           <div className="platform-surface__header">
-            <h3>Detail du bien</h3>
+            <h3>Détail du bien</h3>
             <span className="platform-badge">{activeListing.badge}</span>
           </div>
 
@@ -384,7 +384,7 @@ function ListingsWorkspaceScreen({
 
           <div className="platform-mini-metrics">
             <div className="platform-mini-metric">
-              <span>Decision</span>
+              <span>Décision</span>
               <strong>{activeMeta.tempo}</strong>
             </div>
             <div className="platform-mini-metric">
@@ -396,7 +396,7 @@ function ListingsWorkspaceScreen({
               <strong>{activeMeta.score}</strong>
             </div>
             <div className="platform-mini-metric">
-              <span>Next step</span>
+              <span>Prochaine étape</span>
               <strong>{activeMeta.nextAction}</strong>
             </div>
           </div>
@@ -439,20 +439,20 @@ function AssistantWorkspaceScreen({
 
       <header className="screen-intro">
         <p className="eyebrow">Assistant IA</p>
-        <h1>Je peux cadrer une visite, negocier une offre et securiser votre dossier.</h1>
+        <h1>Je peux cadrer une visite, négocier une offre et sécuriser votre dossier.</h1>
         <p className="body-copy">{scenario.assistantIntro}</p>
       </header>
 
       <div className="platform-toolbar-row">
         <ModeTabs mode={mode} onChange={onModeChange} />
-        <span className="platform-chip">Modele actif : {runtime.label}</span>
+        <span className="platform-chip">Modèle actif : {runtime.label}</span>
       </div>
 
       <div className="platform-grid platform-grid--assistant">
         <article className="platform-surface platform-chat-surface">
           <div className="platform-surface__header">
             <h3>Conversation active</h3>
-            <span className="platform-badge">Reponses actionnables</span>
+            <span className="platform-badge">Réponses actionnables</span>
           </div>
 
           <article className="platform-inline-panel">
@@ -484,7 +484,7 @@ function AssistantWorkspaceScreen({
 
           <div className="composer-card">
             <label className="composer-card__label" htmlFor="platform-assistant-message">
-              Message a envoyer
+              Message à envoyer
             </label>
             <textarea
               className="platform-composer__input"
@@ -509,7 +509,7 @@ function AssistantWorkspaceScreen({
 
           <div className="platform-context-list">
             <div>
-              <span className="platform-context-list__label">Resume</span>
+              <span className="platform-context-list__label">Résumé</span>
               <p>{scenario.projectStatus}</p>
             </div>
             <div>
@@ -534,9 +534,9 @@ function AssistantWorkspaceScreen({
             ) : (
               <article className="platform-source-card">
                 <span className="platform-context-list__label">Aucune source</span>
-                <strong>Pas de contexte dossier retrouve</strong>
+                <strong>Pas de contexte dossier retrouvé</strong>
                 <p>
-                  L'assistant n'a trouve aucun extrait pertinent dans les documents charges pour cette question.
+                  L'assistant n'a trouvé aucun extrait pertinent dans les documents chargés pour cette question.
                 </p>
               </article>
             )}
@@ -618,12 +618,12 @@ function ProjectsWorkspaceScreen({
 
         <article className="platform-surface">
           <div className="platform-surface__header">
-            <h3>Focus d'etape</h3>
+            <h3>Focus d'étape</h3>
             <span className="platform-badge">Prioritaire</span>
           </div>
           <div className="platform-context-list">
             <div>
-              <span className="platform-context-list__label">Etape active</span>
+              <span className="platform-context-list__label">Étape active</span>
               <p>{activeStep?.title}</p>
             </div>
             <div>
@@ -639,7 +639,7 @@ function ProjectsWorkspaceScreen({
               <p>{activeMeta?.checkpoint}</p>
             </div>
             <div>
-              <span className="platform-context-list__label">Blocker</span>
+              <span className="platform-context-list__label">Blocage</span>
               <p>{activeMeta?.blocker}</p>
             </div>
           </div>
@@ -653,8 +653,8 @@ function ProjectsWorkspaceScreen({
           {error ? <div className="feedback-banner is-error">{error}</div> : null}
           <p className="platform-summary-copy">
             {mode === "buyer"
-              ? "Le bien cible reste prometteur, mais la copropriete et le timing banque doivent etre verifies avant arbitrage d'offre."
-              : "Le prix et les documents de copropriete demandent encore un arbitrage avant diffusion large."}
+              ? "Le bien cible reste prometteur, mais la copropriété et le calendrier bancaire doivent être vérifiés avant l'arbitrage de l'offre."
+              : "Le prix et les documents de copropriété demandent encore un arbitrage avant une diffusion large."}
           </p>
           <div className="platform-priority-list platform-priority-list--contrast">
             {(projectsData?.scenario.checklist || scenario.checklist).map((item) => (
@@ -667,11 +667,11 @@ function ProjectsWorkspaceScreen({
           <div className="platform-inline-actions">
             {!projectsData?.projectId ? (
               <button className="platform-primary-button platform-primary-button--light" disabled={projectBusy} onClick={onCreateProject} type="button">
-                {projectBusy ? "Creation..." : "Creer le projet"}
+                {projectBusy ? "Création..." : "Créer le projet"}
               </button>
             ) : null}
             <button className="platform-ghost-button platform-ghost-button--dark" onClick={() => onNavigate("social")} type="button">
-              Ouvrir la communaute
+              Ouvrir la communauté
             </button>
             <button className="platform-ghost-button platform-ghost-button--dark" type="button">
               Ajouter un contexte
@@ -730,8 +730,8 @@ function DocumentsScreen({
         <span className="platform-section-label">Vision documentaire</span>
         <strong>
           {mode === "buyer"
-            ? "Les pieces critiques du financement et de la visite sont centralisees pour accelerer le dossier."
-            : "Les documents vendeur sont classes par statut pour preparer la diffusion et le futur RAG."}
+            ? "Les pièces critiques du financement et de la visite sont centralisées pour accélérer le dossier."
+            : "Les documents vendeur sont classés par statut pour préparer la diffusion et le futur RAG."}
         </strong>
       </article>
 
@@ -742,7 +742,7 @@ function DocumentsScreen({
           {[
             { label: "Tous", value: "all" },
             { label: "Action requise", value: "action" },
-            { label: "RAG pret", value: "rag" },
+            { label: "RAG prêt", value: "rag" },
           ].map((filter) => (
             <button
               className={documentFilter === filter.value ? "platform-chip platform-chip--button is-active" : "platform-chip platform-chip--button"}
@@ -754,7 +754,7 @@ function DocumentsScreen({
             </button>
           ))}
         </div>
-        <span className="platform-chip">Contexte IA : {documentContextSelection.length} pieces</span>
+        <span className="platform-chip">Contexte IA : {documentContextSelection.length} pièces</span>
       </div>
 
       <div className="platform-kpi-grid platform-kpi-grid--documents">
@@ -806,9 +806,9 @@ function DocumentsScreen({
 
           <article className="platform-inline-panel">
             <span className="platform-section-label">Ajouter un document</span>
-            <strong>Chargez un fichier ou referencez une nouvelle piece pour la suite du RAG.</strong>
+            <strong>Chargez un fichier ou référencez une nouvelle pièce pour la suite du RAG.</strong>
             <p className="platform-summary-copy">
-              Les PDF textuels sont maintenant analyses automatiquement pour alimenter le contexte IA.
+              Les PDF textuels sont maintenant analysés automatiquement pour alimenter le contexte IA.
               Si un fichier ne contient pas de texte exploitable, un avertissement s'affichera ici.
             </p>
             <div className="platform-composer">
@@ -821,7 +821,7 @@ function DocumentsScreen({
               <textarea
                 className="platform-composer__input"
                 onChange={(event) => setSummaryDraft(event.target.value)}
-                placeholder="Resume ou objectif de ce document"
+                placeholder="Résumé ou objectif de ce document"
                 rows={3}
                 value={summaryDraft}
               />
@@ -850,7 +850,7 @@ function DocumentsScreen({
 
         <article className="platform-surface">
           <div className="platform-surface__header">
-            <h3>Detail document</h3>
+            <h3>Détail du document</h3>
             <span className="platform-badge">RAG {activeDocument?.ragStatus || "missing"}</span>
           </div>
 
@@ -862,26 +862,26 @@ function DocumentsScreen({
                   <p>{activeDocument.label}</p>
                 </div>
                 <div>
-                  <span className="platform-context-list__label">Owner</span>
+                  <span className="platform-context-list__label">Responsable</span>
                   <p>{activeDocument.owner}</p>
                 </div>
                 <div>
-                  <span className="platform-context-list__label">Last updated</span>
+                  <span className="platform-context-list__label">Dernière mise à jour</span>
                   <p>{activeDocument.lastUpdated}</p>
                 </div>
                 <div>
-                  <span className="platform-context-list__label">Summary</span>
+                  <span className="platform-context-list__label">Résumé</span>
                   <p>{activeDocument.summary}</p>
                 </div>
                 <div>
-                  <span className="platform-context-list__label">Next action</span>
+                  <span className="platform-context-list__label">Prochaine action</span>
                   <p>{activeDocument.nextAction}</p>
                 </div>
               </div>
 
               <div className="platform-mini-metrics">
                 <div className="platform-mini-metric">
-                  <span>Chunks</span>
+                  <span>Extraits</span>
                   <strong>{activeDocument.chunkCount}</strong>
                 </div>
                 <div className="platform-mini-metric">
@@ -912,7 +912,7 @@ function DocumentsScreen({
               </div>
             </>
           ) : (
-            <p className="platform-summary-copy">Ajoutez un document pour commencer a construire le contexte du dossier.</p>
+            <p className="platform-summary-copy">Ajoutez un document pour commencer à construire le contexte du dossier.</p>
           )}
         </article>
       </div>
@@ -1082,7 +1082,7 @@ function SocialWorkspaceScreen({
               </div>
             </>
           ) : (
-            <p className="platform-summary-copy">Aucun cercle charge pour le moment.</p>
+            <p className="platform-summary-copy">Aucun cercle chargé pour le moment.</p>
           )}
         </article>
       </div>
@@ -1134,7 +1134,7 @@ function SocialWorkspaceScreen({
                   <p>{activeThread.title}</p>
                 </div>
                 <div>
-                  <span className="platform-context-list__label">Synthese IA</span>
+                  <span className="platform-context-list__label">Synthèse IA</span>
                   <p>{activeThread.aiSummary}</p>
                 </div>
               </div>
@@ -1146,7 +1146,7 @@ function SocialWorkspaceScreen({
                 </div>
                 <div className="platform-priority-item">
                   <span className="platform-priority-item__dot" />
-                  <span>Escalader si le sujet touche au prix, au financement ou a un risque juridique.</span>
+                  <span>Transmettre au coach si le sujet touche au prix, au financement ou à un risque juridique.</span>
                 </div>
               </div>
 
@@ -1200,7 +1200,7 @@ function ProfileWorkspaceScreen({
           <div className="platform-profile-head">
             <div className="profile-hero__avatar">LM</div>
             <div>
-              <h3>{sessionEmail || "Loic Metivier"}</h3>
+              <h3>{sessionEmail || "Loïc Métivier"}</h3>
               <p>{sessionEmail ? "Session Supabase active" : "Accompagnement hybride IA + coach humain"}</p>
             </div>
           </div>
@@ -1217,7 +1217,7 @@ function ProfileWorkspaceScreen({
 
         <article className="platform-surface is-dark">
           <div className="platform-surface__header">
-            <h3>Securite et confiance</h3>
+            <h3>Sécurité et confiance</h3>
             <span className="platform-badge is-contrast">Mistral API active</span>
           </div>
           <p className="platform-summary-copy">{securityMessage}</p>
@@ -1226,7 +1226,7 @@ function ProfileWorkspaceScreen({
         <article className="platform-surface">
           <div className="platform-surface__header">
             <h3>Authentification</h3>
-            <span className="platform-badge">{authConfigured ? "Supabase pret" : "Variables requises"}</span>
+            <span className="platform-badge">{authConfigured ? "Supabase prêt" : "Variables requises"}</span>
           </div>
           {!authConfigured ? (
             <p className="platform-summary-copy">
@@ -1236,7 +1236,7 @@ function ProfileWorkspaceScreen({
             <div className="platform-inline-actions">
               <span className="platform-chip">{sessionEmail}</span>
               <button className="platform-primary-button" disabled={authLoading} onClick={onSignOut} type="button">
-                {authLoading ? "Deconnexion..." : "Se deconnecter"}
+                {authLoading ? "Déconnexion..." : "Se déconnecter"}
               </button>
             </div>
           ) : (
@@ -1269,7 +1269,7 @@ function ProfileWorkspaceScreen({
                   onClick={() => onSignUp(email, password)}
                   type="button"
                 >
-                  Creer un compte
+                  Créer un compte
                 </button>
               </div>
               {authError ? <div className="feedback-banner is-error">{authError}</div> : null}

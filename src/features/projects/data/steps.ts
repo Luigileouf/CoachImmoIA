@@ -3,8 +3,8 @@ import type { ProjectMode, ProjectStep } from "../../../types/product.js";
 export const projectSteps: Record<ProjectMode, ProjectStep[]> = {
   buyer: [
     {
-      title: "Budget et capacite d'emprunt",
-      detail: "Simulation obtenue et budget deja cadre avec marge de securite.",
+      title: "Budget et capacité d'emprunt",
+      detail: "Simulation obtenue et budget déjà cadré avec une marge de sécurité.",
       status: "done",
     },
     {
@@ -20,18 +20,18 @@ export const projectSteps: Record<ProjectMode, ProjectStep[]> = {
   ],
   seller: [
     {
-      title: "Preparation du dossier",
-      detail: "Rassembler les pieces et identifier les documents encore manquants.",
+      title: "Préparation du dossier",
+      detail: "Rassembler les pièces et identifier les documents encore manquants.",
       status: "active",
     },
     {
-      title: "Positionnement prix et strategie",
+      title: "Positionnement prix et stratégie",
       detail: "Arbitrer entre mandat agence, vente directe et niveau de prix cible.",
       status: "next",
     },
     {
       title: "Mise en vente et tri des offres",
-      detail: "Orchestrer les visites et qualifier les offres sans precipiter la decision.",
+      detail: "Orchestrer les visites et qualifier les offres sans précipiter la décision.",
       status: "next",
     },
   ],

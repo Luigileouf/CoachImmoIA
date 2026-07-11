@@ -4,29 +4,29 @@ export const assistantConversations: Record<ProjectMode, AssistantConversationMe
   buyer: [
     {
       from: "assistant",
-      text: "Bonjour Loic, j'ai resume votre situation : budget cadre, 4 visites utiles et un besoin de securiser l'offre.",
+      text: "Bonjour Loïc, j'ai résumé votre situation : budget cadré, 4 visites utiles et un besoin de sécuriser l'offre.",
     },
     {
       from: "user",
-      text: "Je veux preparer la visite de demain sans oublier les points sensibles.",
+      text: "Je veux préparer la visite de demain sans oublier les points sensibles.",
     },
     {
       from: "assistant",
-      text: "Parfait. Je vous propose un plan en 3 temps : copropriete, travaux, financement. Je peux aussi generer les questions mot pour mot.",
+      text: "Parfait. Je vous propose un plan en 3 temps : copropriété, travaux, financement. Je peux aussi générer les questions mot pour mot.",
     },
   ],
   seller: [
     {
       from: "assistant",
-      text: "Bonjour Loic, j'ai analyse votre projet vendeur : le point critique reste la preparation du dossier avant diffusion.",
+      text: "Bonjour Loïc, j'ai analysé votre projet vendeur : le point critique reste la préparation du dossier avant diffusion.",
     },
     {
       from: "user",
-      text: "Je veux envoyer un message au syndic pour obtenir les pieces manquantes.",
+      text: "Je veux envoyer un message au syndic pour obtenir les pièces manquantes.",
     },
     {
       from: "assistant",
-      text: "Je peux vous preparer un email concis avec la liste exacte des documents et le niveau d'urgence associe.",
+      text: "Je peux vous préparer un email concis avec la liste exacte des documents et le niveau d'urgence associé.",
     },
   ],
 };

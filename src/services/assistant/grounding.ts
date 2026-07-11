@@ -159,23 +159,23 @@ export function buildGroundedFinancialAnswer(
 
   const labels = dedupeDocumentLabels(sources).join(", ");
   const lines = [
-    `D'apres le document ${labels}, voici ce que je trouve sur votre capacite d'emprunt :`,
+    `D'après le document ${labels}, voici ce que je trouve sur votre capacité d'emprunt :`,
   ];
 
   if (borrowedAmount) {
-    lines.push(`- Montant emprunte retenu : ${borrowedAmount}`);
+    lines.push(`- Montant emprunté retenu : ${borrowedAmount}`);
   }
   if (contribution) {
     lines.push(`- Apport personnel : ${contribution}`);
   }
   if (duration) {
-    lines.push(`- Duree retenue : ${duration}`);
+    lines.push(`- Durée retenue : ${duration}`);
   }
   if (nominalRate) {
     lines.push(`- Taux nominal fixe : ${nominalRate}`);
   }
   if (monthlyPayment) {
-    lines.push(`- Mensualite estimee : ${monthlyPayment}`);
+    lines.push(`- Mensualité estimée : ${monthlyPayment}`);
   }
   if (correctedDebtRatio) {
     lines.push(`- Taux d'endettement retenu par la banque : ${correctedDebtRatio}`);
@@ -184,11 +184,11 @@ export function buildGroundedFinancialAnswer(
     lines.push(`- Taux d'endettement brut : ${grossDebtRatio}`);
   }
   if (decision) {
-    lines.push(`- Decision indiquee : ${decision}`);
+    lines.push(`- Décision indiquée : ${decision}`);
   }
 
   lines.push(
-    "Point de vigilance : le document indique qu'il s'agit d'une simulation et non d'une offre de pret definitive.",
+    "Point de vigilance : le document indique qu'il s'agit d'une simulation et non d'une offre de prêt définitive.",
   );
 
   return lines.join("\n");
@@ -223,12 +223,12 @@ export function buildGroundedCoproAnswer(
   ]);
 
   return buildExtractiveSourceAnswer({
-    intro: "D'apres les documents de copropriete disponibles :",
+    intro: "D'après les documents de copropriété disponibles :",
     sources: relatedSources,
     fallbackSummary:
-      "Les pieces de copropriete pointent des elements a verifier avec le syndic avant engagement.",
+      "Les pièces de copropriété signalent des éléments à vérifier avec le syndic avant tout engagement.",
     vigilance:
-      "verifiez les travaux votes, les charges recurrentes et toute decision recente d'assemblee generale.",
+      "vérifiez les travaux votés, les charges récurrentes et toute décision récente d'assemblée générale.",
   });
 }
 
@@ -263,12 +263,12 @@ export function buildGroundedDiagnosticsAnswer(
   ]);
 
   return buildExtractiveSourceAnswer({
-    intro: "D'apres les diagnostics ou extraits relies a ce sujet :",
+    intro: "D'après les diagnostics ou extraits liés à ce sujet :",
     sources: relatedSources,
     fallbackSummary:
-      "Les diagnostics charges doivent etre relus point par point avant diffusion ou engagement.",
+      "Les diagnostics chargés doivent être relus point par point avant diffusion ou engagement.",
     vigilance:
-      "confirmez la date de validite, les anomalies relevees et les obligations de mise a jour avant partage.",
+      "confirmez la date de validité, les anomalies relevées et les obligations de mise à jour avant partage.",
   });
 }
 
@@ -297,10 +297,10 @@ export function buildGroundedCompromiseAnswer(
   ]);
 
   return buildExtractiveSourceAnswer({
-    intro: "D'apres les pieces liees au compromis ou a l'offre :",
+    intro: "D'après les pièces liées au compromis ou à l'offre :",
     sources: relatedSources,
     fallbackSummary:
-      "Les passages recuperes montrent des points contractuels a valider avant signature.",
+      "Les passages récupérés montrent des points contractuels à valider avant signature.",
     vigilance:
       "confirmez toujours les conditions suspensives, le calendrier et les clauses sensibles avec le coach ou le notaire.",
   });
@@ -333,11 +333,11 @@ export function buildGroundedSellerDocumentsAnswer(
   ]);
 
   return buildExtractiveSourceAnswer({
-    intro: "D'apres les documents vendeur retrouves :",
+    intro: "D'après les documents vendeur retrouvés :",
     sources: relatedSources,
     fallbackSummary:
-      "Le dossier vendeur contient plusieurs pieces utiles, mais il faut verifier qu'elles sont toutes a jour.",
+      "Le dossier vendeur contient plusieurs pièces utiles, mais il faut vérifier qu'elles sont toutes à jour.",
     vigilance:
-      "verifiez quelles pieces sont completes, lesquelles manquent encore, et qui doit les fournir avant mise en vente.",
+      "vérifiez quelles pièces sont complètes, lesquelles manquent encore et qui doit les fournir avant la mise en vente.",
   });
 }

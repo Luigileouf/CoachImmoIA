@@ -53,8 +53,8 @@ function App() {
   const [selectedSocialThreadIndex, setSelectedSocialThreadIndex] = useState(0);
   const [documentFilter, setDocumentFilter] = useState<DocumentFilter>("all");
   const [documentContextSelection, setDocumentContextSelection] = useState<Record<ProjectMode, string[]>>({
-    buyer: ["Piece d'identite", "Simulation bancaire"],
-    seller: ["Titre de propriete"],
+    buyer: ["Pièce d'identité", "Simulation bancaire"],
+    seller: ["Titre de propriété"],
   });
   const [assistantDraft, setAssistantDraft] = useState(scenarios.buyer.assistantPrompts[0]);
   const [assistantThreads, setAssistantThreads] = useState<AssistantThread>(() => ({
@@ -130,7 +130,7 @@ function App() {
         [targetMode]: socialResult.data,
       }));
     } catch (error) {
-      console.error("Erreur de rafraichissement des donnees", error);
+      console.error("Erreur de rafraîchissement des données", error);
     }
   };
 
@@ -192,7 +192,7 @@ function App() {
 
     setMode("seller");
     resetModeScopedState("seller");
-    setAssistantDraft("J'aimerais estimer mon bien avant de choisir une strategie de vente.");
+    setAssistantDraft("J'aimerais estimer mon bien avant de choisir une stratégie de vente.");
   };
 
   const handlePrimaryAction = () => {
@@ -307,7 +307,7 @@ function App() {
         summary: summary.trim() || extractedPdf?.summary || "",
         notes: extractedPdf?.notes,
         nextAction: extractedPdf
-          ? "Verifier les extraits indexes et poser une question a l'assistant."
+          ? "Vérifier les extraits indexés et poser une question à l'assistant."
           : undefined,
         storagePath,
       });
@@ -355,7 +355,7 @@ function App() {
         mode,
         projectId: documentsData[mode]?.projectId || projectsData[mode]?.projectId || null,
         label,
-        chunks: chunks.length > 0 ? chunks : [`Document ${label} indexe depuis CoachImmoIA.`],
+        chunks: chunks.length > 0 ? chunks : [`Document ${label} indexé depuis CoachImmoIA.`],
         summary: document?.summary,
       });
 
@@ -439,7 +439,7 @@ function App() {
       await signOut();
       setSessionEmail(null);
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : "Deconnexion impossible.");
+      setAuthError(error instanceof Error ? error.message : "Déconnexion impossible.");
     } finally {
       setAuthLoading(false);
     }
@@ -492,10 +492,10 @@ function App() {
       }));
     } catch (error) {
       const fallbackMessage =
-        error instanceof Error ? error.message : "Connexion au modele impossible pour le moment.";
+        error instanceof Error ? error.message : "Connexion au modèle impossible pour le moment.";
 
       setAssistantError(
-        `${fallbackMessage} Verifiez la cle API Mistral et le modele configure, puis reessayez.`,
+        `${fallbackMessage} Vérifiez la clé API Mistral et le modèle configuré, puis réessayez.`,
       );
       setAssistantDraft(content);
       setAssistantThreads((current) => ({
