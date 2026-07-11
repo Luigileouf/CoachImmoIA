@@ -34,68 +34,6 @@ import type {
   SocialResponse,
 } from "../../../services/api";
 
-function PlatformHeader({
-  mode,
-  activeScreen,
-  onModeChange,
-}: {
-  mode: ProjectMode;
-  activeScreen: AppScreen;
-  onModeChange: (mode: ProjectMode) => void;
-}) {
-  const titles: Record<AppScreen, { title: string; subtitle: string }> = {
-    home: {
-      title: "Dashboard",
-      subtitle: "Vue d'ensemble du dossier, des urgences et des prochaines actions.",
-    },
-    listings: {
-      title: "Biens",
-      subtitle: "Selection, qualification et comparaison des biens ou comparables.",
-    },
-    assistant: {
-      title: "Assistant IA",
-      subtitle: "Workspace conversationnel avec contexte, prompts et sources utiles.",
-    },
-    projects: {
-      title: "Projet",
-      subtitle: "Roadmap, dependances et points de vigilance du dossier actif.",
-    },
-    documents: {
-      title: "Documents",
-      subtitle: "Pilotage documentaire et preparation du futur socle RAG.",
-    },
-    social: {
-      title: "Communaute",
-      subtitle: "Espace social modere pour echanger, debloquer des doutes et recadrer un projet.",
-    },
-    profile: {
-      title: "Profil",
-      subtitle: "Compte, preferences d'accompagnement et cadrage securite.",
-    },
-  };
-
-  return (
-    <header className="platform-header">
-      <div>
-        <p className="platform-header__eyebrow">Plateforme web</p>
-        <h1>{titles[activeScreen].title}</h1>
-        <p>{titles[activeScreen].subtitle}</p>
-      </div>
-
-      <div className="platform-header__actions">
-        <div className="platform-search">Rechercher un dossier, un bien, un document...</div>
-        <ModeTabs mode={mode} onChange={onModeChange} />
-        <button className="platform-ghost-button" type="button">
-          Notifications
-        </button>
-        <button className="platform-primary-button" type="button">
-          Contacter coach
-        </button>
-      </div>
-    </header>
-  );
-}
-
 function PlatformSidebar({
   activeScreen,
   mode,
@@ -1393,8 +1331,6 @@ export function WebPlatformShell({
       <PlatformSidebar activeScreen={activeScreen} mode={mode} onModeChange={onModeChange} onNavigate={onNavigate} />
 
       <div className="web-shell__main">
-        <PlatformHeader activeScreen={activeScreen} mode={mode} onModeChange={onModeChange} />
-
         <div className="web-shell__content">
           {activeScreen === "home" ? (
             <DashboardScreen
