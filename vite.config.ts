@@ -6,6 +6,17 @@ type MistralMessage = {
   content: string;
 };
 
+type GemmaGenerateResponse = {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{ text?: string }>;
+    };
+  }>;
+  error?: {
+    message?: string;
+  };
+};
+
 type ApiHandlerModule = {
   default: (request: Request) => Response | Promise<Response>;
 };
@@ -43,6 +54,7 @@ function mistralProxyPlugin(): Plugin {
       const env = loadEnv(server.config.mode, process.cwd(), "");
       hydrateProcessEnv(env);
       attachMistralMiddleware(server.middlewares, env);
+      attachGemmaMiddleware(server.middlewares, env);
       attachLocalApiMiddleware(
         server.middlewares,
         async (modulePath) => (await server.ssrLoadModule(modulePath)) as ApiHandlerModule,
@@ -54,6 +66,103 @@ function mistralProxyPlugin(): Plugin {
       attachMistralMiddleware(server.middlewares, env);
     },
   };
+}
+
+function attachGemmaMiddleware(
+  middlewares: {
+    use: (
+      path: string,
+      handler: (
+        req: import("node:http").IncomingMessage,
+        res: import("node:http").ServerResponse,
+      ) => void | Promise<void>,
+    ) => void;
+  },
+  env: Record<string, string>,
+) {
+  middlewares.use("/api/gemma", async (req, res) => {
+    if (req.method !== "POST") {
+      res.statusCode = 405;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ error: "Method not allowed" }));
+      return;
+    }
+
+    const apiKey = env.GOOGLE_API_KEY;
+    const model = env.GEMMA_MODEL || env.VITE_GEMMA_MODEL || "gemma-4-26b-a4b-it";
+    const baseUrl = env.GOOGLE_GENERATIVE_API_BASE_URL || "https://generativelanguage.googleapis.com/v1beta";
+
+    if (!apiKey) {
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json");
+      res.end(
+        JSON.stringify({
+          error:
+            "La variable GOOGLE_API_KEY est absente. Ajoutez-la dans .env.local avant d'utiliser Gemma.",
+        }),
+      );
+      return;
+    }
+
+    try {
+      const body = await readBody(req);
+      const payload = JSON.parse(body) as { messages?: MistralMessage[] };
+      const messages = payload.messages ?? [];
+      const systemInstruction = messages
+        .filter((message) => message.role === "system")
+        .map((message) => message.content)
+        .join("\n\n");
+      const contents = messages
+        .filter((message) => message.role !== "system")
+        .map((message) => ({
+          role: message.role === "assistant" ? "model" : "user",
+          parts: [{ text: message.content }],
+        }));
+      const upstream = await fetch(
+        `${baseUrl}/models/${encodeURIComponent(model)}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
+          body: JSON.stringify({
+            ...(systemInstruction
+              ? { systemInstruction: { parts: [{ text: systemInstruction }] } }
+              : {}),
+            contents,
+          }),
+        },
+      );
+      const result = (await upstream.json()) as GemmaGenerateResponse;
+      const content = result.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text?.trim() || "")
+        .filter(Boolean)
+        .join("\n")
+        .trim();
+
+      res.statusCode = upstream.status;
+      res.setHeader("Content-Type", "application/json");
+      res.end(
+        JSON.stringify(
+          upstream.ok && content
+            ? { choices: [{ message: { role: "assistant", content } }], model }
+            : { error: result.error?.message || "Gemma n'a pas retourné de réponse exploitable." },
+        ),
+      );
+    } catch (error) {
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json");
+      res.end(
+        JSON.stringify({
+          error:
+            error instanceof Error
+              ? error.message
+              : "Erreur interne pendant l'appel à l'API Gemma.",
+        }),
+      );
+    }
+  });
 }
 
 function hydrateProcessEnv(env: Record<string, string>) {

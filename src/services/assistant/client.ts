@@ -79,7 +79,7 @@ export async function sendAssistantMessage({
   if (!response.ok) {
     throw new Error(
       payload.error ||
-        `L'API Mistral a répondu avec ${response.status}. Vérifiez la clé API et le modèle configuré.`,
+        `L'API ${runtime.providerLabel} a répondu avec ${response.status}. Vérifiez la clé API et le modèle configuré.`,
     );
   }
 

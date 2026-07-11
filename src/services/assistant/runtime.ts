@@ -1,16 +1,21 @@
 import type { ProjectMode } from "../../types/product";
 
 const DEFAULT_MODEL = "mistral-small-latest";
-const DEFAULT_URL = "/api/mistral";
+const DEFAULT_GEMMA_MODEL = "gemma-4-26b-a4b-it";
 
 export function getAssistantRuntime() {
-  const model = import.meta.env.VITE_MISTRAL_MODEL || DEFAULT_MODEL;
-  const url = DEFAULT_URL;
+  const provider = import.meta.env.VITE_LLM_PROVIDER === "google" ? "google" : "mistral";
+  const model = provider === "google"
+    ? import.meta.env.VITE_GEMMA_MODEL || DEFAULT_GEMMA_MODEL
+    : import.meta.env.VITE_MISTRAL_MODEL || DEFAULT_MODEL;
+  const url = provider === "google" ? "/api/gemma" : "/api/mistral";
 
   return {
+    provider,
+    providerLabel: provider === "google" ? "Google API" : "Mistral API",
     model,
     url,
-    label: `${model} via Mistral API`,
+    label: `${model} via ${provider === "google" ? "Google API" : "Mistral API"}`,
   };
 }
 
