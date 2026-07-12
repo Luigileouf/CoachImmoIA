@@ -27,18 +27,20 @@ async function toWebRequest(request: VercelNodeRequest) {
     }
   }
 
-  let body: BodyInit | undefined;
+  let body: string | undefined;
   if (method !== "GET" && method !== "HEAD") {
     if (request.body !== undefined) {
-      body = typeof request.body === "string" || Buffer.isBuffer(request.body)
+      body = typeof request.body === "string"
         ? request.body
+        : Buffer.isBuffer(request.body)
+          ? request.body.toString("utf8")
         : JSON.stringify(request.body);
     } else {
       const chunks: Buffer[] = [];
       for await (const chunk of request) {
         chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
       }
-      body = Buffer.concat(chunks);
+      body = Buffer.concat(chunks).toString("utf8");
     }
   }
 
