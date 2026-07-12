@@ -1200,10 +1200,10 @@ function ProfileWorkspaceScreen({
       <div className="platform-grid platform-grid--profile">
         <article className="platform-surface">
           <div className="platform-profile-head">
-            <div className="profile-hero__avatar">LM</div>
+            <div className="profile-hero__avatar">TU</div>
             <div>
-              <h3>{sessionEmail || "Loïc Métivier"}</h3>
-              <p>{sessionEmail ? "Session Supabase active" : "Accompagnement hybride IA + coach humain"}</p>
+              <h3>Tu</h3>
+              <p>{sessionEmail ? `Connecté avec ${sessionEmail}` : "Accompagnement hybride IA + coach humain"}</p>
             </div>
           </div>
 

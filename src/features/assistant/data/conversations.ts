@@ -4,7 +4,7 @@ export const assistantConversations: Record<ProjectMode, AssistantConversationMe
   buyer: [
     {
       from: "assistant",
-      text: "Bonjour Loïc, j'ai résumé votre situation : budget cadré, 4 visites utiles et un besoin de sécuriser l'offre.",
+      text: "Bonjour, j'ai résumé votre situation : budget cadré, 4 visites utiles et un besoin de sécuriser l'offre.",
     },
     {
       from: "user",
@@ -18,7 +18,7 @@ export const assistantConversations: Record<ProjectMode, AssistantConversationMe
   seller: [
     {
       from: "assistant",
-      text: "Bonjour Loïc, j'ai analysé votre projet vendeur : le point critique reste la préparation du dossier avant diffusion.",
+      text: "Bonjour, j'ai analysé votre projet vendeur : le point critique reste la préparation du dossier avant diffusion.",
     },
     {
       from: "user",

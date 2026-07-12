@@ -681,10 +681,10 @@ export function ProfileScreen({
       </div>
 
       <article className="profile-hero">
-        <div className="profile-hero__avatar">LM</div>
+        <div className="profile-hero__avatar">TU</div>
         <div>
-          <h2>Loïc Métivier</h2>
-          <p>Projet acheteur · Coaching assiste par IA</p>
+          <h2>Tu</h2>
+          <p>{sessionEmail ? `Connecté avec ${sessionEmail}` : "Projet acheteur · Coaching assisté par IA"}</p>
         </div>
       </article>
 

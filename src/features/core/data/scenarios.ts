@@ -2,7 +2,7 @@ import type { ProjectMode, Scenario } from "../../../types/product.js";
 
 export const scenarios: Record<ProjectMode, Scenario> = {
   buyer: {
-    greeting: "Bonjour Loïc,",
+    greeting: "Bonjour,",
     title: "votre coach immobilier",
     accent: "IA",
     intro: "Démarrez votre projet immobilier en moins de 3 minutes.",
@@ -40,7 +40,7 @@ export const scenarios: Record<ProjectMode, Scenario> = {
     ],
   },
   seller: {
-    greeting: "Bonjour Loïc,",
+    greeting: "Bonjour,",
     title: "votre coach immobilier",
     accent: "IA",
     intro: "Organisez votre vente avec une feuille de route simple et rassurante.",

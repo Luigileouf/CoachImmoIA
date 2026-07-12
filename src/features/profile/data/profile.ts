@@ -4,7 +4,7 @@ export const profileSections: ProfileSection[] = [
   {
     title: "Compte",
     items: [
-      { label: "Nom", value: "Loïc Métivier" },
+      { label: "Profil", value: "Tu" },
       { label: "Projet principal", value: "Résidence principale" },
       { label: "Ville cible", value: "Paris et proche couronne" },
     ],
