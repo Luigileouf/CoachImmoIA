@@ -1,6 +1,23 @@
 import { buildSystemPrompt, getAssistantRuntime } from "./runtime";
 import type { AssistantRequest, MistralChatResponse, MistralContent } from "./types";
 
+function extractApiError(error: unknown) {
+  if (typeof error === "string" && error.trim()) {
+    return error;
+  }
+
+  if (error && typeof error === "object") {
+    const details = error as { message?: unknown; detail?: unknown };
+    const message = typeof details.message === "string" ? details.message : details.detail;
+
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+  }
+
+  return null;
+}
+
 function extractContent(content: MistralContent | undefined) {
   if (typeof content === "string") {
     return content.trim();
@@ -78,7 +95,7 @@ export async function sendAssistantMessage({
 
   if (!response.ok) {
     throw new Error(
-      payload.error ||
+      extractApiError(payload.error) ||
         `L'API ${runtime.providerLabel} a répondu avec ${response.status}. Vérifiez la clé API et le modèle configuré.`,
     );
   }

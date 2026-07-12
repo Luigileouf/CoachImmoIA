@@ -494,9 +494,7 @@ function App() {
       const fallbackMessage =
         error instanceof Error ? error.message : "Connexion au modèle impossible pour le moment.";
 
-      setAssistantError(
-        `${fallbackMessage} Vérifiez la clé API Mistral et le modèle configuré, puis réessayez.`,
-      );
+      setAssistantError(fallbackMessage);
       setAssistantDraft(content);
       setAssistantThreads((current) => ({
         ...current,

@@ -21,6 +21,34 @@ type ApiHandlerModule = {
   default: (request: Request) => Response | Promise<Response>;
 };
 
+const GEMMA_MAX_ATTEMPTS = 3;
+const GEMMA_RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+
+async function fetchGemmaWithRetry(url: string, init: RequestInit) {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= GEMMA_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetch(url, init);
+
+      if (!GEMMA_RETRYABLE_STATUSES.has(response.status) || attempt === GEMMA_MAX_ATTEMPTS) {
+        return response;
+      }
+
+      await response.arrayBuffer();
+    } catch (error) {
+      lastError = error;
+      if (attempt === GEMMA_MAX_ATTEMPTS) {
+        throw error;
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** (attempt - 1)));
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("L'appel à l'API Gemma a échoué.");
+}
+
 const localApiRoutes = [
   {
     path: "/api/projects",
@@ -64,6 +92,7 @@ function mistralProxyPlugin(): Plugin {
       const env = loadEnv(server.config.mode, process.cwd(), "");
       hydrateProcessEnv(env);
       attachMistralMiddleware(server.middlewares, env);
+      attachGemmaMiddleware(server.middlewares, env);
     },
   };
 }
@@ -118,7 +147,7 @@ function attachGemmaMiddleware(
           role: message.role === "assistant" ? "model" : "user",
           parts: [{ text: message.content }],
         }));
-      const upstream = await fetch(
+      const upstream = await fetchGemmaWithRetry(
         `${baseUrl}/models/${encodeURIComponent(model)}:generateContent`,
         {
           method: "POST",

@@ -27,5 +27,5 @@ export type MistralChatResponse = {
       content?: MistralContent;
     };
   }>;
-  error?: string;
+  error?: unknown;
 };

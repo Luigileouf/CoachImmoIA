@@ -6,6 +6,34 @@ type GemmaRuntimeConfig = {
   baseUrl?: string;
 };
 
+const GEMMA_MAX_ATTEMPTS = 3;
+const GEMMA_RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+
+async function fetchGemmaWithRetry(url: string, init: RequestInit) {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= GEMMA_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetch(url, init);
+
+      if (!GEMMA_RETRYABLE_STATUSES.has(response.status) || attempt === GEMMA_MAX_ATTEMPTS) {
+        return response;
+      }
+
+      await response.arrayBuffer();
+    } catch (error) {
+      lastError = error;
+      if (attempt === GEMMA_MAX_ATTEMPTS) {
+        throw error;
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** (attempt - 1)));
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("L'appel à l'API Gemma a échoué.");
+}
+
 export function getGemmaRuntimeConfig({
   apiKey = process.env.GOOGLE_API_KEY,
   model = process.env.GEMMA_MODEL || "gemma-4-26b-a4b-it",
@@ -53,7 +81,7 @@ export async function forwardGemmaChat(
     );
   }
 
-  const upstream = await fetch(
+  const upstream = await fetchGemmaWithRetry(
     `${runtime.baseUrl}/models/${encodeURIComponent(runtime.model || "gemma-4-26b-a4b-it")}:generateContent`,
     {
       method: "POST",
