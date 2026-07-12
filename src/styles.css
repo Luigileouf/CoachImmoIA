@@ -2085,6 +2085,29 @@ svg {
   background: var(--mint-soft);
 }
 
+.mobile-auth-card {
+  display: grid;
+  gap: 18px;
+}
+
+.mobile-auth-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-auth-card__header h2,
+.mobile-auth-card__header .eyebrow {
+  margin-bottom: 0;
+}
+
+.mobile-auth-card .platform-primary-button,
+.mobile-auth-card .platform-ghost-button {
+  width: 100%;
+  min-height: 50px;
+}
+
 .summary-card,
 .sheet-card,
 .composer-card,

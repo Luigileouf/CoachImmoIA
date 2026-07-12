@@ -429,7 +429,7 @@ function App() {
         message === "Failed to fetch"
           ? "Le service d’authentification est momentanément inaccessible. Réessayez dans quelques instants."
           : message.toLowerCase().includes("email rate limit")
-            ? "Trop d’e-mails de confirmation ont été demandés. Patientez quelques minutes avant de réessayer."
+            ? "Compte non créé : la limite d’e-mails a été atteinte et aucun message ne vous a été envoyé. Réessayez plus tard."
           : message,
       );
     } finally {
@@ -596,6 +596,10 @@ function App() {
           activeAction={activeAction}
           activeScreen={activeScreen}
           assistantProvider={assistantProvider}
+          authConfigured={authConfigured}
+          authError={authError}
+          authLoading={authLoading}
+          authNotice={authNotice}
           draft={assistantDraft}
           error={assistantError}
           isLoading={assistantLoading}
@@ -611,11 +615,15 @@ function App() {
           onPromptClick={setAssistantDraft}
           onSelectSocialCircle={handleSocialCircleSelect}
           onSelectSocialThread={setSelectedSocialThreadIndex}
+          onSignIn={handleSignIn}
+          onSignOut={handleSignOut}
+          onSignUp={handleSignUp}
           onSubmit={handleAssistantSubmit}
           scenario={scenario}
           screenVariants={screenVariants}
           selectedSocialCircleIndex={selectedSocialCircleIndex}
           selectedSocialThreadIndex={selectedSocialThreadIndex}
+          sessionEmail={sessionEmail}
         />
       </div>
     </main>

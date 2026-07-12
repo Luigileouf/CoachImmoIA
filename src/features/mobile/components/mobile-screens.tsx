@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   listingFeeds,
   profileSections,
@@ -548,14 +548,132 @@ export function ProjectsScreen({
   );
 }
 
-export function ProfileScreen({ onNavigate }: { onNavigate: (screen: AppScreen) => void }) {
+function MobileAuthCard({
+  authConfigured,
+  authError,
+  authLoading,
+  authNotice,
+  sessionEmail,
+  onSignIn,
+  onSignOut,
+  onSignUp,
+}: {
+  authConfigured: boolean;
+  authError: string | null;
+  authLoading: boolean;
+  authNotice: string | null;
+  sessionEmail: string | null;
+  onSignIn: (email: string, password: string) => void;
+  onSignOut: () => void;
+  onSignUp: (email: string, password: string) => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const formDisabled = authLoading || !email.trim() || !password.trim();
+
+  return (
+    <article className="sheet-card mobile-auth-card">
+      <div className="mobile-auth-card__header">
+        <div>
+          <p className="eyebrow">Votre compte</p>
+          <h2>{sessionEmail ? "Compte connecté" : "Connexion ou inscription"}</h2>
+        </div>
+        <span className="pill-badge">{authConfigured ? "Sécurisé" : "Indisponible"}</span>
+      </div>
+
+      {!authConfigured ? (
+        <p className="body-copy">Le service de compte est momentanément indisponible.</p>
+      ) : sessionEmail ? (
+        <div className="platform-composer">
+          <p className="body-copy">Connecté avec {sessionEmail}</p>
+          <button className="platform-primary-button" disabled={authLoading} onClick={onSignOut} type="button">
+            {authLoading ? "Déconnexion..." : "Se déconnecter"}
+          </button>
+        </div>
+      ) : (
+        <div className="platform-composer">
+          <input
+            aria-label="Email"
+            autoComplete="email"
+            className="platform-composer__input"
+            inputMode="email"
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Votre adresse e-mail"
+            type="email"
+            value={email}
+          />
+          <input
+            aria-label="Mot de passe"
+            autoComplete="current-password"
+            className="platform-composer__input"
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Votre mot de passe"
+            type="password"
+            value={password}
+          />
+          <button
+            className="platform-primary-button"
+            disabled={formDisabled}
+            onClick={() => onSignIn(email, password)}
+            type="button"
+          >
+            {authLoading ? "Connexion..." : "Se connecter"}
+          </button>
+          <button
+            className="platform-ghost-button"
+            disabled={formDisabled}
+            onClick={() => onSignUp(email, password)}
+            type="button"
+          >
+            Créer mon compte
+          </button>
+          {authError ? <div className="feedback-banner is-error">{authError}</div> : null}
+          {authNotice ? <div className="feedback-banner is-success">{authNotice}</div> : null}
+        </div>
+      )}
+    </article>
+  );
+}
+
+export function ProfileScreen({
+  authConfigured,
+  authError,
+  authLoading,
+  authNotice,
+  sessionEmail,
+  onNavigate,
+  onSignIn,
+  onSignOut,
+  onSignUp,
+}: {
+  authConfigured: boolean;
+  authError: string | null;
+  authLoading: boolean;
+  authNotice: string | null;
+  sessionEmail: string | null;
+  onNavigate: (screen: AppScreen) => void;
+  onSignIn: (email: string, password: string) => void;
+  onSignOut: () => void;
+  onSignUp: (email: string, password: string) => void;
+}) {
   return (
     <section className="screen-flow">
       <header className="screen-intro">
-        <p className="eyebrow">Plus</p>
-        <h1>Vos espaces et réglages</h1>
-        <p className="body-copy">Accédez aux documents, à la communauté et aux préférences du compte.</p>
+        <p className="eyebrow">Compte</p>
+        <h1>Votre espace personnel</h1>
+        <p className="body-copy">Connectez-vous pour retrouver votre projet et vos documents.</p>
       </header>
+
+      <MobileAuthCard
+        authConfigured={authConfigured}
+        authError={authError}
+        authLoading={authLoading}
+        authNotice={authNotice}
+        onSignIn={onSignIn}
+        onSignOut={onSignOut}
+        onSignUp={onSignUp}
+        sessionEmail={sessionEmail}
+      />
 
       <div className="more-navigation">
         <button onClick={() => onNavigate("documents")} type="button">Documents</button>
@@ -689,7 +807,7 @@ export function BottomNav({
     { key: "listings", label: "Biens", icon: <GridIcon /> },
     { key: "assistant", label: "IA", icon: <ChatIcon /> },
     { key: "projects", label: "Projet", icon: <CheckIcon /> },
-    { key: "profile", label: "Plus", icon: <UserIcon /> },
+    { key: "profile", label: "Compte", icon: <UserIcon /> },
   ];
 
   return (
@@ -722,6 +840,11 @@ type MobilePreviewShellProps = {
   messages: AssistantMessage[];
   selectedSocialCircleIndex: number;
   selectedSocialThreadIndex: number;
+  authConfigured: boolean;
+  authError: string | null;
+  authLoading: boolean;
+  authNotice: string | null;
+  sessionEmail: string | null;
   onActionChange: (id: ActionCard["id"]) => void;
   onAssistantProviderChange: (provider: AssistantProvider) => void;
   onCompareResponse: (message: AssistantMessage, provider: AssistantProvider) => void;
@@ -732,6 +855,9 @@ type MobilePreviewShellProps = {
   onPromptClick: (prompt: string) => void;
   onSelectSocialCircle: (index: number) => void;
   onSelectSocialThread: (index: number) => void;
+  onSignIn: (email: string, password: string) => void;
+  onSignOut: () => void;
+  onSignUp: (email: string, password: string) => void;
   onSubmit: () => void;
 };
 
@@ -748,6 +874,11 @@ export function MobilePreviewShell({
   messages,
   selectedSocialCircleIndex,
   selectedSocialThreadIndex,
+  authConfigured,
+  authError,
+  authLoading,
+  authNotice,
+  sessionEmail,
   onActionChange,
   onAssistantProviderChange,
   onCompareResponse,
@@ -758,6 +889,9 @@ export function MobilePreviewShell({
   onPromptClick,
   onSelectSocialCircle,
   onSelectSocialThread,
+  onSignIn,
+  onSignOut,
+  onSignUp,
   onSubmit,
 }: MobilePreviewShellProps) {
   const renderScreen = () => {
@@ -829,7 +963,19 @@ export function MobilePreviewShell({
       );
     }
 
-    return <ProfileScreen onNavigate={onNavigate} />;
+    return (
+      <ProfileScreen
+        authConfigured={authConfigured}
+        authError={authError}
+        authLoading={authLoading}
+        authNotice={authNotice}
+        onNavigate={onNavigate}
+        onSignIn={onSignIn}
+        onSignOut={onSignOut}
+        onSignUp={onSignUp}
+        sessionEmail={sessionEmail}
+      />
+    );
   };
 
   return (
