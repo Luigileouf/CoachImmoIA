@@ -6,6 +6,9 @@ export type AssistantRole = "system" | "user" | "assistant";
 export type AssistantMessage = {
   role: AssistantRole;
   content: string;
+  provider?: AssistantProvider;
+  model?: string;
+  sourcePrompt?: string;
 };
 
 export type AssistantRequest = {

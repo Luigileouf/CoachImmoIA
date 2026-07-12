@@ -68,6 +68,9 @@ function buildGemmaPayload(body: GemmaRequestBody) {
         }
       : {}),
     contents,
+    generationConfig: {
+      maxOutputTokens: 700,
+    },
   };
 }
 

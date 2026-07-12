@@ -39,7 +39,7 @@ export const documentWorkspaceData: Record<ProjectMode, DocumentWorkspaceItem[]>
       lastUpdated: "Hier · 18:10",
       summary: "Base de référence pour cadrer le budget et la capacité d'emprunt.",
       nextAction: "Mettre à jour si le taux change.",
-      notes: ["Budget cadré : 620 kEUR", "Taux à revérifier sous 15 jours"],
+      notes: ["Budget cadré : 620 k€", "Taux à revérifier sous 15 jours"],
     },
     {
       label: "Plan de financement",

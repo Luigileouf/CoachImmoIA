@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from "react";
 import {
-  actionCards,
   listingFeeds,
   profileSections,
   projectSteps,
@@ -25,7 +24,6 @@ import {
   CheckIcon,
   DocumentIcon,
   GridIcon,
-  HomeActionCard,
   HomeGlyph,
   ListingCard,
   LogoMark,
@@ -113,30 +111,29 @@ function PlatformSidebar({
 }
 
 function DashboardScreen({
+  assistantProvider,
   activeAction,
   mode,
   scenario,
   projectsData,
   socialData,
   error,
-  projectBusy,
   onActionChange,
-  onCreateProject,
   onNavigate,
   onPrimaryAction,
 }: {
+  assistantProvider: AssistantProvider;
   activeAction: "buyer" | "seller" | "estimate";
   mode: ProjectMode;
   scenario: ScenarioData;
   projectsData: ProjectsResponse | null;
   socialData: SocialResponse | null;
   error: string | null;
-  projectBusy: boolean;
   onActionChange: (id: "buyer" | "seller" | "estimate") => void;
-  onCreateProject: () => void;
   onNavigate: (screen: AppScreen) => void;
   onPrimaryAction: () => void;
 }) {
+  const activeRuntime = getAssistantRuntime(assistantProvider);
   const roadmap = projectsData?.steps.length ? projectsData.steps : projectSteps[mode].map((step, index) => ({
     ...step,
     meta: projectStepMeta[mode][index],
@@ -168,24 +165,13 @@ function DashboardScreen({
           onChange={() => undefined}
         />
 
-        <div className="card-stack">
-          {actionCards.map((card) => (
-            <HomeActionCard active={card.id === activeAction} card={card} key={card.id} onClick={onActionChange} />
-          ))}
-        </div>
-
         <div className="platform-inline-actions">
           <button className="platform-primary-button" onClick={onPrimaryAction} type="button">
             {scenario.cta}
           </button>
           <button className="platform-ghost-button" onClick={() => onNavigate("assistant")} type="button">
-            Ouvrir l&apos;assistant
+            Poser une question
           </button>
-          {!projectsData?.projectId ? (
-            <button className="platform-ghost-button" disabled={projectBusy} onClick={onCreateProject} type="button">
-              {projectBusy ? "Création..." : "Créer un projet"}
-            </button>
-          ) : null}
         </div>
 
         {error ? <div className="feedback-banner is-error">{error}</div> : null}
@@ -262,7 +248,9 @@ function DashboardScreen({
         <article className="platform-surface">
           <div className="platform-surface__header">
             <h3>Coach et IA</h3>
-            <span className="platform-badge">Mistral actif</span>
+            <span className="platform-badge">
+              {activeRuntime.provider === "google" ? "Gemma actif" : "Mistral actif"}
+            </span>
           </div>
           <p className="platform-summary-copy">{scenario.coachHint}</p>
           <div className="platform-mini-metrics">
@@ -418,7 +406,7 @@ function AssistantWorkspaceScreen({
   assistantSources,
   onDraftChange,
   onAssistantProviderChange,
-  onModeChange,
+  onCompareResponse,
   onPromptClick,
   onSubmit,
 }: {
@@ -432,57 +420,59 @@ function AssistantWorkspaceScreen({
   assistantSources: RagContextResponse["sources"];
   onDraftChange: (value: string) => void;
   onAssistantProviderChange: (provider: AssistantProvider) => void;
-  onModeChange: (mode: ProjectMode) => void;
+  onCompareResponse: (message: AssistantMessage, provider: AssistantProvider) => void;
   onPromptClick: (prompt: string) => void;
   onSubmit: () => void;
 }) {
-  const runtime = getAssistantRuntime(assistantProvider);
+  const hasMessages = messages.length > 0;
 
   return (
     <section className="platform-screen platform-screen--assistant">
-      <AppTopBar subtitle={`${runtime.providerLabel} · parcours ${mode === "buyer" ? "acheteur" : "vendeur"}`} />
+      <AppTopBar subtitle={`Assistant · parcours ${mode === "buyer" ? "acheteur" : "vendeur"}`} />
 
-      <header className="screen-intro">
-        <p className="eyebrow">Assistant IA</p>
-        <h1>Je peux cadrer une visite, négocier une offre et sécuriser votre dossier.</h1>
-        <p className="body-copy">{scenario.assistantIntro}</p>
+      <header className="screen-intro platform-assistant-intro">
+        <p className="eyebrow">Assistant immobilier</p>
+        <h1>Que souhaitez-vous préparer&nbsp;?</h1>
       </header>
 
       <div className="platform-toolbar-row">
-        <ModeTabs mode={mode} onChange={onModeChange} />
         <ProviderSelector
           disabled={isLoading}
           onChange={onAssistantProviderChange}
           provider={assistantProvider}
         />
       </div>
-      <span className="platform-chip">Modèle actif : {runtime.label}</span>
 
       <div className="platform-grid platform-grid--assistant">
         <article className="platform-surface platform-chat-surface">
           <div className="platform-surface__header">
             <h3>Conversation active</h3>
-            <span className="platform-badge">Réponses actionnables</span>
+            <span className="platform-badge">{hasMessages ? `${messages.length} messages` : "Nouvelle conversation"}</span>
           </div>
 
-          <article className="platform-inline-panel">
-            <span className="platform-section-label">Objectif courant</span>
-            <strong>
-              {mode === "buyer"
-                ? "Structurer la visite et les questions avant engagement."
-                : "Organiser les relances documentaires et le cadrage prix."}
-            </strong>
-          </article>
-
-          <div className="chat-thread">
+          <div className={hasMessages ? "chat-thread" : "chat-thread is-empty"}>
+            {!hasMessages ? (
+              <div className="assistant-empty-state">
+                <strong>Posez une question concrète pour commencer.</strong>
+                <span>Vous pourrez ensuite tester exactement la même demande avec l’autre modèle.</span>
+              </div>
+            ) : null}
             {messages.map((message, index) => (
-              <AssistantThreadBubble key={`${message.content}-${index}`} message={message} />
+              <AssistantThreadBubble
+                key={`${message.content}-${index}`}
+                message={message}
+                onCompare={onCompareResponse}
+              />
             ))}
 
-            {isLoading ? <div className="message-bubble is-assistant">CoachImmoIA reflechit...</div> : null}
+            {isLoading ? (
+              <div className="message-bubble is-assistant">
+                {assistantProvider === "google" ? "Gemma" : "Mistral"} prépare sa réponse…
+              </div>
+            ) : null}
           </div>
 
-          <div className="platform-chip-row">
+          <div className={hasMessages ? "platform-chip-row assistant-suggestions is-compact" : "platform-chip-row assistant-suggestions"}>
             {scenario.assistantPrompts.map((prompt) => (
               <button className="platform-chip platform-chip--button" key={prompt} onClick={() => onPromptClick(prompt)} type="button">
                 {prompt}
@@ -501,7 +491,7 @@ function AssistantWorkspaceScreen({
               id="platform-assistant-message"
               onChange={(event) => onDraftChange(event.target.value)}
               placeholder="Posez une question sur votre projet immobilier..."
-              rows={4}
+              rows={3}
               value={draft}
             />
             <button className="platform-primary-button" disabled={isLoading || !draft.trim()} onClick={onSubmit} type="button">
@@ -512,22 +502,22 @@ function AssistantWorkspaceScreen({
 
         <article className="platform-surface">
           <div className="platform-surface__header">
-            <h3>Contexte dossier</h3>
-            <span className="platform-badge">RAG actif</span>
+            <h3>Documents utilisés</h3>
+            <span className="platform-badge">{assistantSources.length}</span>
           </div>
-          <p className="platform-summary-copy">{scenario.assistantIntro}</p>
+          <p className="platform-summary-copy">Les réponses peuvent s’appuyer sur les documents de votre projet.</p>
 
           <div className="platform-context-list">
             <div>
-              <span className="platform-context-list__label">Résumé</span>
+              <span className="platform-context-list__label">Projet</span>
               <p>{scenario.projectStatus}</p>
             </div>
             <div>
-              <span className="platform-context-list__label">Sources liees</span>
+              <span className="platform-context-list__label">Documents disponibles</span>
               <p>{scenario.projectDocuments.slice(0, 3).join(" · ")}</p>
             </div>
             <div>
-              <span className="platform-context-list__label">Escalade</span>
+              <span className="platform-context-list__label">Besoin d’aide</span>
               <p>{scenario.coachHint}</p>
             </div>
           </div>
@@ -543,10 +533,10 @@ function AssistantWorkspaceScreen({
               ))
             ) : (
               <article className="platform-source-card">
-                <span className="platform-context-list__label">Aucune source</span>
-                <strong>Pas de contexte dossier retrouvé</strong>
+                <span className="platform-context-list__label">Aucun document utilisé</span>
+                <strong>Réponse basée sur votre question</strong>
                 <p>
-                  L'assistant n'a trouvé aucun extrait pertinent dans les documents chargés pour cette question.
+                  Ajoutez ou sélectionnez un document si vous souhaitez une réponse liée à votre dossier.
                 </p>
               </article>
             )}
@@ -1324,6 +1314,7 @@ type WebPlatformShellProps = {
   onCreateSocialThread: (payload: { circleId: string; title: string; body: string }) => void;
   onActionChange: (id: "buyer" | "seller" | "estimate") => void;
   onAssistantProviderChange: (provider: AssistantProvider) => void;
+  onCompareResponse: (message: AssistantMessage, provider: AssistantProvider) => void;
   onDraftChange: (value: string) => void;
   onDocumentFilterChange: (filter: DocumentFilter) => void;
   onIndexDocument: (label: string) => void;
@@ -1376,6 +1367,7 @@ export function WebPlatformShell({
   onCreateSocialThread,
   onActionChange,
   onAssistantProviderChange,
+  onCompareResponse,
   onDraftChange,
   onDocumentFilterChange,
   onIndexDocument,
@@ -1403,13 +1395,12 @@ export function WebPlatformShell({
           {activeScreen === "home" ? (
             <DashboardScreen
               activeAction={activeAction}
+              assistantProvider={assistantProvider}
               error={error}
               mode={mode}
               onActionChange={onActionChange}
-              onCreateProject={onCreateProject}
               onNavigate={onNavigate}
               onPrimaryAction={onPrimaryAction}
-              projectBusy={projectBusy}
               projectsData={projectsData}
               scenario={scenario}
               socialData={socialData}
@@ -1435,7 +1426,7 @@ export function WebPlatformShell({
               mode={mode}
               onDraftChange={onDraftChange}
               onAssistantProviderChange={onAssistantProviderChange}
-              onModeChange={onModeChange}
+              onCompareResponse={onCompareResponse}
               onPromptClick={onPromptClick}
               onSubmit={onSubmit}
               scenario={scenario}

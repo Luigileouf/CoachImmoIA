@@ -28,7 +28,7 @@ export const scenarios: Record<ProjectMode, Scenario> = {
       "Une sélection alignée sur votre budget, vos critères et votre vitesse d'exécution.",
     listingFilters: ["Paris 11e", "T3-T4", "Budget 500k-700k"],
     stats: [
-      { label: "Budget cadre", value: "620 kEUR" },
+      { label: "Budget cadré", value: "620 k€" },
       { label: "Visites retenues", value: "4" },
       { label: "Offre cible", value: "1 à préparer" },
     ],
@@ -66,7 +66,7 @@ export const scenarios: Record<ProjectMode, Scenario> = {
       "Des références utiles pour cadrer la valeur de votre bien avant la mise en marché.",
     listingFilters: ["Biens vendus", "90 derniers jours", "Surface proche"],
     stats: [
-      { label: "Prix visé", value: "785 kEUR" },
+      { label: "Prix visé", value: "785 k€" },
       { label: "Docs critiques", value: "3 manquants" },
       { label: "Stratégie", value: "Agence ou direct" },
     ],

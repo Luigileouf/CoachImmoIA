@@ -160,6 +160,9 @@ function attachGemmaMiddleware(
               ? { systemInstruction: { parts: [{ text: systemInstruction }] } }
               : {}),
             contents,
+            generationConfig: {
+              maxOutputTokens: 700,
+            },
           }),
         },
       );
@@ -246,9 +249,10 @@ function attachMistralMiddleware(
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          model,
-          messages: payload.messages ?? [],
+          body: JSON.stringify({
+            model,
+            max_tokens: 700,
+            messages: payload.messages ?? [],
         }),
       });
 

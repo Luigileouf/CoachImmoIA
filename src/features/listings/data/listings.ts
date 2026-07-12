@@ -5,7 +5,7 @@ export const listingFeeds: Record<ProjectMode, ListingItem[]> = {
     {
       title: "Appartement lumineux avec balcon",
       location: "Paris 11e - Saint Ambroise",
-      price: "648 kEUR",
+      price: "648 k€",
       badge: "Visite prioritaire",
       detail: "3 pièces, 61 m², copropriété saine, peu de travaux à prévoir.",
       scene: "house",
@@ -13,7 +13,7 @@ export const listingFeeds: Record<ProjectMode, ListingItem[]> = {
     {
       title: "Duplex calme proche commerces",
       location: "Montreuil - Croix de Chavaux",
-      price: "598 kEUR",
+      price: "598 k€",
       badge: "À challenger",
       detail: "4 pièces, 78 m², fort potentiel mais DPE à vérifier en détail.",
       scene: "living",
@@ -21,7 +21,7 @@ export const listingFeeds: Record<ProjectMode, ListingItem[]> = {
     {
       title: "Appartement ancien bien optimisé",
       location: "Paris 20e - Gambetta",
-      price: "612 kEUR",
+      price: "612 k€",
       badge: "Bon rapport surface",
       detail: "3 pièces, 67 m², étage élevé, charges maîtrisées, cave incluse.",
       scene: "building",

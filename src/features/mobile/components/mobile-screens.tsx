@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import {
-  actionCards,
   listingFeeds,
   profileSections,
   projectSteps,
@@ -12,7 +11,7 @@ import {
   type AppScreen,
   type ProjectMode,
 } from "../../../data/content";
-import { getAssistantRuntime, type AssistantMessage, type AssistantProvider } from "../../../lib/assistant";
+import type { AssistantMessage, AssistantProvider } from "../../../lib/assistant";
 import { ProviderSelector } from "../../shared/components/provider-selector";
 import type {
   AssistantVariant,
@@ -31,14 +30,11 @@ import {
   CheckIcon,
   EmptyStateVisual,
   GridIcon,
-  HomeActionCard,
   HomeGlyph,
   ListingCard,
   ModeTabs,
-  SocialIcon,
   SparkleIcon,
   UserIcon,
-  VariantSwitcher,
 } from "../../shared/components/primitives";
 
 export function HomeScreen({
@@ -116,17 +112,6 @@ export function HomeScreen({
         onChange={onModeChange}
       />
 
-      <div className="card-stack">
-        {actionCards.map((card) => (
-          <HomeActionCard
-            active={card.id === activeAction}
-            card={card}
-            key={card.id}
-            onClick={onActionChange}
-          />
-        ))}
-      </div>
-
       <button className="hero-cta" onClick={onPrimaryAction} type="button">
         <span>{scenario.cta}</span>
         <SparkleIcon />
@@ -203,7 +188,6 @@ export function ListingsScreen({
 
 export function AssistantScreen({
   assistantProvider,
-  mode,
   scenario,
   variant,
   draft,
@@ -212,12 +196,11 @@ export function AssistantScreen({
   messages,
   onDraftChange,
   onAssistantProviderChange,
-  onModeChange,
+  onCompareResponse,
   onPromptClick,
   onSubmit,
 }: {
   assistantProvider: AssistantProvider;
-  mode: ProjectMode;
   scenario: ScenarioData;
   variant: AssistantVariant;
   draft: string;
@@ -226,12 +209,12 @@ export function AssistantScreen({
   messages: AssistantMessage[];
   onDraftChange: (value: string) => void;
   onAssistantProviderChange: (provider: AssistantProvider) => void;
-  onModeChange: (mode: ProjectMode) => void;
+  onCompareResponse: (message: AssistantMessage, provider: AssistantProvider) => void;
   onPromptClick: (prompt: string) => void;
   onSubmit: () => void;
 }) {
-  const runtime = getAssistantRuntime(assistantProvider);
   const showLoadingPreview = variant === "loading";
+  const hasMessages = messages.length > 0;
 
   if (variant === "empty") {
     return (
@@ -263,14 +246,11 @@ export function AssistantScreen({
   }
 
   return (
-    <section className="screen-flow">
+    <section className="screen-flow assistant-screen">
       <header className="screen-intro">
-        <p className="eyebrow">Assistant IA</p>
-        <h1>Une conversation qui fait avancer le projet</h1>
-        <p className="body-copy">{scenario.assistantIntro}</p>
+        <p className="eyebrow">Assistant immobilier</p>
+        <h1>Que souhaitez-vous préparer&nbsp;?</h1>
       </header>
-
-      <ModeTabs mode={mode} onChange={onModeChange} />
 
       <ProviderSelector
         disabled={isLoading || showLoadingPreview}
@@ -278,26 +258,29 @@ export function AssistantScreen({
         provider={assistantProvider}
       />
 
-      <article className="assistant-hero-card">
-        <div>
-          <p className="assistant-hero-card__label">Modèle actif</p>
-          <strong>{runtime.label}</strong>
-          <span>Réponses courtes, structurées et actionnables</span>
-        </div>
-        <div className="assistant-hero-card__tag">Réponse claire</div>
-      </article>
-
-      <div className="chat-thread">
+      <div className={hasMessages ? "chat-thread" : "chat-thread is-empty"}>
+        {!hasMessages ? (
+          <div className="assistant-empty-state">
+            <strong>Commencez par une question concrète.</strong>
+            <span>Visite, offre, financement ou document&nbsp;: choisissez une suggestion ou écrivez librement.</span>
+          </div>
+        ) : null}
         {messages.map((message, index) => (
-          <AssistantThreadBubble key={`${message.content}-${index}`} message={message} />
+          <AssistantThreadBubble
+            key={`${message.content}-${index}`}
+            message={message}
+            onCompare={onCompareResponse}
+          />
         ))}
 
         {isLoading || showLoadingPreview ? (
-          <div className="message-bubble is-assistant">CoachImmoIA reflechit...</div>
+          <div className="message-bubble is-assistant">
+            {assistantProvider === "google" ? "Gemma" : "Mistral"} prépare sa réponse…
+          </div>
         ) : null}
       </div>
 
-      <div className="chip-row">
+      <div className={hasMessages ? "chip-row assistant-suggestions is-compact" : "chip-row assistant-suggestions"}>
         {scenario.assistantPrompts.map((prompt) => (
           <button className="filter-chip filter-chip--button" key={prompt} onClick={() => onPromptClick(prompt)} type="button">
             {prompt}
@@ -306,17 +289,6 @@ export function AssistantScreen({
       </div>
 
       {error ? <div className="feedback-banner is-error">{error}</div> : null}
-
-      <article className="summary-card">
-        <h2>Prochaines actions</h2>
-        <p>
-          1. Préparer vos questions de visite
-          <br />
-          2. Relever les points de risque
-          <br />
-          3. Sécuriser le calendrier du financement
-        </p>
-      </article>
 
       <div className="composer-card">
         <label className="composer-card__label" htmlFor="assistant-message">
@@ -327,7 +299,7 @@ export function AssistantScreen({
           id="assistant-message"
           onChange={(event) => onDraftChange(event.target.value)}
           placeholder="Posez une question sur votre projet immobilier..."
-          rows={4}
+          rows={3}
           value={draft}
         />
 
@@ -393,7 +365,7 @@ function BuyerProjectScreen({
         <article className="dark-card">
           <h2>Moment critique</h2>
           <p>
-            Prix affiché : 648 kEUR. Le bien reste intéressant, mais la stratégie d&apos;offre doit être
+            Prix affiché : 648 k€. Le bien reste intéressant, mais la stratégie d&apos;offre doit être
             securisee.
           </p>
         </article>
@@ -576,14 +548,19 @@ export function ProjectsScreen({
   );
 }
 
-export function ProfileScreen() {
+export function ProfileScreen({ onNavigate }: { onNavigate: (screen: AppScreen) => void }) {
   return (
     <section className="screen-flow">
       <header className="screen-intro">
-        <p className="eyebrow">Profil</p>
-        <h1>Compte, confiance et preferences</h1>
-        <p className="body-copy">Retrouvez vos reglages projet, vos habitudes de suivi et le cadre de partage.</p>
+        <p className="eyebrow">Plus</p>
+        <h1>Vos espaces et réglages</h1>
+        <p className="body-copy">Accédez aux documents, à la communauté et aux préférences du compte.</p>
       </header>
+
+      <div className="more-navigation">
+        <button onClick={() => onNavigate("documents")} type="button">Documents</button>
+        <button onClick={() => onNavigate("social")} type="button">Communauté</button>
+      </div>
 
       <article className="profile-hero">
         <div className="profile-hero__avatar">LM</div>
@@ -712,8 +689,7 @@ export function BottomNav({
     { key: "listings", label: "Biens", icon: <GridIcon /> },
     { key: "assistant", label: "IA", icon: <ChatIcon /> },
     { key: "projects", label: "Projet", icon: <CheckIcon /> },
-    { key: "social", label: "Social", icon: <SocialIcon /> },
-    { key: "profile", label: "Profil", icon: <UserIcon /> },
+    { key: "profile", label: "Plus", icon: <UserIcon /> },
   ];
 
   return (
@@ -733,73 +709,6 @@ export function BottomNav({
   );
 }
 
-export function PrototypeToolbar({
-  activeScreen,
-  variants,
-  onChange,
-}: {
-  activeScreen: AppScreen;
-  variants: ScreenVariantState;
-  onChange: <T extends keyof ScreenVariantState>(screen: T, variant: ScreenVariantState[T]) => void;
-}) {
-  if (activeScreen === "profile" || activeScreen === "documents" || activeScreen === "social") {
-    return null;
-  }
-
-  if (activeScreen === "home") {
-    return (
-      <VariantSwitcher
-        active={variants.home}
-        onChange={(value) => onChange("home", value as HomeVariant)}
-        options={[
-          { label: "Default", value: "default" },
-          { label: "Empty", value: "empty" },
-        ]}
-      />
-    );
-  }
-
-  if (activeScreen === "listings") {
-    return (
-      <VariantSwitcher
-        active={variants.listings}
-        onChange={(value) => onChange("listings", value as ListingsVariant)}
-        options={[
-          { label: "Default", value: "default" },
-          { label: "Empty", value: "empty" },
-        ]}
-      />
-    );
-  }
-
-  if (activeScreen === "assistant") {
-    return (
-      <VariantSwitcher
-        active={variants.assistant}
-        onChange={(value) => onChange("assistant", value as AssistantVariant)}
-        options={[
-          { label: "Default", value: "default" },
-          { label: "Empty", value: "empty" },
-          { label: "Loading", value: "loading" },
-        ]}
-      />
-    );
-  }
-
-  return (
-    <VariantSwitcher
-      active={variants.projects}
-      onChange={(value) => onChange("projects", value as ProjectsVariant)}
-      options={[
-        { label: "Default", value: "default" },
-        { label: "Empty", value: "empty" },
-        { label: "Risk", value: "risk" },
-        { label: "Sent", value: "sent" },
-      ]}
-    />
-  );
-}
-
 type MobilePreviewShellProps = {
   activeScreen: AppScreen;
   activeAction: ActionCard["id"];
@@ -815,6 +724,7 @@ type MobilePreviewShellProps = {
   selectedSocialThreadIndex: number;
   onActionChange: (id: ActionCard["id"]) => void;
   onAssistantProviderChange: (provider: AssistantProvider) => void;
+  onCompareResponse: (message: AssistantMessage, provider: AssistantProvider) => void;
   onDraftChange: (value: string) => void;
   onModeChange: (mode: ProjectMode) => void;
   onNavigate: (screen: AppScreen) => void;
@@ -823,7 +733,6 @@ type MobilePreviewShellProps = {
   onSelectSocialCircle: (index: number) => void;
   onSelectSocialThread: (index: number) => void;
   onSubmit: () => void;
-  onVariantChange: <T extends keyof ScreenVariantState>(screen: T, variant: ScreenVariantState[T]) => void;
 };
 
 export function MobilePreviewShell({
@@ -841,6 +750,7 @@ export function MobilePreviewShell({
   selectedSocialThreadIndex,
   onActionChange,
   onAssistantProviderChange,
+  onCompareResponse,
   onDraftChange,
   onModeChange,
   onNavigate,
@@ -849,7 +759,6 @@ export function MobilePreviewShell({
   onSelectSocialCircle,
   onSelectSocialThread,
   onSubmit,
-  onVariantChange,
 }: MobilePreviewShellProps) {
   const renderScreen = () => {
     if (activeScreen === "home") {
@@ -885,10 +794,9 @@ export function MobilePreviewShell({
           error={error}
           isLoading={isLoading}
           messages={messages}
-          mode={mode}
           onDraftChange={onDraftChange}
           onAssistantProviderChange={onAssistantProviderChange}
-          onModeChange={onModeChange}
+          onCompareResponse={onCompareResponse}
           onPromptClick={onPromptClick}
           onSubmit={onSubmit}
           scenario={scenario}
@@ -921,7 +829,7 @@ export function MobilePreviewShell({
       );
     }
 
-    return <ProfileScreen />;
+    return <ProfileScreen onNavigate={onNavigate} />;
   };
 
   return (
@@ -931,24 +839,9 @@ export function MobilePreviewShell({
         <div className="device-shell__speaker" />
 
         <div className="device-screen">
-          <header className="status-bar" aria-hidden="true">
-            <span>9:41</span>
-            <div className="status-bar__icons">
-              <span className="status-bar__signal">
-                <i />
-                <i />
-                <i />
-                <i />
-              </span>
-              <span className="status-bar__wifi" />
-              <span className="status-bar__battery" />
-            </div>
-          </header>
-
           <AppTopBar subtitle={mode === "buyer" ? "Parcours acheteur" : "Parcours vendeur"} />
 
           <div className="screen-scroll">
-            <PrototypeToolbar activeScreen={activeScreen} onChange={onVariantChange} variants={screenVariants} />
             {renderScreen()}
           </div>
 

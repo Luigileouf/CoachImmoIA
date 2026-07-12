@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  assistantConversations,
   scenarios,
   type ActionCard,
   type AppScreen,
@@ -37,7 +36,6 @@ import {
   defaultScreenVariants,
   type AssistantThread,
   type DocumentFilter,
-  type ScreenVariantState,
 } from "./features/app/types";
 import { MobilePreviewShell } from "./features/mobile/components/mobile-screens";
 import { WebPlatformShell } from "./features/platform/components/web-shell";
@@ -64,20 +62,14 @@ function App() {
     buyer: ["Pièce d'identité", "Simulation bancaire"],
     seller: ["Titre de propriété"],
   });
-  const [assistantDraft, setAssistantDraft] = useState(scenarios.buyer.assistantPrompts[0]);
-  const [assistantThreads, setAssistantThreads] = useState<AssistantThread>(() => ({
-    buyer: assistantConversations.buyer.map((message) => ({
-      role: message.from,
-      content: message.text,
-    })),
-    seller: assistantConversations.seller.map((message) => ({
-      role: message.from,
-      content: message.text,
-    })),
-  }));
+  const [assistantDraft, setAssistantDraft] = useState("");
+  const [assistantThreads, setAssistantThreads] = useState<AssistantThread>({
+    buyer: [],
+    seller: [],
+  });
   const [assistantError, setAssistantError] = useState<string | null>(null);
   const [assistantLoading, setAssistantLoading] = useState(false);
-  const [screenVariants, setScreenVariants] = useState<ScreenVariantState>(defaultScreenVariants);
+  const screenVariants = defaultScreenVariants;
   const [projectsData, setProjectsData] = useState<ModeRecord<ProjectsResponse | null>>({
     buyer: null,
     seller: null,
@@ -106,14 +98,14 @@ function App() {
   );
   const scenario = scenarios[mode];
 
-  const resetModeScopedState = (nextMode: ProjectMode) => {
+  const resetModeScopedState = () => {
     setSelectedListingIndex(0);
     setSelectedProjectStepIndex(0);
     setSelectedDocumentIndex(0);
     setSelectedSocialCircleIndex(0);
     setSelectedSocialThreadIndex(0);
     setDocumentFilter("all");
-    setAssistantDraft(scenarios[nextMode].assistantPrompts[0]);
+    setAssistantDraft("");
     setAssistantError(null);
   };
 
@@ -175,7 +167,7 @@ function App() {
 
   const handleModeChange = (nextMode: ProjectMode) => {
     setMode(nextMode);
-    resetModeScopedState(nextMode);
+    resetModeScopedState();
 
     if (activeAction !== "estimate") {
       setActiveAction(nextMode);
@@ -188,18 +180,18 @@ function App() {
 
     if (id === "buyer") {
       setMode("buyer");
-      resetModeScopedState("buyer");
+      resetModeScopedState();
       return;
     }
 
     if (id === "seller") {
       setMode("seller");
-      resetModeScopedState("seller");
+      resetModeScopedState();
       return;
     }
 
     setMode("seller");
-    resetModeScopedState("seller");
+    resetModeScopedState();
     setAssistantDraft("J'aimerais estimer mon bien avant de choisir une stratégie de vente.");
   };
 
@@ -210,16 +202,6 @@ function App() {
     }
 
     setActiveScreen("projects");
-  };
-
-  const handleVariantChange = <T extends keyof ScreenVariantState>(
-    screen: T,
-    variant: ScreenVariantState[T],
-  ) => {
-    setScreenVariants((current) => ({
-      ...current,
-      [screen]: variant,
-    }));
   };
 
   const handleDocumentFilterChange = (nextFilter: DocumentFilter) => {
@@ -453,9 +435,7 @@ function App() {
     }
   };
 
-  const handleAssistantSubmit = async () => {
-    const content = assistantDraft.trim();
-
+  const submitAssistantMessage = async (content: string, provider: AssistantProvider) => {
     if (!content || assistantLoading) {
       return;
     }
@@ -478,7 +458,7 @@ function App() {
     try {
       const agentResult = await runCoachImmoAgent({
         mode,
-        provider: assistantProvider,
+        provider,
         query: content,
         messages: nextThread,
         contextLabels: documentContextSelection[mode],
@@ -496,6 +476,9 @@ function App() {
           {
             role: "assistant",
             content: agentResult.reply,
+            provider,
+            model: agentResult.model || getAssistantRuntime(provider).model,
+            sourcePrompt: content,
           },
         ],
       }));
@@ -514,10 +497,23 @@ function App() {
     }
   };
 
+  const handleAssistantSubmit = async () => {
+    await submitAssistantMessage(assistantDraft.trim(), assistantProvider);
+  };
+
   const handleAssistantProviderChange = (provider: AssistantProvider) => {
     setAssistantProvider(provider);
     setAssistantError(null);
     window.localStorage.setItem("coachimmoia:assistant-provider", provider);
+  };
+
+  const handleCompareResponse = (message: AssistantMessage, provider: AssistantProvider) => {
+    if (!message.sourcePrompt || assistantLoading) {
+      return;
+    }
+
+    handleAssistantProviderChange(provider);
+    void submitAssistantMessage(message.sourcePrompt, provider);
   };
 
   return (
@@ -545,6 +541,7 @@ function App() {
           mode={mode}
           onActionChange={handleActionChange}
           onAssistantProviderChange={handleAssistantProviderChange}
+          onCompareResponse={handleCompareResponse}
           onCreateDocument={handleCreateDocument}
           onCreateProject={handleCreateProject}
           onCreateSocialThread={handleCreateSocialThread}
@@ -589,6 +586,7 @@ function App() {
           mode={mode}
           onActionChange={handleActionChange}
           onAssistantProviderChange={handleAssistantProviderChange}
+          onCompareResponse={handleCompareResponse}
           onDraftChange={setAssistantDraft}
           onModeChange={handleModeChange}
           onNavigate={setActiveScreen}
@@ -597,7 +595,6 @@ function App() {
           onSelectSocialCircle={handleSocialCircleSelect}
           onSelectSocialThread={setSelectedSocialThreadIndex}
           onSubmit={handleAssistantSubmit}
-          onVariantChange={handleVariantChange}
           scenario={scenario}
           screenVariants={screenVariants}
           selectedSocialCircleIndex={selectedSocialCircleIndex}

@@ -87,7 +87,7 @@ export async function sendAssistantMessage({
               },
             ]
           : []),
-        ...messages,
+        ...messages.map(({ role, content }) => ({ role, content })),
       ],
     }),
   });
@@ -97,7 +97,7 @@ export async function sendAssistantMessage({
   if (!response.ok) {
     throw new Error(
       extractApiError(payload.error) ||
-        `L'API ${runtime.providerLabel} a répondu avec ${response.status}. Vérifiez la clé API et le modèle configuré.`,
+        `${runtime.providerLabel} est momentanément indisponible. Réessayez ou choisissez l'autre modèle.`,
     );
   }
 

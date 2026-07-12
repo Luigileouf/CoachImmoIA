@@ -36,6 +36,7 @@ export async function forwardMistralChat(
     },
     body: JSON.stringify({
       model: runtime.model,
+      max_tokens: 700,
       messages: body.messages ?? [],
     }),
   });

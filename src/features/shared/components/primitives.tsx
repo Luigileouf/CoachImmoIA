@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { ActionCard, ProjectMode } from "../../../types/product";
-import type { AssistantMessage } from "../../../lib/assistant";
+import type { AssistantMessage, AssistantProvider } from "../../../lib/assistant";
 import { listingFeeds } from "../../../data/content";
 
 export function LogoMark() {
@@ -376,10 +376,52 @@ export function ListingCard({
   );
 }
 
-export function AssistantThreadBubble({ message }: { message: AssistantMessage }) {
+export function AssistantThreadBubble({
+  message,
+  onCompare,
+}: {
+  message: AssistantMessage;
+  onCompare?: (message: AssistantMessage, provider: AssistantProvider) => void;
+}) {
+  const alternativeProvider = message.provider === "mistral" ? "google" : "mistral";
+  const providerLabel = message.provider === "google" ? "Gemma" : message.provider === "mistral" ? "Mistral" : null;
+  const contentLines = message.content.split("\n").filter((line) => line.trim());
+
+  const renderLine = (line: string, index: number) => {
+    const cleanLine = line
+      .replace(/^#{1,6}\s+/, "")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      .trim();
+
+    if (!cleanLine || cleanLine === "---") {
+      return null;
+    }
+
+    if (/^#{1,6}\s+/.test(line)) {
+      return <strong className="message-bubble__heading" key={`${cleanLine}-${index}`}>{cleanLine}</strong>;
+    }
+
+    if (/^[-✅❌]\s*/.test(cleanLine)) {
+      return <span className="message-bubble__list-item" key={`${cleanLine}-${index}`}>{cleanLine.replace(/^[-✅❌]\s*/, "")}</span>;
+    }
+
+    return <p key={`${cleanLine}-${index}`}>{cleanLine}</p>;
+  };
+
   return (
     <div className={message.role === "assistant" ? "message-bubble is-assistant" : "message-bubble is-user"}>
-      {message.content}
+      {providerLabel ? <span className="message-bubble__provider">{providerLabel}</span> : null}
+      <div className="message-bubble__content">{contentLines.map(renderLine)}</div>
+      {message.role === "assistant" && message.sourcePrompt && message.provider && onCompare ? (
+        <button
+          className="message-bubble__compare"
+          onClick={() => onCompare(message, alternativeProvider)}
+          type="button"
+        >
+          Tester avec {alternativeProvider === "google" ? "Gemma" : "Mistral"}
+        </button>
+      ) : null}
     </div>
   );
 }
