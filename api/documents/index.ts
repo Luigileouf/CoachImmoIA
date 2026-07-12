@@ -2,6 +2,7 @@ import { getDocumentsPayload } from "../_lib/domain.js";
 import { json, methodNotAllowed } from "../_lib/http.js";
 import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase.js";
 import { scenarios, type ProjectMode } from "../../src/data/content.js";
+import { adaptWebHandler } from "../_lib/vercel-node.js";
 
 function mapDocumentRow(row: {
   label: string;
@@ -34,7 +35,7 @@ export const config = {
   runtime: "nodejs",
 };
 
-export default async function handler(request: Request) {
+async function webHandler(request: Request) {
   if (request.method === "GET") {
     const { searchParams } = new URL(request.url);
     const mode = searchParams.get("mode") === "seller" ? "seller" : "buyer";
@@ -246,3 +247,5 @@ export default async function handler(request: Request) {
 
   return methodNotAllowed(["GET", "POST"]);
 }
+
+export default adaptWebHandler(webHandler);

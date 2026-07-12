@@ -7,12 +7,13 @@ import {
   socialStats,
   type ProjectMode,
 } from "../../src/data/content.js";
+import { adaptWebHandler } from "../_lib/vercel-node.js";
 
 export const config = {
   runtime: "nodejs",
 };
 
-export default async function handler(request: Request) {
+async function webHandler(request: Request) {
   if (request.method === "GET") {
     const { searchParams } = new URL(request.url);
     const mode = searchParams.get("mode") === "seller" ? "seller" : "buyer";
@@ -198,7 +199,7 @@ export default async function handler(request: Request) {
         method: "GET",
       });
 
-      return await handler(syntheticRequest);
+      return await webHandler(syntheticRequest);
     } catch (error) {
       return json(
         {
@@ -214,3 +215,5 @@ export default async function handler(request: Request) {
 
   return methodNotAllowed(["GET", "POST"]);
 }
+
+export default adaptWebHandler(webHandler);

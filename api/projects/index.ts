@@ -3,12 +3,13 @@ import { json, methodNotAllowed } from "../_lib/http.js";
 import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase.js";
 import { projectSteps, scenarios, type ProjectMode } from "../../src/data/content.js";
 import { projectStepMeta } from "../../src/features/platform/data/workspace.js";
+import { adaptWebHandler } from "../_lib/vercel-node.js";
 
 export const config = {
   runtime: "nodejs",
 };
 
-export default async function handler(request: Request) {
+async function webHandler(request: Request) {
   if (request.method === "GET") {
     const { searchParams } = new URL(request.url);
     const mode = searchParams.get("mode") === "seller" ? "seller" : "buyer";
@@ -177,3 +178,5 @@ export default async function handler(request: Request) {
 
   return methodNotAllowed(["GET", "POST"]);
 }
+
+export default adaptWebHandler(webHandler);

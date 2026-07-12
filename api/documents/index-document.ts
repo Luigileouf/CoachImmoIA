@@ -2,6 +2,7 @@ import { getDocumentsPayload } from "../_lib/domain.js";
 import { json, methodNotAllowed } from "../_lib/http.js";
 import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase.js";
 import type { ProjectMode } from "../../src/data/content.js";
+import { adaptWebHandler } from "../_lib/vercel-node.js";
 
 function mapDocumentRow(row: {
   label: string;
@@ -34,7 +35,7 @@ export const config = {
   runtime: "nodejs",
 };
 
-export default async function handler(request: Request) {
+async function webHandler(request: Request) {
   if (request.method !== "POST") {
     return methodNotAllowed(["POST"]);
   }
@@ -159,3 +160,5 @@ export default async function handler(request: Request) {
     );
   }
 }
+
+export default adaptWebHandler(webHandler);
