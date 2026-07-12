@@ -1,4 +1,5 @@
 import type { ProjectMode } from "../../types/product";
+import type { AssistantProvider } from "./runtime";
 
 export type AssistantRole = "system" | "user" | "assistant";
 
@@ -9,6 +10,7 @@ export type AssistantMessage = {
 
 export type AssistantRequest = {
   mode: ProjectMode;
+  provider: AssistantProvider;
   messages: AssistantMessage[];
   contextSnippets?: string[];
 };

@@ -618,6 +618,46 @@ svg {
   color: #fff;
 }
 
+.provider-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  padding: 4px;
+  border: 1px solid rgba(228, 221, 213, 0.92);
+  border-radius: 999px;
+  background: rgba(255, 252, 248, 0.9);
+}
+
+.provider-selector__label {
+  padding: 0 8px;
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.provider-selector__button {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.provider-selector__button.is-active {
+  background: var(--ink);
+  color: #fff;
+}
+
+.provider-selector__button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
 .platform-summary-copy {
   font-size: 0.98rem;
   line-height: 1.65;

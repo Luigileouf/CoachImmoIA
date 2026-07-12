@@ -10,7 +10,8 @@ import {
   type AppScreen,
   type ProjectMode,
 } from "../../../data/content";
-import { getAssistantRuntime, type AssistantMessage } from "../../../lib/assistant";
+import { getAssistantRuntime, type AssistantMessage, type AssistantProvider } from "../../../lib/assistant";
+import { ProviderSelector } from "../../shared/components/provider-selector";
 import type { DocumentFilter, ScenarioData } from "../../app/types";
 import {
   listingWorkspaceMeta,
@@ -407,6 +408,7 @@ function ListingsWorkspaceScreen({
 }
 
 function AssistantWorkspaceScreen({
+  assistantProvider,
   mode,
   scenario,
   draft,
@@ -415,10 +417,12 @@ function AssistantWorkspaceScreen({
   messages,
   assistantSources,
   onDraftChange,
+  onAssistantProviderChange,
   onModeChange,
   onPromptClick,
   onSubmit,
 }: {
+  assistantProvider: AssistantProvider;
   mode: ProjectMode;
   scenario: ScenarioData;
   draft: string;
@@ -427,15 +431,16 @@ function AssistantWorkspaceScreen({
   messages: AssistantMessage[];
   assistantSources: RagContextResponse["sources"];
   onDraftChange: (value: string) => void;
+  onAssistantProviderChange: (provider: AssistantProvider) => void;
   onModeChange: (mode: ProjectMode) => void;
   onPromptClick: (prompt: string) => void;
   onSubmit: () => void;
 }) {
-  const runtime = getAssistantRuntime();
+  const runtime = getAssistantRuntime(assistantProvider);
 
   return (
     <section className="platform-screen platform-screen--assistant">
-      <AppTopBar subtitle={`Mistral · parcours ${mode === "buyer" ? "acheteur" : "vendeur"}`} />
+      <AppTopBar subtitle={`${runtime.providerLabel} · parcours ${mode === "buyer" ? "acheteur" : "vendeur"}`} />
 
       <header className="screen-intro">
         <p className="eyebrow">Assistant IA</p>
@@ -445,8 +450,13 @@ function AssistantWorkspaceScreen({
 
       <div className="platform-toolbar-row">
         <ModeTabs mode={mode} onChange={onModeChange} />
-        <span className="platform-chip">Modèle actif : {runtime.label}</span>
+        <ProviderSelector
+          disabled={isLoading}
+          onChange={onAssistantProviderChange}
+          provider={assistantProvider}
+        />
       </div>
+      <span className="platform-chip">Modèle actif : {runtime.label}</span>
 
       <div className="platform-grid platform-grid--assistant">
         <article className="platform-surface platform-chat-surface">
@@ -1284,6 +1294,7 @@ function ProfileWorkspaceScreen({
 type WebPlatformShellProps = {
   activeScreen: AppScreen;
   activeAction: "buyer" | "seller" | "estimate";
+  assistantProvider: AssistantProvider;
   mode: ProjectMode;
   scenario: ScenarioData;
   selectedListingIndex: number;
@@ -1312,6 +1323,7 @@ type WebPlatformShellProps = {
   onCreateProject: () => void;
   onCreateSocialThread: (payload: { circleId: string; title: string; body: string }) => void;
   onActionChange: (id: "buyer" | "seller" | "estimate") => void;
+  onAssistantProviderChange: (provider: AssistantProvider) => void;
   onDraftChange: (value: string) => void;
   onDocumentFilterChange: (filter: DocumentFilter) => void;
   onIndexDocument: (label: string) => void;
@@ -1334,6 +1346,7 @@ type WebPlatformShellProps = {
 export function WebPlatformShell({
   activeScreen,
   activeAction,
+  assistantProvider,
   mode,
   scenario,
   selectedListingIndex,
@@ -1362,6 +1375,7 @@ export function WebPlatformShell({
   onCreateProject,
   onCreateSocialThread,
   onActionChange,
+  onAssistantProviderChange,
   onDraftChange,
   onDocumentFilterChange,
   onIndexDocument,
@@ -1413,12 +1427,14 @@ export function WebPlatformShell({
           {activeScreen === "assistant" ? (
             <AssistantWorkspaceScreen
               assistantSources={assistantSources}
+              assistantProvider={assistantProvider}
               draft={draft}
               error={error}
               isLoading={isLoading}
               messages={messages}
               mode={mode}
               onDraftChange={onDraftChange}
+              onAssistantProviderChange={onAssistantProviderChange}
               onModeChange={onModeChange}
               onPromptClick={onPromptClick}
               onSubmit={onSubmit}

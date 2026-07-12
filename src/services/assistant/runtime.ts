@@ -3,8 +3,13 @@ import type { ProjectMode } from "../../types/product";
 const DEFAULT_MODEL = "mistral-small-latest";
 const DEFAULT_GEMMA_MODEL = "gemma-4-26b-a4b-it";
 
-export function getAssistantRuntime() {
-  const provider = import.meta.env.VITE_LLM_PROVIDER === "google" ? "google" : "mistral";
+export type AssistantProvider = "mistral" | "google";
+
+export function getDefaultAssistantProvider(): AssistantProvider {
+  return import.meta.env.VITE_LLM_PROVIDER === "google" ? "google" : "mistral";
+}
+
+export function getAssistantRuntime(provider: AssistantProvider = getDefaultAssistantProvider()) {
   const model = provider === "google"
     ? import.meta.env.VITE_GEMMA_MODEL || DEFAULT_GEMMA_MODEL
     : import.meta.env.VITE_MISTRAL_MODEL || DEFAULT_MODEL;

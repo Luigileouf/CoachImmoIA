@@ -7,6 +7,8 @@ import {
   type ProjectMode,
 } from "./data/content";
 import {
+  getAssistantRuntime,
+  type AssistantProvider,
   type AssistantMessage,
 } from "./lib/assistant";
 import {
@@ -43,6 +45,12 @@ import { WebPlatformShell } from "./features/platform/components/web-shell";
 type ModeRecord<T> = Record<ProjectMode, T>;
 
 function App() {
+  const [assistantProvider, setAssistantProvider] = useState<AssistantProvider>(() => {
+    const storedProvider = window.localStorage.getItem("coachimmoia:assistant-provider");
+    return storedProvider === "mistral" || storedProvider === "google"
+      ? storedProvider
+      : getAssistantRuntime().provider;
+  });
   const [mode, setMode] = useState<ProjectMode>("buyer");
   const [activeAction, setActiveAction] = useState<ActionCard["id"]>("buyer");
   const [activeScreen, setActiveScreen] = useState<AppScreen>("home");
@@ -470,6 +478,7 @@ function App() {
     try {
       const agentResult = await runCoachImmoAgent({
         mode,
+        provider: assistantProvider,
         query: content,
         messages: nextThread,
         contextLabels: documentContextSelection[mode],
@@ -505,6 +514,12 @@ function App() {
     }
   };
 
+  const handleAssistantProviderChange = (provider: AssistantProvider) => {
+    setAssistantProvider(provider);
+    setAssistantError(null);
+    window.localStorage.setItem("coachimmoia:assistant-provider", provider);
+  };
+
   return (
     <main className="app-stage">
       <div className="app-glow app-glow--left" />
@@ -515,6 +530,7 @@ function App() {
           activeAction={activeAction}
           activeScreen={activeScreen}
           assistantSources={assistantSources[mode]}
+          assistantProvider={assistantProvider}
           authConfigured={authConfigured}
           authError={authError}
           authLoading={authLoading}
@@ -528,6 +544,7 @@ function App() {
           messages={assistantThreads[mode]}
           mode={mode}
           onActionChange={handleActionChange}
+          onAssistantProviderChange={handleAssistantProviderChange}
           onCreateDocument={handleCreateDocument}
           onCreateProject={handleCreateProject}
           onCreateSocialThread={handleCreateSocialThread}
@@ -564,12 +581,14 @@ function App() {
         <MobilePreviewShell
           activeAction={activeAction}
           activeScreen={activeScreen}
+          assistantProvider={assistantProvider}
           draft={assistantDraft}
           error={assistantError}
           isLoading={assistantLoading}
           messages={assistantThreads[mode]}
           mode={mode}
           onActionChange={handleActionChange}
+          onAssistantProviderChange={handleAssistantProviderChange}
           onDraftChange={setAssistantDraft}
           onModeChange={handleModeChange}
           onNavigate={setActiveScreen}

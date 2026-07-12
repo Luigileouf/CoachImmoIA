@@ -12,7 +12,8 @@ import {
   type AppScreen,
   type ProjectMode,
 } from "../../../data/content";
-import { getAssistantRuntime, type AssistantMessage } from "../../../lib/assistant";
+import { getAssistantRuntime, type AssistantMessage, type AssistantProvider } from "../../../lib/assistant";
+import { ProviderSelector } from "../../shared/components/provider-selector";
 import type {
   AssistantVariant,
   HomeVariant,
@@ -201,6 +202,7 @@ export function ListingsScreen({
 }
 
 export function AssistantScreen({
+  assistantProvider,
   mode,
   scenario,
   variant,
@@ -209,10 +211,12 @@ export function AssistantScreen({
   isLoading,
   messages,
   onDraftChange,
+  onAssistantProviderChange,
   onModeChange,
   onPromptClick,
   onSubmit,
 }: {
+  assistantProvider: AssistantProvider;
   mode: ProjectMode;
   scenario: ScenarioData;
   variant: AssistantVariant;
@@ -221,11 +225,12 @@ export function AssistantScreen({
   isLoading: boolean;
   messages: AssistantMessage[];
   onDraftChange: (value: string) => void;
+  onAssistantProviderChange: (provider: AssistantProvider) => void;
   onModeChange: (mode: ProjectMode) => void;
   onPromptClick: (prompt: string) => void;
   onSubmit: () => void;
 }) {
-  const runtime = getAssistantRuntime();
+  const runtime = getAssistantRuntime(assistantProvider);
   const showLoadingPreview = variant === "loading";
 
   if (variant === "empty") {
@@ -266,6 +271,12 @@ export function AssistantScreen({
       </header>
 
       <ModeTabs mode={mode} onChange={onModeChange} />
+
+      <ProviderSelector
+        disabled={isLoading || showLoadingPreview}
+        onChange={onAssistantProviderChange}
+        provider={assistantProvider}
+      />
 
       <article className="assistant-hero-card">
         <div>
@@ -792,6 +803,7 @@ export function PrototypeToolbar({
 type MobilePreviewShellProps = {
   activeScreen: AppScreen;
   activeAction: ActionCard["id"];
+  assistantProvider: AssistantProvider;
   mode: ProjectMode;
   scenario: ScenarioData;
   screenVariants: ScreenVariantState;
@@ -802,6 +814,7 @@ type MobilePreviewShellProps = {
   selectedSocialCircleIndex: number;
   selectedSocialThreadIndex: number;
   onActionChange: (id: ActionCard["id"]) => void;
+  onAssistantProviderChange: (provider: AssistantProvider) => void;
   onDraftChange: (value: string) => void;
   onModeChange: (mode: ProjectMode) => void;
   onNavigate: (screen: AppScreen) => void;
@@ -816,6 +829,7 @@ type MobilePreviewShellProps = {
 export function MobilePreviewShell({
   activeScreen,
   activeAction,
+  assistantProvider,
   mode,
   scenario,
   screenVariants,
@@ -826,6 +840,7 @@ export function MobilePreviewShell({
   selectedSocialCircleIndex,
   selectedSocialThreadIndex,
   onActionChange,
+  onAssistantProviderChange,
   onDraftChange,
   onModeChange,
   onNavigate,
@@ -865,12 +880,14 @@ export function MobilePreviewShell({
     if (activeScreen === "assistant") {
       return (
         <AssistantScreen
+          assistantProvider={assistantProvider}
           draft={draft}
           error={error}
           isLoading={isLoading}
           messages={messages}
           mode={mode}
           onDraftChange={onDraftChange}
+          onAssistantProviderChange={onAssistantProviderChange}
           onModeChange={onModeChange}
           onPromptClick={onPromptClick}
           onSubmit={onSubmit}

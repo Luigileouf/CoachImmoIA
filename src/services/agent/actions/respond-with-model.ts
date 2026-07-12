@@ -15,6 +15,7 @@ export const respondWithModelAction: AgentActionHandler = async ({
 
   const response = await environment.sendModelReply({
     mode: memory.mode,
+    provider: memory.provider,
     messages: [
       {
         role: "system",

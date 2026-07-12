@@ -36,10 +36,11 @@ function extractContent(content: MistralContent | undefined) {
 
 export async function sendAssistantMessage({
   mode,
+  provider,
   messages,
   contextSnippets = [],
 }: AssistantRequest): Promise<{ content: string; model: string }> {
-  const runtime = getAssistantRuntime();
+  const runtime = getAssistantRuntime(provider);
   const groundingMessage =
     contextSnippets.length > 0
       ? [

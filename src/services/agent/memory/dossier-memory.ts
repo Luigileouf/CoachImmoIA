@@ -4,6 +4,7 @@ import type { DossierAgentMemory, DossierAgentRequest } from "../types";
 export function createDossierMemory(request: DossierAgentRequest): DossierAgentMemory {
   return {
     mode: request.mode,
+    provider: request.provider,
     query: request.query,
     messages: request.messages,
     contextLabels: request.contextLabels,

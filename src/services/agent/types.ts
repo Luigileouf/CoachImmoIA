@@ -1,5 +1,5 @@
 import type { RagContextResponse } from "../api";
-import type { AssistantMessage } from "../assistant";
+import type { AssistantMessage, AssistantProvider } from "../assistant";
 import type { ProjectMode } from "../../types/product";
 
 export type AgentGoalId = "dossier" | "buyer" | "seller";
@@ -33,6 +33,7 @@ export type AgentGoalDefinition = {
 
 export type DossierAgentRequest = {
   mode: ProjectMode;
+  provider: AssistantProvider;
   query: string;
   messages: AssistantMessage[];
   contextLabels: string[];
@@ -40,6 +41,7 @@ export type DossierAgentRequest = {
 
 export type DossierAgentMemory = {
   mode: ProjectMode;
+  provider: AssistantProvider;
   query: string;
   messages: AssistantMessage[];
   contextLabels: string[];
@@ -59,6 +61,7 @@ export type DossierAgentEnvironment = {
   }) => Promise<RagContextResponse>;
   sendModelReply: (payload: {
     mode: ProjectMode;
+    provider: AssistantProvider;
     messages: AssistantMessage[];
     contextSnippets?: string[];
   }) => Promise<{ content: string; model: string }>;
