@@ -2108,6 +2108,156 @@ svg {
   min-height: 50px;
 }
 
+.coach-access-button {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 8px 18px 8px 9px;
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(19, 36, 44, 0.24);
+  font: inherit;
+  font-weight: 800;
+}
+
+.coach-access-button__icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--ink);
+}
+
+.coach-access-button__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.coach-contact-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(19, 36, 44, 0.52);
+  backdrop-filter: blur(10px);
+}
+
+.coach-contact-panel {
+  display: grid;
+  gap: 22px;
+  width: min(100%, 520px);
+  max-height: min(760px, calc(100vh - 40px));
+  overflow-y: auto;
+  border: 1px solid rgba(228, 221, 213, 0.95);
+  border-radius: 30px;
+  padding: 26px;
+  background: #fffdf9;
+  box-shadow: 0 30px 80px rgba(19, 36, 44, 0.28);
+}
+
+.coach-contact-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.coach-contact-panel__header h2 {
+  margin: 6px 0 0;
+  color: var(--ink);
+  font-family: "Cormorant Garamond", "Iowan Old Style", "Times New Roman", serif;
+  font-size: 2.2rem;
+  line-height: 0.95;
+}
+
+.coach-contact-panel__close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  font-size: 1.5rem;
+}
+
+.coach-contact-form,
+.coach-contact-success {
+  display: grid;
+  gap: 16px;
+}
+
+.coach-contact-form > p,
+.coach-contact-success p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.coach-contact-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.coach-contact-form input,
+.coach-contact-form select,
+.coach-contact-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.coach-contact-form textarea {
+  resize: vertical;
+}
+
+.coach-contact-form .coach-contact-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.coach-contact-consent input {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--mint-deep);
+}
+
+.coach-contact-success {
+  border-radius: 24px;
+  padding: 20px;
+  background: var(--mint-soft);
+}
+
+.coach-contact-success strong {
+  color: var(--ink);
+  font-size: 1.2rem;
+}
+
 .summary-card,
 .sheet-card,
 .composer-card,
@@ -2613,6 +2763,35 @@ svg {
 }
 
 @media (max-width: 540px) {
+  .coach-access-button {
+    right: 14px;
+    bottom: 88px;
+    min-height: 48px;
+    padding: 6px 14px 6px 7px;
+    font-size: 0.78rem;
+  }
+
+  .coach-access-button__icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .coach-contact-overlay {
+    place-items: end center;
+    padding: 0;
+  }
+
+  .coach-contact-panel {
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 28px 28px 0 0;
+    padding: 22px 18px calc(22px + env(safe-area-inset-bottom));
+  }
+
+  .coach-contact-panel__header h2 {
+    font-size: 2rem;
+  }
+
   .app-stage {
     padding: 0;
   }

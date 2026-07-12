@@ -39,6 +39,7 @@ import {
 } from "./features/app/types";
 import { MobilePreviewShell } from "./features/mobile/components/mobile-screens";
 import { WebPlatformShell } from "./features/platform/components/web-shell";
+import { CoachContact } from "./features/shared/components/coach-contact";
 
 type ModeRecord<T> = Record<ProjectMode, T>;
 
@@ -626,6 +627,13 @@ function App() {
           sessionEmail={sessionEmail}
         />
       </div>
+
+      <CoachContact
+        activeScreen={activeScreen}
+        authConfigured={authConfigured}
+        mode={mode}
+        sessionEmail={sessionEmail}
+      />
     </main>
   );
 }
