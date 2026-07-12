@@ -19,7 +19,7 @@ export function getSupabaseRuntimeConfig() {
     url: supabaseUrl,
     anonKey: supabaseAnonKey,
     serviceRoleKey: supabaseServiceRoleKey,
-    isConfigured: Boolean(supabaseUrl && (supabaseServiceRoleKey || supabaseAnonKey)),
+    isConfigured: Boolean(supabaseUrl && supabaseServiceRoleKey),
   };
 }
 

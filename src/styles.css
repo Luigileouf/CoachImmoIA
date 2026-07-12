@@ -2080,6 +2080,11 @@ svg {
   background: rgba(255, 247, 243, 0.95);
 }
 
+.feedback-banner.is-success {
+  color: var(--mint-deep);
+  background: var(--mint-soft);
+}
+
 .summary-card,
 .sheet-card,
 .composer-card,

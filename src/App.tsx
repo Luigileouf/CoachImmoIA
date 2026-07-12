@@ -91,6 +91,7 @@ function App() {
   const [socialBusy, setSocialBusy] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
 
   const authConfigured = Boolean(
@@ -288,7 +289,7 @@ function App() {
       }
 
       const storagePath =
-        file && authConfigured ? await uploadProjectDocument(file) : undefined;
+        file && authConfigured && sessionEmail ? await uploadProjectDocument(file) : undefined;
       const createdDocumentResponse = await createDocument({
         mode,
         projectId: projectsData[mode]?.projectId || null,
@@ -399,6 +400,7 @@ function App() {
   const handleSignIn = async (email: string, password: string) => {
     setAuthLoading(true);
     setAuthError(null);
+    setAuthNotice(null);
     try {
       const session = await signInWithPassword(email, password);
       setSessionEmail(session?.user.email || null);
@@ -412,11 +414,24 @@ function App() {
   const handleSignUp = async (email: string, password: string) => {
     setAuthLoading(true);
     setAuthError(null);
+    setAuthNotice(null);
     try {
-      const session = await signUpWithPassword(email, password);
-      setSessionEmail(session?.user.email || email);
+      const { session, user } = await signUpWithPassword(email, password);
+
+      if (session) {
+        setSessionEmail(session.user.email || email);
+      } else if (user) {
+        setAuthNotice("Compte créé. Consultez votre e-mail pour confirmer votre inscription.");
+      }
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : "Creation de compte impossible.");
+      const message = error instanceof Error ? error.message : "Création de compte impossible.";
+      setAuthError(
+        message === "Failed to fetch"
+          ? "Le service d’authentification est momentanément inaccessible. Réessayez dans quelques instants."
+          : message.toLowerCase().includes("email rate limit")
+            ? "Trop d’e-mails de confirmation ont été demandés. Patientez quelques minutes avant de réessayer."
+          : message,
+      );
     } finally {
       setAuthLoading(false);
     }
@@ -425,6 +440,7 @@ function App() {
   const handleSignOut = async () => {
     setAuthLoading(true);
     setAuthError(null);
+    setAuthNotice(null);
     try {
       await signOut();
       setSessionEmail(null);
@@ -529,6 +545,7 @@ function App() {
           assistantProvider={assistantProvider}
           authConfigured={authConfigured}
           authError={authError}
+          authNotice={authNotice}
           authLoading={authLoading}
           documentBusy={documentBusy}
           documentContextSelection={documentContextSelection[mode]}

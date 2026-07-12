@@ -1172,6 +1172,7 @@ function ProfileWorkspaceScreen({
   authConfigured,
   authLoading,
   authError,
+  authNotice,
   sessionEmail,
   onSignIn,
   onSignOut,
@@ -1180,6 +1181,7 @@ function ProfileWorkspaceScreen({
   authConfigured: boolean;
   authLoading: boolean;
   authError: string | null;
+  authNotice: string | null;
   sessionEmail: string | null;
   onSignIn: (email: string, password: string) => void;
   onSignOut: () => void;
@@ -1273,6 +1275,7 @@ function ProfileWorkspaceScreen({
                 </button>
               </div>
               {authError ? <div className="feedback-banner is-error">{authError}</div> : null}
+              {authNotice ? <div className="feedback-banner is-success">{authNotice}</div> : null}
             </div>
           )}
         </article>
@@ -1305,6 +1308,7 @@ type WebPlatformShellProps = {
   authConfigured: boolean;
   authLoading: boolean;
   authError: string | null;
+  authNotice: string | null;
   sessionEmail: string | null;
   projectBusy: boolean;
   documentBusy: boolean;
@@ -1358,6 +1362,7 @@ export function WebPlatformShell({
   authConfigured,
   authLoading,
   authError,
+  authNotice,
   sessionEmail,
   projectBusy,
   documentBusy,
@@ -1480,6 +1485,7 @@ export function WebPlatformShell({
             <ProfileWorkspaceScreen
               authConfigured={authConfigured}
               authError={authError}
+              authNotice={authNotice}
               authLoading={authLoading}
               onSignIn={onSignIn}
               onSignOut={onSignOut}

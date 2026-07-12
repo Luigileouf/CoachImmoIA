@@ -37,7 +37,7 @@ export async function signUpWithPassword(email: string, password: string) {
     throw error;
   }
 
-  return data.session;
+  return data;
 }
 
 export async function signOut() {
