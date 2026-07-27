@@ -128,6 +128,7 @@ Le point d'entree design versionne est dans :
 
 Les specs UX principales sont dans :
 
+- [docs/plan-action-audit-ux-ui-2026.md](/Users/lmetivier/Dev/01_Projets_IA_Agents/CoachImoIA/docs/plan-action-audit-ux-ui-2026.md)
 - [docs/ux-parcours-produit.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-parcours-produit.md)
 - [docs/ux-flow-acheteur-ecran-par-ecran.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-flow-acheteur-ecran-par-ecran.md)
 - [docs/ux-flow-vendeur-ecran-par-ecran.md](/Users/lmetivier/Dev/CoachImoIA/docs/ux-flow-vendeur-ecran-par-ecran.md)
