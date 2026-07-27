@@ -2972,3 +2972,29 @@ svg {
     grid-template-columns: 102px minmax(0, 1fr) auto;
   }
 }
+.demo-disclosure {
+  align-items: center;
+  background: #fff4cf;
+  border: 1px solid #e7ce79;
+  border-radius: 16px;
+  color: #26343a;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 12px 18px;
+}
+
+.demo-disclosure strong {
+  font-weight: 800;
+}
+
+.demo-disclosure span {
+  color: #58666c;
+}
+
+.form-field-error {
+  color: #a13d35;
+  font-size: 0.86rem;
+  margin: -6px 0 4px;
+}

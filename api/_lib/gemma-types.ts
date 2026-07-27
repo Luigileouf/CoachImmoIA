@@ -9,6 +9,7 @@ export type GemmaRequestBody = {
 
 export type GemmaGenerateResponse = {
   candidates?: Array<{
+    finishReason?: string;
     content?: {
       parts?: Array<{ text?: string }>;
     };

@@ -209,6 +209,9 @@ export function ModeTabs({
   activeAction?: ActionCard["id"];
   onActionChange?: (id: ActionCard["id"]) => void;
 }) {
+  const estimationEnabled =
+    includeEstimate && import.meta.env.VITE_ENABLE_ESTIMATION === "true";
+
   return (
     <div className="mode-tabs" role="tablist" aria-label="Type de parcours">
       <button
@@ -231,7 +234,7 @@ export function ModeTabs({
       >
         Vendeur
       </button>
-      {includeEstimate ? (
+      {estimationEnabled ? (
         <button
           className={activeAction === "estimate" ? "mode-tab is-active" : "mode-tab"}
           onClick={() => {
@@ -258,10 +261,12 @@ export function AppTopBar({ subtitle }: { subtitle: string }) {
         </div>
       </div>
 
-      <button className="round-button" type="button" aria-label="Notifications">
-        <BellIcon />
-        <span className="round-button__dot" />
-      </button>
+      {import.meta.env.VITE_ENABLE_NOTIFICATIONS === "true" ? (
+        <button className="round-button" type="button" aria-label="Notifications">
+          <BellIcon />
+          <span className="round-button__dot" />
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -413,7 +418,11 @@ export function AssistantThreadBubble({
     <div className={message.role === "assistant" ? "message-bubble is-assistant" : "message-bubble is-user"}>
       {providerLabel ? <span className="message-bubble__provider">{providerLabel}</span> : null}
       <div className="message-bubble__content">{contentLines.map(renderLine)}</div>
-      {message.role === "assistant" && message.sourcePrompt && message.provider && onCompare ? (
+      {import.meta.env.VITE_SHOW_MODEL_SELECTOR === "true" &&
+      message.role === "assistant" &&
+      message.sourcePrompt &&
+      message.provider &&
+      onCompare ? (
         <button
           className="message-bubble__compare"
           onClick={() => onCompare(message, alternativeProvider)}

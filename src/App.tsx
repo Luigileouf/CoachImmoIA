@@ -31,6 +31,7 @@ import {
   signUpWithPassword,
   subscribeToAuthChanges,
 } from "./services/auth/client";
+import { localizeAuthError, validateCredentials } from "./services/auth/validation";
 import { uploadProjectDocument } from "./services/supabase/storage";
 import {
   defaultScreenVariants,
@@ -88,6 +89,7 @@ function App() {
     seller: [],
   });
   const [projectBusy, setProjectBusy] = useState(false);
+  const [projectNotice, setProjectNotice] = useState<string | null>(null);
   const [documentBusy, setDocumentBusy] = useState(false);
   const [socialBusy, setSocialBusy] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
@@ -232,6 +234,7 @@ function App() {
 
   const handleCreateProject = async () => {
     setAssistantError(null);
+    setProjectNotice(null);
     setProjectBusy(true);
     try {
       const response = await createProject({
@@ -244,8 +247,11 @@ function App() {
         [mode]: response.data,
       }));
       setSelectedProjectStepIndex(0);
+      setProjectNotice("Projet créé. Votre feuille de route est prête.");
     } catch (error) {
-      setAssistantError(error instanceof Error ? error.message : "Creation du projet impossible.");
+      setAssistantError(
+        error instanceof Error ? error.message : "Création du projet impossible.",
+      );
     } finally {
       setProjectBusy(false);
     }
@@ -399,6 +405,12 @@ function App() {
   };
 
   const handleSignIn = async (email: string, password: string) => {
+    const validation = validateCredentials(email, password);
+    if (!validation.isValid) {
+      setAuthError(validation.emailError || validation.passwordError);
+      return;
+    }
+
     setAuthLoading(true);
     setAuthError(null);
     setAuthNotice(null);
@@ -406,13 +418,19 @@ function App() {
       const session = await signInWithPassword(email, password);
       setSessionEmail(session?.user.email || null);
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : "Connexion impossible.");
+      setAuthError(localizeAuthError(error));
     } finally {
       setAuthLoading(false);
     }
   };
 
   const handleSignUp = async (email: string, password: string) => {
+    const validation = validateCredentials(email, password);
+    if (!validation.isValid) {
+      setAuthError(validation.emailError || validation.passwordError);
+      return;
+    }
+
     setAuthLoading(true);
     setAuthError(null);
     setAuthNotice(null);
@@ -425,14 +443,7 @@ function App() {
         setAuthNotice("Compte créé. Consultez votre e-mail pour confirmer votre inscription.");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Création de compte impossible.";
-      setAuthError(
-        message === "Failed to fetch"
-          ? "Le service d’authentification est momentanément inaccessible. Réessayez dans quelques instants."
-          : message.toLowerCase().includes("email rate limit")
-            ? "Compte non créé : la limite d’e-mails a été atteinte et aucun message ne vous a été envoyé. Réessayez plus tard."
-          : message,
-      );
+      setAuthError(localizeAuthError(error, "Création de compte impossible."));
     } finally {
       setAuthLoading(false);
     }
@@ -581,6 +592,7 @@ function App() {
           onToggleDocumentContext={handleToggleDocumentContext}
           onSubmit={handleAssistantSubmit}
           projectBusy={projectBusy}
+          projectNotice={projectNotice}
           projectsData={projectsData[mode]}
           scenario={scenario}
           selectedDocumentIndex={selectedDocumentIndex}

@@ -32,5 +32,6 @@ export type MistralChatResponse = {
       content?: MistralContent;
     };
   }>;
+  incomplete?: boolean;
   error?: unknown;
 };

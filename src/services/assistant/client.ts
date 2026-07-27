@@ -108,7 +108,9 @@ export async function sendAssistantMessage({
   }
 
   return {
-    content,
+    content: payload.incomplete
+      ? `${content}\n\nRéponse incomplète : vous pouvez demander à l’assistant de continuer.`
+      : content,
     model: runtime.model,
   };
 }

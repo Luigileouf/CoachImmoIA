@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { validateCredentials } from "../../../services/auth/validation";
 import {
   listingFeeds,
   profileSections,
@@ -90,6 +91,7 @@ function PlatformSidebar({
       <nav className="platform-sidebar__nav" aria-label="Navigation plateforme">
         {navItems.map((item) => (
           <button
+            aria-current={activeScreen === item.key ? "page" : undefined}
             className={activeScreen === item.key ? "platform-sidebar__item is-active" : "platform-sidebar__item"}
             key={item.key}
             onClick={() => onNavigate(item.key)}
@@ -554,6 +556,7 @@ function ProjectsWorkspaceScreen({
   selectedStepIndex,
   error,
   projectBusy,
+  projectNotice,
   onCreateProject,
   onNavigate,
   onSelectStep,
@@ -564,6 +567,7 @@ function ProjectsWorkspaceScreen({
   selectedStepIndex: number;
   error: string | null;
   projectBusy: boolean;
+  projectNotice: string | null;
   onCreateProject: () => void;
   onNavigate: (screen: AppScreen) => void;
   onSelectStep: (index: number) => void;
@@ -651,6 +655,11 @@ function ProjectsWorkspaceScreen({
             <span className="platform-badge is-contrast">Coach recommande</span>
           </div>
           {error ? <div className="feedback-banner is-error">{error}</div> : null}
+          {projectNotice ? (
+            <div className="feedback-banner is-success" role="status">
+              {projectNotice}
+            </div>
+          ) : null}
           <p className="platform-summary-copy">
             {mode === "buyer"
               ? "Le bien cible reste prometteur, mais la copropriété et le calendrier bancaire doivent être vérifiés avant l'arbitrage de l'offre."
@@ -1189,6 +1198,7 @@ function ProfileWorkspaceScreen({
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const credentials = validateCredentials(email, password);
 
   return (
     <section className="platform-screen platform-screen--profile">
@@ -1242,24 +1252,42 @@ function ProfileWorkspaceScreen({
               </button>
             </div>
           ) : (
-            <div className="platform-composer">
+            <div className="platform-composer" aria-live="polite">
+              <label className="composer-card__label" htmlFor="platform-auth-email">
+                Adresse e-mail
+              </label>
               <input
+                autoComplete="email"
                 className="platform-composer__input"
+                id="platform-auth-email"
+                inputMode="email"
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="Email"
+                placeholder="vous@exemple.fr"
+                type="email"
                 value={email}
               />
+              <label className="composer-card__label" htmlFor="platform-auth-password">
+                Mot de passe
+              </label>
               <input
+                autoComplete="current-password"
                 className="platform-composer__input"
+                id="platform-auth-password"
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Mot de passe"
+                placeholder="8 caractères minimum"
                 type="password"
                 value={password}
               />
+              {email && credentials.emailError ? (
+                <p className="form-field-error">{credentials.emailError}</p>
+              ) : null}
+              {password && credentials.passwordError ? (
+                <p className="form-field-error">{credentials.passwordError}</p>
+              ) : null}
               <div className="platform-inline-actions">
                 <button
                   className="platform-primary-button"
-                  disabled={authLoading || !email.trim() || !password.trim()}
+                  disabled={authLoading || !credentials.isValid}
                   onClick={() => onSignIn(email, password)}
                   type="button"
                 >
@@ -1267,7 +1295,7 @@ function ProfileWorkspaceScreen({
                 </button>
                 <button
                   className="platform-ghost-button"
-                  disabled={authLoading || !email.trim() || !password.trim()}
+                  disabled={authLoading || !credentials.isValid}
                   onClick={() => onSignUp(email, password)}
                   type="button"
                 >
@@ -1311,6 +1339,7 @@ type WebPlatformShellProps = {
   authNotice: string | null;
   sessionEmail: string | null;
   projectBusy: boolean;
+  projectNotice: string | null;
   documentBusy: boolean;
   socialBusy: boolean;
   onCreateDocument: (payload: { label: string; summary: string; source: string; file?: File | null }) => void;
@@ -1365,6 +1394,7 @@ export function WebPlatformShell({
   authNotice,
   sessionEmail,
   projectBusy,
+  projectNotice,
   documentBusy,
   socialBusy,
   onCreateDocument,
@@ -1397,6 +1427,12 @@ export function WebPlatformShell({
 
       <div className="web-shell__main">
         <div className="web-shell__content">
+          {!sessionEmail ? (
+            <div className="demo-disclosure" role="status">
+              <strong>Mode démonstration</strong>
+              <span>Les exemples affichés ne sont pas vos données personnelles.</span>
+            </div>
+          ) : null}
           {activeScreen === "home" ? (
             <DashboardScreen
               activeAction={activeAction}
@@ -1445,6 +1481,7 @@ export function WebPlatformShell({
               onNavigate={onNavigate}
               onSelectStep={onSelectProjectStep}
               projectBusy={projectBusy}
+              projectNotice={projectNotice}
               projectsData={projectsData}
               scenario={scenario}
               selectedStepIndex={selectedProjectStepIndex}

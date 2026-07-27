@@ -1,5 +1,6 @@
 import { forwardMistralChat, getMistralRuntimeConfig } from "./_lib/mistral.js";
 import type { MistralRequestBody } from "./_lib/mistral-types.js";
+import { validateAssistantOutput } from "./_lib/assistant-output.js";
 import {
   readJsonBody,
   sendJson,
@@ -32,17 +33,42 @@ export default async function handler(
 
   try {
     const body = await readJsonBody<MistralRequestBody>(request);
-    const { upstream, text } = await forwardMistralChat(body, runtime);
+    const { upstream, payload } = await forwardMistralChat(body, runtime);
 
-    response.statusCode = upstream.status;
-    response.setHeader("Content-Type", "application/json; charset=utf-8");
-    response.end(text);
+    if (!upstream.ok) {
+      sendJson(response, payload, upstream.status);
+      return;
+    }
+
+    const choice = payload.choices?.[0];
+    const validatedOutput = validateAssistantOutput(
+      choice?.message?.content,
+      choice?.finish_reason,
+    );
+
+    if (!validatedOutput.content) {
+      sendJson(response, { error: validatedOutput.error }, 502);
+      return;
+    }
+
+    sendJson(response, {
+      choices: [
+        {
+          message: {
+            role: "assistant",
+            content: validatedOutput.content,
+          },
+        },
+      ],
+      model: runtime.model,
+      incomplete: validatedOutput.incomplete,
+    });
   } catch (error) {
     sendJson(response, {
       error:
         error instanceof Error
           ? error.message
-          : "Erreur interne pendant l'appel a l'API Mistral.",
+          : "Erreur interne pendant l’appel à l’API Mistral.",
     }, 500);
   }
 }

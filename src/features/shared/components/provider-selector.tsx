@@ -9,6 +9,10 @@ export function ProviderSelector({
   provider: AssistantProvider;
   onChange: (provider: AssistantProvider) => void;
 }) {
+  if (import.meta.env.VITE_SHOW_MODEL_SELECTOR !== "true") {
+    return null;
+  }
+
   return (
     <div className="provider-selector" role="group" aria-label="Modèle IA à utiliser">
       <span className="provider-selector__label">Tester avec</span>

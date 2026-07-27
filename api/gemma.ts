@@ -52,6 +52,7 @@ export default async function handler(
         },
       ],
       model: runtime.model,
+      incomplete: result.incomplete,
     });
   } catch (error) {
     sendJson(response, {

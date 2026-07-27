@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { validateCredentials } from "../../../services/auth/validation";
 import {
   listingFeeds,
   profileSections,
@@ -569,7 +570,8 @@ function MobileAuthCard({
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const formDisabled = authLoading || !email.trim() || !password.trim();
+  const credentials = validateCredentials(email, password);
+  const formDisabled = authLoading || !credentials.isValid;
 
   return (
     <article className="sheet-card mobile-auth-card">
@@ -592,25 +594,37 @@ function MobileAuthCard({
         </div>
       ) : (
         <div className="platform-composer">
+          <label className="composer-card__label" htmlFor="mobile-auth-email">
+            Adresse e-mail
+          </label>
           <input
-            aria-label="Email"
             autoComplete="email"
             className="platform-composer__input"
+            id="mobile-auth-email"
             inputMode="email"
             onChange={(event) => setEmail(event.target.value)}
             placeholder="Votre adresse e-mail"
             type="email"
             value={email}
           />
+          <label className="composer-card__label" htmlFor="mobile-auth-password">
+            Mot de passe
+          </label>
           <input
-            aria-label="Mot de passe"
             autoComplete="current-password"
             className="platform-composer__input"
+            id="mobile-auth-password"
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Votre mot de passe"
             type="password"
             value={password}
           />
+          {email && credentials.emailError ? (
+            <p className="form-field-error">{credentials.emailError}</p>
+          ) : null}
+          {password && credentials.passwordError ? (
+            <p className="form-field-error">{credentials.passwordError}</p>
+          ) : null}
           <button
             className="platform-primary-button"
             disabled={formDisabled}

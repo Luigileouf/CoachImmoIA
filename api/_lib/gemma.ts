@@ -1,4 +1,5 @@
 import type { GemmaGenerateResponse, GemmaRequestBody } from "./gemma-types.js";
+import { validateAssistantOutput } from "./assistant-output.js";
 
 type GemmaRuntimeConfig = {
   apiKey?: string;
@@ -96,15 +97,18 @@ export async function forwardGemmaChat(
     },
   );
   const payload = (await upstream.json()) as GemmaGenerateResponse;
-  const content = payload.candidates?.[0]?.content?.parts
+  const candidate = payload.candidates?.[0];
+  const content = candidate?.content?.parts
     ?.map((part) => part.text?.trim() || "")
     .filter(Boolean)
     .join("\n")
     .trim();
+  const validatedOutput = validateAssistantOutput(content, candidate?.finishReason);
 
   return {
-    content,
-    error: payload.error?.message,
+    content: validatedOutput.content,
+    error: payload.error?.message || validatedOutput.error,
+    incomplete: validatedOutput.incomplete,
     status: upstream.status,
   };
 }

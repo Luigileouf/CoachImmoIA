@@ -1,5 +1,15 @@
 import type { MistralRequestBody } from "./mistral-types.js";
 
+type MistralResponsePayload = {
+  choices?: Array<{
+    finish_reason?: string;
+    message?: {
+      content?: string;
+    };
+  }>;
+  error?: unknown;
+};
+
 type MistralRuntimeConfig = {
   apiKey?: string;
   model?: string;
@@ -43,6 +53,6 @@ export async function forwardMistralChat(
 
   return {
     upstream,
-    text: await upstream.text(),
+    payload: (await upstream.json()) as MistralResponsePayload,
   };
 }
