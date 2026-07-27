@@ -82,8 +82,8 @@ Dernière mise à jour : 27 juillet 2026.
 
 | Ticket | État | Avancement |
 | --- | --- | --- |
-| DATA-00 | En cours | Mode démonstration désormais signalé ; inventaire détaillé restant |
-| DATA-01 | À faire | Modèle multi-projets à concevoir et migrer |
+| DATA-00 | Réalisé | Inventaire, propriétaires, états et règles du mode démonstration documentés |
+| DATA-01 | En cours | Modèle et migration codés ; application distante bloquée par le projet Supabase inactif |
 | IA-01 | Réalisé | Contrôle serveur des brouillons internes pour Gemma et Mistral |
 | IA-02 | Réalisé | Détection des limites de génération et signalement des réponses incomplètes |
 | IA-03 | Réalisé | Sélecteur et comparaison masqués par défaut, disponibles par feature flag interne |
@@ -91,7 +91,7 @@ Dernière mise à jour : 27 juillet 2026.
 | AUTH-02 | Réalisé | Validation e-mail et mot de passe centralisée côté interface et actions |
 | EST-01 | Mesure de sécurité appliquée | Parcours masqué par défaut tant qu'il n'est pas fonctionnel |
 | NOTIF-01 | Mesure de sécurité appliquée | Notifications masquées par défaut tant qu'elles ne sont pas branchées |
-| PROJ-01 | En cours | Confirmation explicite ajoutée ; formulaire de création progressive restant |
+| PROJ-01 | En cours | Formulaire métier et confirmation implémentés ; reprise du brouillon et migration distante restantes |
 | A11Y-01 | En cours | Navigation active, labels et retours asynchrones améliorés |
 
 ## 5. Lot 0 - Cadrage et vérité des données

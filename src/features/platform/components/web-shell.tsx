@@ -38,6 +38,7 @@ import type {
   ProjectsResponse,
   RagContextResponse,
   SocialResponse,
+  CreateProjectPayload,
 } from "../../../services/api";
 
 function PlatformSidebar({
@@ -557,6 +558,7 @@ function ProjectsWorkspaceScreen({
   error,
   projectBusy,
   projectNotice,
+  canCreateProject,
   onCreateProject,
   onNavigate,
   onSelectStep,
@@ -568,10 +570,18 @@ function ProjectsWorkspaceScreen({
   error: string | null;
   projectBusy: boolean;
   projectNotice: string | null;
-  onCreateProject: () => void;
+  canCreateProject: boolean;
+  onCreateProject: (payload: CreateProjectPayload) => void;
   onNavigate: (screen: AppScreen) => void;
   onSelectStep: (index: number) => void;
 }) {
+  const [location, setLocation] = useState("");
+  const [propertyType, setPropertyType] = useState("");
+  const [budget, setBudget] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const intakeComplete = Boolean(
+    location.trim() && propertyType.trim() && budget.trim() && deadline,
+  );
   const steps = projectsData?.steps.length
     ? projectsData.steps
     : projectSteps[mode].map((step, index) => ({
@@ -590,6 +600,85 @@ function ProjectsWorkspaceScreen({
         <h1>{mode === "buyer" ? "Mon projet acheteur" : "Ma feuille de route vendeur"}</h1>
         <p className="body-copy">{projectsData?.scenario.projectStatus || scenario.projectStatus}</p>
       </header>
+
+      {!projectsData?.projectId ? (
+        <article className="platform-surface project-intake">
+          <div className="platform-surface__header">
+            <div>
+              <span className="platform-section-label">Créer mon projet</span>
+              <h2>Quatre informations pour obtenir votre première feuille de route</h2>
+            </div>
+            <span className="platform-badge">Environ 3 minutes</span>
+          </div>
+
+          <div className="project-intake__grid">
+            <label>
+              <span>Où se situe votre projet&nbsp;?</span>
+              <input
+                autoComplete="address-level2"
+                onChange={(event) => setLocation(event.target.value)}
+                placeholder="Ex. Paris 11e"
+                value={location}
+              />
+            </label>
+            <label>
+              <span>Quel type de bien recherchez-vous&nbsp;?</span>
+              <select
+                onChange={(event) => setPropertyType(event.target.value)}
+                value={propertyType}
+              >
+                <option value="">Choisir un type</option>
+                <option value="apartment">Appartement</option>
+                <option value="house">Maison</option>
+                <option value="land">Terrain</option>
+                <option value="other">Autre</option>
+              </select>
+            </label>
+            <label>
+              <span>{mode === "buyer" ? "Quel est votre budget ?" : "Quel prix envisagez-vous ?"}</span>
+              <input
+                inputMode="numeric"
+                onChange={(event) => setBudget(event.target.value)}
+                placeholder="Ex. 450 000 €"
+                value={budget}
+              />
+            </label>
+            <label>
+              <span>Quelle est votre échéance&nbsp;?</span>
+              <input
+                min={new Date().toISOString().slice(0, 10)}
+                onChange={(event) => setDeadline(event.target.value)}
+                type="date"
+                value={deadline}
+              />
+            </label>
+          </div>
+
+          {!canCreateProject ? (
+            <p className="project-intake__notice">
+              Connectez-vous depuis Compte pour enregistrer ce projet et protéger vos données.
+            </p>
+          ) : null}
+
+          <button
+            className="platform-primary-button"
+            disabled={projectBusy || !intakeComplete || !canCreateProject}
+            onClick={() =>
+              onCreateProject({
+                mode,
+                title: `${mode === "buyer" ? "Achat" : "Vente"} · ${location.trim()}`,
+                location: location.trim(),
+                propertyType,
+                budget: budget.trim(),
+                deadline,
+              })
+            }
+            type="button"
+          >
+            {projectBusy ? "Création en cours..." : "Créer mon projet"}
+          </button>
+        </article>
+      ) : null}
 
       <div className="platform-grid platform-grid--projects">
         <article className="platform-surface">
@@ -674,11 +763,6 @@ function ProjectsWorkspaceScreen({
             ))}
           </div>
           <div className="platform-inline-actions">
-            {!projectsData?.projectId ? (
-              <button className="platform-primary-button platform-primary-button--light" disabled={projectBusy} onClick={onCreateProject} type="button">
-                {projectBusy ? "Création..." : "Créer le projet"}
-              </button>
-            ) : null}
             <button className="platform-ghost-button platform-ghost-button--dark" onClick={() => onNavigate("social")} type="button">
               Ouvrir la communauté
             </button>
@@ -1340,10 +1424,11 @@ type WebPlatformShellProps = {
   sessionEmail: string | null;
   projectBusy: boolean;
   projectNotice: string | null;
+  canCreateProject: boolean;
   documentBusy: boolean;
   socialBusy: boolean;
   onCreateDocument: (payload: { label: string; summary: string; source: string; file?: File | null }) => void;
-  onCreateProject: () => void;
+  onCreateProject: (payload: CreateProjectPayload) => void;
   onCreateSocialThread: (payload: { circleId: string; title: string; body: string }) => void;
   onActionChange: (id: "buyer" | "seller" | "estimate") => void;
   onAssistantProviderChange: (provider: AssistantProvider) => void;
@@ -1395,6 +1480,7 @@ export function WebPlatformShell({
   sessionEmail,
   projectBusy,
   projectNotice,
+  canCreateProject,
   documentBusy,
   socialBusy,
   onCreateDocument,
@@ -1482,6 +1568,7 @@ export function WebPlatformShell({
               onSelectStep={onSelectProjectStep}
               projectBusy={projectBusy}
               projectNotice={projectNotice}
+              canCreateProject={canCreateProject}
               projectsData={projectsData}
               scenario={scenario}
               selectedStepIndex={selectedProjectStepIndex}

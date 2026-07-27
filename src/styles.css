@@ -2998,3 +2998,53 @@ svg {
   font-size: 0.86rem;
   margin: -6px 0 4px;
 }
+
+.project-intake {
+  margin-bottom: 24px;
+}
+
+.project-intake__grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 22px 0;
+}
+
+.project-intake__grid label {
+  color: #26343a;
+  display: grid;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.project-intake__grid input,
+.project-intake__grid select {
+  appearance: none;
+  background: #fffdfa;
+  border: 1px solid #ddd5ca;
+  border-radius: 14px;
+  color: #142931;
+  font: inherit;
+  min-height: 52px;
+  padding: 0 15px;
+}
+
+.project-intake__grid input:focus-visible,
+.project-intake__grid select:focus-visible {
+  border-color: #2b8a6e;
+  outline: 3px solid rgba(72, 192, 151, 0.2);
+}
+
+.project-intake__notice {
+  background: #fff4cf;
+  border-radius: 12px;
+  color: #5f5122;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+}
+
+@media (max-width: 760px) {
+  .project-intake__grid {
+    grid-template-columns: 1fr;
+  }
+}

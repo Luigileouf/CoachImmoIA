@@ -31,6 +31,11 @@ export type ProjectsResponse = {
   mode: ProjectMode;
   projectId?: string | null;
   projectTitle?: string;
+  location?: string | null;
+  propertyType?: string | null;
+  budget?: string | null;
+  deadline?: string | null;
+  isDemo?: boolean;
   scenario: Pick<Scenario, "projectStatus" | "projectNote" | "checklist" | "projectDocuments">;
   steps: Array<ProjectStep & { meta: ProjectStepMeta | undefined }>;
 };
@@ -48,6 +53,10 @@ export type SocialResponse = {
 export type CreateProjectPayload = {
   mode: ProjectMode;
   title: string;
+  location: string;
+  propertyType: string;
+  budget: string;
+  deadline: string;
 };
 
 export type CreateDocumentPayload = {

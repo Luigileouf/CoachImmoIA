@@ -39,3 +39,25 @@ export function createSupabaseServerClient() {
     },
   });
 }
+
+export async function getAuthenticatedUserId(
+  request: Request,
+  supabase = createSupabaseServerClient(),
+) {
+  const authorization = request.headers.get("authorization");
+  const accessToken = authorization?.startsWith("Bearer ")
+    ? authorization.slice("Bearer ".length).trim()
+    : "";
+
+  if (!accessToken) {
+    return null;
+  }
+
+  const { data, error } = await supabase.auth.getUser(accessToken);
+
+  if (error || !data.user) {
+    return null;
+  }
+
+  return data.user.id;
+}

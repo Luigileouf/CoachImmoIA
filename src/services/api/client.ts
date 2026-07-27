@@ -1,10 +1,30 @@
 import type { ApiEnvelope } from "./types";
+import { getSupabaseBrowserClient } from "../supabase/browser";
+
+async function getApiHeaders(includeContentType = false) {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+  };
+
+  if (includeContentType) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  try {
+    const { data } = await getSupabaseBrowserClient().auth.getSession();
+    if (data.session?.access_token) {
+      headers.Authorization = `Bearer ${data.session.access_token}`;
+    }
+  } catch {
+    // Public demo requests remain available when Supabase is not configured.
+  }
+
+  return headers;
+}
 
 export async function fetchApi<T>(path: string) {
   const response = await fetch(path, {
-    headers: {
-      Accept: "application/json",
-    },
+    headers: await getApiHeaders(),
   });
 
   if (!response.ok) {
@@ -18,10 +38,7 @@ export async function fetchApi<T>(path: string) {
 export async function postApi<TResponse, TPayload>(path: string, payload: TPayload) {
   const response = await fetch(path, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers: await getApiHeaders(true),
     body: JSON.stringify(payload),
   });
 

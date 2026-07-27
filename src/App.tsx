@@ -19,6 +19,7 @@ import {
   fetchSocial,
   indexDocument,
   type DocumentsResponse,
+  type CreateProjectPayload,
   type ProjectsResponse,
   type RagContextResponse,
   type SocialResponse,
@@ -232,15 +233,12 @@ function App() {
     setSelectedSocialThreadIndex(0);
   };
 
-  const handleCreateProject = async () => {
+  const handleCreateProject = async (payload: CreateProjectPayload) => {
     setAssistantError(null);
     setProjectNotice(null);
     setProjectBusy(true);
     try {
-      const response = await createProject({
-        mode,
-        title: mode === "buyer" ? "Projet acheteur CoachImmoIA" : "Projet vendeur CoachImmoIA",
-      });
+      const response = await createProject(payload);
 
       setProjectsData((current) => ({
         ...current,
@@ -593,6 +591,7 @@ function App() {
           onSubmit={handleAssistantSubmit}
           projectBusy={projectBusy}
           projectNotice={projectNotice}
+          canCreateProject={Boolean(sessionEmail) || !authConfigured}
           projectsData={projectsData[mode]}
           scenario={scenario}
           selectedDocumentIndex={selectedDocumentIndex}

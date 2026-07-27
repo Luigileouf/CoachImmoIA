@@ -1,6 +1,10 @@
 import { getProjectsPayload } from "../_lib/domain.js";
 import { json, methodNotAllowed } from "../_lib/http.js";
-import { createSupabaseServerClient, getSupabaseRuntimeConfig } from "../_lib/supabase.js";
+import {
+  createSupabaseServerClient,
+  getAuthenticatedUserId,
+  getSupabaseRuntimeConfig,
+} from "../_lib/supabase.js";
 import { projectSteps, scenarios, type ProjectMode } from "../../src/data/content.js";
 import { projectStepMeta } from "../../src/features/platform/data/workspace.js";
 import { adaptWebHandler } from "../_lib/vercel-node.js";
@@ -17,15 +21,31 @@ async function webHandler(request: Request) {
     if (!getSupabaseRuntimeConfig().isConfigured) {
       return json({
         ok: true,
-        data: getProjectsPayload(mode),
+        data: {
+          ...getProjectsPayload(mode),
+          isDemo: true,
+        },
       });
     }
 
     try {
       const supabase = createSupabaseServerClient();
+      const ownerId = await getAuthenticatedUserId(request, supabase);
+
+      if (!ownerId) {
+        return json({
+          ok: true,
+          data: {
+            ...getProjectsPayload(mode),
+            isDemo: true,
+          },
+        });
+      }
+
       const { data: project, error: projectError } = await supabase
         .from("projects")
-        .select("id, title")
+        .select("id, title, location, property_type, budget_label, target_date")
+        .eq("owner_id", ownerId)
         .eq("mode", mode)
         .order("updated_at", { ascending: false })
         .limit(1)
@@ -58,6 +78,11 @@ async function webHandler(request: Request) {
           mode,
           projectId: project.id,
           projectTitle: project.title,
+          location: project.location,
+          propertyType: project.property_type,
+          budget: project.budget_label,
+          deadline: project.target_date,
+          isDemo: false,
           scenario: {
             projectStatus: scenarios[mode].projectStatus,
             projectNote: scenarios[mode].projectNote,
@@ -92,10 +117,30 @@ async function webHandler(request: Request) {
   }
 
   if (request.method === "POST") {
-    const body = (await request.json()) as { mode?: ProjectMode; title?: string };
+    const body = (await request.json()) as {
+      mode?: ProjectMode;
+      title?: string;
+      location?: string;
+      propertyType?: string;
+      budget?: string;
+      deadline?: string;
+    };
     const mode = body.mode === "seller" ? "seller" : "buyer";
     const title =
       body.title?.trim() || (mode === "buyer" ? "Projet acheteur CoachImmoIA" : "Projet vendeur CoachImmoIA");
+    const location = body.location?.trim() || "";
+    const propertyType = body.propertyType?.trim() || "";
+    const budget = body.budget?.trim() || "";
+    const deadline = body.deadline?.trim() || "";
+
+    if (!location || !propertyType || !budget || !deadline) {
+      return json(
+        {
+          error: "Localisation, type de bien, budget et échéance sont obligatoires.",
+        },
+        { status: 400 },
+      );
+    }
 
     if (!getSupabaseRuntimeConfig().isConfigured) {
       const payload = getProjectsPayload(mode);
@@ -106,21 +151,42 @@ async function webHandler(request: Request) {
           ...payload,
           projectId: `mock-${mode}-${Date.now()}`,
           projectTitle: title,
+          location,
+          propertyType,
+          budget,
+          deadline,
+          isDemo: true,
         },
       });
     }
 
     try {
       const supabase = createSupabaseServerClient();
+      const ownerId = await getAuthenticatedUserId(request, supabase);
+
+      if (!ownerId) {
+        return json(
+          {
+            error: "Connectez-vous pour enregistrer votre projet.",
+          },
+          { status: 401 },
+        );
+      }
+
       const { data: project, error: projectError } = await supabase
         .from("projects")
         .insert({
+          owner_id: ownerId,
           mode,
           title,
           status: "active",
+          location,
+          property_type: propertyType,
+          budget_label: budget,
+          target_date: deadline,
           checklist: scenarios[mode].checklist,
         })
-        .select("id, title")
+        .select("id, title, location, property_type, budget_label, target_date")
         .single();
 
       if (projectError) {
@@ -151,6 +217,11 @@ async function webHandler(request: Request) {
           mode,
           projectId: project.id,
           projectTitle: project.title,
+          location: project.location,
+          propertyType: project.property_type,
+          budget: project.budget_label,
+          deadline: project.target_date,
+          isDemo: false,
           scenario: {
             projectStatus: scenarios[mode].projectStatus,
             projectNote: scenarios[mode].projectNote,
